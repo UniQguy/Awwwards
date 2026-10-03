@@ -15,6 +15,14 @@ if not SELLER_STATE:
         stacklevel=2,
     )
 
+# Warn if SECRET_KEY is using the placeholder template
+if SECRET_KEY.startswith("CHANGE_ME"):
+    warnings.warn(
+        "SECRET_KEY is using the template placeholder. Generate a secure key in .env.",
+        UserWarning,
+        stacklevel=2,
+    )
+
 # Enable Vite dev server integration in local mode
 DJANGO_VITE["default"]["dev_mode"] = True
 
