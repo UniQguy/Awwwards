@@ -89,3 +89,7 @@ def estimate(pincode: str, today: datetime.date | None = None) -> DeliveryEstima
         serviceable=False,
         unavailable_reason="Delivery unavailable for this PIN code.",
     )
+
+
+estimate_delivery = estimate
+

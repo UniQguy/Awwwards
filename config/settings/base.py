@@ -70,6 +70,13 @@ LOCAL_APPS = [
     "apps.tax",
     "apps.shipping",
     "apps.catalog",
+    "apps.inventory",
+    "apps.cart",
+    "apps.wishlist",
+    "apps.promotions",
+    "apps.orders",
+    "apps.payments",
+    "apps.search",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
