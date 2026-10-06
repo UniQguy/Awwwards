@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <h1>Terms of Service</h1>
+  <p class="text-muted"><small>Last updated: {% now "F j, Y" %}</small></p>
+
+  <section>
+    <h2>1. Introduction & Overview</h2>
+    <p>Welcome to ELECTROCART, operated by {{ seller_mode.seller_legal_name }}. By browsing, accessing, or purchasing from our platform, you agree to comply with and be bound by the following terms and conditions.</p>
+  </section>
+
+  <section>
+    <h2>2. Commerce & Pricing</h2>
+    <p>All prices listed on ELECTROCART are in Indian Rupees (INR ₹) and are inclusive of Goods and Services Tax (GST) as applicable under Indian statutory regulations. We reserve the right to revise catalog pricing, specifications, and availability without prior notice.</p>
+  </section>
+
+  <section>
+    <h2>3. Orders, Dispatch & Invoicing</h2>
+    <p>Placement of an order constitutes an offer to purchase. Contracts are concluded upon order confirmation and dispatch. A valid GST Tax Invoice or Bill of Supply will be generated and issued with every completed order.</p>
+  </section>
+
+  <section>
+    <h2>4. Editorial & Legal Review Notice</h2>
+    <div class="alert alert-info" role="note">
+      <p><strong>[PLACEHOLDER - SUBJECT TO OWNER LEGAL REVIEW]</strong></p>
+      <p>The operational clauses, dispute resolution venue (jurisdiction), and indemnity provisions herein reflect baseline provisions and are subject to final vetting by the platform owner's legal counsel.</p>
+    </div>
+  </section>
+</div>
+{% endblock %}

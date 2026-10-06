@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block title %}Product Comparison — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% include "includes/breadcrumbs.html" %}
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem;">
+    <div>
+      <h1>Product Comparison</h1>
+      {% if common_category %}
+        <p class="text-muted">Comparing products in <strong>{{ common_category.name }}</strong> (Max 3 items)</p>
+      {% endif %}
+    </div>
+
+    {% if compared_products %}
+      <form action="{% url 'compare_clear' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary btn-sm">Clear Comparison</button>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if compared_products %}
+    <div class="table-responsive">
+      <table class="spec-table" style="table-layout: fixed;">
+        <caption class="sr-only">Side by side product comparison matrix</caption>
+        <thead>
+          <tr>
+            <th scope="col" style="width: 25%;">Feature</th>
+            {% for prod in compared_products %}
+              <th scope="col" style="text-align: center; vertical-align: top;">
+                <div style="margin-bottom: 0.5rem; max-width: 150px; margin-left: auto; margin-right: auto;">
+                  {% include "includes/product_image.html" with product=prod %}
+                </div>
+                <div style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                  <a href="{% url 'product_detail' slug=prod.slug %}">{{ prod.display_name }}</a>
+                </div>
+                {% include "includes/price_block.html" with product=prod %}
+                <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; justify-content: center;">
+                  {% include "includes/add_to_cart_form.html" with product=prod %}
+                  <form action="{% url 'compare_remove' product_id=prod.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-secondary" aria-label="Remove {{ prod.display_name }} from comparison">&times;</button>
+                  </form>
+                </div>
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Brand</th>
+            {% for prod in compared_products %}
+              <td style="text-align: center;">{{ prod.parsed_brand }}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <th scope="row">Availability</th>
+            {% for prod in compared_products %}
+              <td style="text-align: center;">{% include "includes/stock_badge.html" with product=prod %}</td>
+            {% endfor %}
+          </tr>
+          {% for key, row_values in spec_matrix.items %}
+            <tr>
+              <th scope="row">{{ key }}</th>
+              {% for prod in compared_products %}
+                <td style="text-align: center;">
+                  {% for pid, val in row_values.items %}
+                    {% if pid == prod.id %}{{ val }}{% endif %}
+                  {% endfor %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      <p>No products are currently in your comparison tray.</p>
+      <p>Browse categories and click "Compare" on any item to view side-by-side technical specifications.</p>
+      <p><a href="{% url 'category_list' %}" class="btn btn-primary btn-sm">Browse Categories</a></p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

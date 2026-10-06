@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block title %}ELECTROCART — Premium Electronics India{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <header style="margin-bottom: 2.5rem; text-align: center;">
+    <h1>Curated Electronics &amp; Accessories</h1>
+    <p style="font-size: 1.15rem; max-width: 680px; margin: 0 auto 1rem auto; color: var(--color-text-muted);">
+      An editorial catalog of precision personal audio, tactile mechanical gear, monitors, and photography instruments.
+    </p>
+    <p class="text-muted">
+      <small>Exploring {{ total_products_count }} curated products across {{ categories_count }} dedicated worlds.</small>
+    </p>
+  </header>
+
+  {% if featured_collections %}
+    {% for collection in featured_collections %}
+      <section style="margin-bottom: 3.5rem;" aria-labelledby="coll-title-{{ collection.id }}">
+        <div style="margin-bottom: 1.25rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem;">
+          <h2 id="coll-title-{{ collection.id }}">{{ collection.title }}</h2>
+          {% if collection.intro %}
+            <p class="text-muted">{{ collection.intro }}</p>
+          {% endif %}
+        </div>
+
+        <div class="grid-4">
+          {% for item in collection.featured_items.all %}
+            {% with product=item.product %}
+              {% include "includes/product_card.html" %}
+            {% endwith %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endfor %}
+  {% endif %}
+
+  <section aria-labelledby="sec-all-categories">
+    <div style="margin-bottom: 1.25rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem;">
+      <h2 id="sec-all-categories">Browse by Category</h2>
+    </div>
+
+    <div class="grid-3">
+      {% for cat in categories %}
+        <article class="product-card" style="text-align: center; padding: 2rem 1.5rem;">
+          <h3><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></h3>
+          {% if cat.description %}
+            <p class="text-muted"><small>{{ cat.description|truncatewords:20 }}</small></p>
+          {% endif %}
+          <p style="margin-top: auto;">
+            <a href="{% url 'category_detail' slug=cat.slug %}" class="btn btn-secondary btn-sm">Explore Collection &rarr;</a>
+          </p>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

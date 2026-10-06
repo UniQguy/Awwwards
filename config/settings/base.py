@@ -110,6 +110,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",  # Required by allauth
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.core.context_processors.storefront_context",
             ],
         },
     },
@@ -308,4 +309,9 @@ RAZORPAY_WEBHOOK_SECRET = os.environ.get("RAZORPAY_WEBHOOK_SECRET", "")
 # In local development, an empty value warns on startup and tax calculations raise errors.
 SELLER_STATE = os.environ.get("SELLER_STATE", "").strip()
 SELLER_GSTIN = os.environ.get("SELLER_GSTIN", "").strip()
+SELLER_LEGAL_NAME = os.environ.get("SELLER_LEGAL_NAME", "").strip()
+SELLER_ADDRESS = os.environ.get("SELLER_ADDRESS", "").strip()
+
+CSRF_FAILURE_VIEW = "apps.core.views.csrf_failure"
+CART_MAX_QTY_PER_LINE = 10
 

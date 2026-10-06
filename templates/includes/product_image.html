@@ -1,0 +1,18 @@
+{% with media_item=product.media.first %}
+  {% if media_item and media_item.url %}
+    <img
+      class="product-img"
+      src="{{ media_item.url }}"
+      alt="{{ media_item.alt_text|default:product.display_name }}"
+      width="300"
+      height="300"
+      loading="{% if eager %}eager{% else %}lazy{% endif %}"
+      data-category="{{ product.category.name }}"
+    >
+  {% else %}
+    <div class="image-fallback-plate" role="img" aria-label="{{ product.display_name }}">
+      <span class="fallback-title">ELECTROCART</span>
+      <span class="fallback-category">{{ product.category.name }}</span>
+    </div>
+  {% endif %}
+{% endwith %}

@@ -1,7 +1,9 @@
 # KNOWN ISSUES & BLOCKERS LOG (ELECTROCART)
 
-### Active Issues
-*None. All Phase 1 components, database migrations, and test suites are passing with zero errors.*
+### Active Issues / Non-Blocking Tracking
+- **ISS-004 (Non-Blocking / By Design)**: Catalog sample data contains external CDN image URLs. A resilient CSS plate and client-side micro-fallback (`image-fallback.js`) handles absent/slow images gracefully. Phase 4 will ingest local optimized assets.
+- **ISS-005 (Non-Blocking / Business Content)**: Standard shipping fee confirmation and legal templates (`/legal/terms/`, `/legal/privacy/`, etc.) carry explicit `[PLACEHOLDER]` disclaimers pending owner business registration data.
+
 
 ### Historical Resolved Issues
 - **ISS-001 (Resolved)**: PostgreSQL 18 password authentication failure for role `electrocart`.

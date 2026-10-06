@@ -37,3 +37,13 @@ CONTENT_SECURITY_POLICY["DIRECTIVES"]["script-src"] = list(
 CONTENT_SECURITY_POLICY["DIRECTIVES"]["connect-src"] = list(
     CONTENT_SECURITY_POLICY["DIRECTIVES"]["connect-src"]
 ) + ["http://localhost:5173", "ws://localhost:5173"]
+
+# Plain staticfiles storage for local development and test execution without manifest compilation
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}

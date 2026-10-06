@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block title %}Order Confirmed #{{ order.order_number }} — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="max-width: 760px; margin: 0 auto;">
+    <div style="background: var(--color-success-bg); border: 1px solid var(--color-success-text); border-radius: var(--radius-md); padding: 2rem; text-align: center; margin-bottom: 2.5rem;">
+      <h1 style="color: var(--color-success-text); font-size: 1.85rem; margin-bottom: 0.5rem;">
+        &check; Order Placed Successfully!
+      </h1>
+      <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">
+        Thank you for choosing ELECTROCART. Your order reference is <strong>#{{ order.order_number }}</strong>.
+      </p>
+      <p class="text-muted" style="margin: 0; font-size: 0.9rem;">
+        A confirmation receipt has been sent to <strong>{{ order.recipient_email }}</strong>.
+      </p>
+    </div>
+
+    <!-- Quick Action Links -->
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 2.5rem; flex-wrap: wrap;">
+      <a href="{% url 'order_track_timeline' order_number=order.order_number %}" class="btn btn-primary">
+        Track Shipment &rarr;
+      </a>
+      <a href="{% url 'order_invoice' order_number=order.order_number %}" class="btn btn-secondary" target="_blank">
+        View GST Invoice / Bill of Supply
+      </a>
+    </div>
+
+    <!-- Order Summary Details -->
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.75rem; margin-bottom: 2rem;">
+      <h2 style="font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">Order Specifications</h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; font-size: 0.95rem;">
+        <div>
+          <p style="margin: 0 0 0.5rem 0;"><strong>Status:</strong> <span class="badge badge-in-stock">{{ order.get_status_display }}</span></p>
+          <p style="margin: 0 0 0.5rem 0;"><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+          <p style="margin: 0 0 0.5rem 0;"><strong>Payment Status:</strong> {{ order.get_payment_status_display }}</p>
+          <p style="margin: 0;"><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y, g:i A" }}</p>
+        </div>
+        <div>
+          <strong>Shipping Destination:</strong>
+          <p style="margin: 0.25rem 0 0 0;">
+            {{ order.shipping_address_snapshot.full_name }} &bull; {{ order.shipping_address_snapshot.phone }}<br>
+            {{ order.shipping_address_snapshot.line1 }}<br>
+            {{ order.shipping_address_snapshot.city }}, {{ order.shipping_address_snapshot.state }} &ndash; {{ order.shipping_address_snapshot.pincode }}
+          </p>
+        </div>
+      </div>
+
+      <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem;">Merchandise Items</h3>
+      <table class="data-table" style="margin-bottom: 1.5rem;">
+        <caption class="sr-only">Items included in order</caption>
+        <thead>
+          <tr>
+            <th scope="col">Product</th>
+            <th scope="col" style="text-align: right;">Unit Price</th>
+            <th scope="col" style="text-align: center;">Qty</th>
+            <th scope="col" style="text-align: right;">Line Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in order.items.all %}
+            <tr>
+              <td>
+                <strong>{{ item.product_title }}</strong>
+                <div class="text-muted"><small>SKU: {{ item.product_sku }} &bull; HSN: {{ item.hsn_code }} ({{ item.gst_rate }}% GST)</small></div>
+              </td>
+              <td style="text-align: right;">{{ item.unit_price|inr }}</td>
+              <td style="text-align: center;">{{ item.quantity }}</td>
+              <td style="text-align: right;"><strong>{{ item.line_total|inr }}</strong></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <dl style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem 1rem; margin: 0; font-size: 0.95rem;">
+        <dt>Subtotal</dt>
+        <dd style="margin: 0; text-align: right;">{{ order.subtotal|inr }}</dd>
+
+        {% if order.discount_amount > 0 %}
+          <dt class="text-success">Discount Applied</dt>
+          <dd style="margin: 0; text-align: right;" class="text-success">-{{ order.discount_amount|inr }}</dd>
+        {% endif %}
+
+        <dt>Shipping Fee</dt>
+        <dd style="margin: 0; text-align: right;">
+          {% if order.shipping_fee > 0 %}{{ order.shipping_fee|inr }}{% else %}<span class="text-success">FREE</span>{% endif %}
+        </dd>
+
+        <dt style="font-size: 0.85rem; color: var(--color-text-muted);">GST Tax</dt>
+        <dd style="margin: 0; text-align: right; font-size: 0.85rem; color: var(--color-text-muted);">
+          Included ({{ order.tax_amount|inr }})
+        </dd>
+
+        <dt style="font-size: 1.15rem; font-weight: 700; border-top: 2px solid var(--color-border); padding-top: 0.5rem;">Total Paid / Payable</dt>
+        <dd style="margin: 0; text-align: right; font-size: 1.25rem; font-weight: 700; color: var(--color-accent); border-top: 2px solid var(--color-border); padding-top: 0.5rem;">
+          {{ order.total_amount|inr }}
+        </dd>
+      </dl>
+    </div>
+
+    <!-- Order Cancellation Option (if state permits) -->
+    {% if order.status != 'cancelled' and order.status != 'delivered' and order.status != 'refunded' %}
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
+        <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Need to cancel this order?</h3>
+        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">
+          You can cancel this order prior to warehouse departure. Inventory reservations will be instantly restored.
+        </p>
+        <form action="{% url 'order_cancel' order_number=order.order_number %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-danger">Cancel Order</button>
+        </form>
+      </div>
+    {% elif order.status == 'cancelled' %}
+      <div class="alert alert-error" style="text-align: center;">
+        <strong>This order has been cancelled.</strong>
+        {% if order.credit_notes.exists %}
+          A statutory GST Credit Note has been generated.
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

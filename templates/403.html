@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}403 Forbidden — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <h1>403 — Forbidden</h1>
+  <p>You do not have permission to access this resource or your session validation failed.</p>
+  <p><a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a></p>
+</div>
+{% endblock %}

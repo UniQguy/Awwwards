@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block title %}My Orders — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% include "includes/breadcrumbs.html" %}
+
+  <header style="margin-bottom: 2rem;">
+    <h1>Order History</h1>
+    <p class="text-muted">Review your current shipments and past purchases.</p>
+  </header>
+
+  <nav aria-label="Account sections" style="margin-bottom: 2rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
+    <ul style="list-style: none; padding: 0; margin: 0; display: flex; gap: 1.5rem;">
+      <li><a href="{% url 'account_dashboard' %}">Dashboard</a></li>
+      <li><a href="{% url 'account_order_list' %}" style="font-weight: 700;">Order History</a></li>
+      <li><a href="{% url 'account_address_list' %}">Saved Addresses</a></li>
+      <li><a href="{% url 'account_profile' %}">Profile Settings</a></li>
+    </ul>
+  </nav>
+
+  {% if page_obj %}
+    <div class="table-responsive">
+      <table class="data-table">
+        <caption class="sr-only">Comprehensive customer order list</caption>
+        <thead>
+          <tr>
+            <th scope="col">Order Number</th>
+            <th scope="col">Date</th>
+            <th scope="col">Items</th>
+            <th scope="col">Status</th>
+            <th scope="col">Payment</th>
+            <th scope="col" style="text-align: right;">Total Amount</th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in page_obj %}
+            <tr>
+              <td><strong>{{ order.order_number }}</strong></td>
+              <td>{{ order.created_at|date:"d M Y" }}</td>
+              <td>{{ order.items.count }} item{{ order.items.count|pluralize }}</td>
+              <td><span class="badge badge-in-stock">{{ order.get_status_display }}</span></td>
+              <td>{{ order.get_payment_method_display }}</td>
+              <td style="text-align: right;"><strong>{{ order.total_amount|inr }}</strong></td>
+              <td>
+                <div style="display: flex; gap: 0.5rem;">
+                  <a href="{% url 'account_order_detail' order_number=order.order_number %}" class="btn btn-sm btn-secondary">Details</a>
+                  <a href="{% url 'order_invoice' order_number=order.order_number %}" class="btn btn-sm btn-secondary" target="_blank">Invoice</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% include "includes/pagination.html" %}
+  {% else %}
+    <div class="alert alert-info">
+      <p>No orders recorded for your account.</p>
+      <p><a href="{% url 'category_list' %}" class="btn btn-primary btn-sm">Explore Products</a></p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

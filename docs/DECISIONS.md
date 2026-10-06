@@ -53,3 +53,28 @@
 - **Decision**: Rank redundant marketplace variants using `RowNumber()` partitioned by `raw_name` ordered by lowest selling price, highest rating count, and ID.
 - **Reason**: Protects catalog aesthetic integrity by ensuring distinct editorial cards while keeping all product variants purchasable.
 - **Alternative Rejected**: Raw SQL GROUP BY queries that discard variant attributes or violate SQLite ANSI SQL standards.
+
+### DEC-010: No-JavaScript Primary Commerce Workflows
+- **Date**: 2026-10-06
+- **Decision**: All browsing, search, cart mutations, coupon redemptions, PIN validation, address management, and checkout submissions operate via standard semantic HTML `<form method="post">` with CSRF tokens and HTTP 302 Post/Redirect/Get patterns.
+- **Reason**: Meets Phase 3 core requirement that the storefront functions 100% with JavaScript disabled in the browser, establishing rock-solid accessibility and server-side state integrity prior to client-side styling/motion layers in Phase 4.
+- **Alternative Rejected**: Relying on client-side fetch/AJAX or single-page application hydration for cart or checkout actions.
+
+### DEC-011: Image Broken-Asset Handling via CSS and JS Micro-Fallback
+- **Date**: 2026-10-06
+- **Decision**: Storefront cards and detail pages render high-contrast CSS fallbacks displaying category and brand typography when external product images fail to load or are absent, paired with a tiny non-blocking `image-fallback.js` error handler.
+- **Reason**: Prevents broken image badges from marring editorial quality during local development before self-hosted static media assets are ingested in Phase 4.
+- **Alternative Rejected**: Blank empty slots or third-party placeholder image services that cause network lag or CORS failures.
+
+### DEC-012: Static Storage Configuration in Local and Test Environments
+- **Date**: 2026-10-06
+- **Decision**: Use standard `StaticFilesStorage` in `local.py` and `test.py` environments rather than `ManifestStaticFilesStorage`.
+- **Reason**: Avoids mandatory pre-compilation (`collectstatic`) during unit test runs while preserving cache-busting manifest capabilities for production.
+- **Alternative Rejected**: Requiring `collectstatic` execution before every test suite invocation.
+
+### DEC-013: Address Model UUID Parameterization for Public Endpoints
+- **Date**: 2026-10-06
+- **Decision**: Route address editing, deletion, and default toggling through `<uuid:uuid>` referencing `Address.uuid` (from `UUIDModel`) rather than internal autoincrement integer primary keys.
+- **Reason**: Eliminates enumeration vulnerabilities on customer account URLs and aligns with ELECTROCART tamper-proof ID standards.
+- **Alternative Rejected**: Exposing sequential integer IDs in account management URLs.
+

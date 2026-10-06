@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="max-width: 440px; margin: 0 auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem;">
+    <header style="text-align: center; margin-bottom: 1.5rem;">
+      <h1>Create Account</h1>
+      <p class="text-muted">Join ELECTROCART for order tracking and saved addresses.</p>
+    </header>
+
+    {% include "includes/form_errors.html" %}
+
+    <form method="post" action="{% url 'account_signup' %}">
+      {% csrf_token %}
+      {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+      {% endif %}
+
+      {% for field in form %}
+        {% include "includes/field.html" with field=field %}
+      {% endfor %}
+
+      <button type="submit" class="btn btn-primary btn-block" style="padding: 0.75rem; margin-top: 1.25rem;">
+        Create Account
+      </button>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--color-border); padding-top: 1rem; font-size: 0.9rem;">
+      Already have an account? <a href="{% url 'account_login' %}{% if redirect_field_value %}?next={{ redirect_field_value }}{% endif %}">Sign In</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

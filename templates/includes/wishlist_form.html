@@ -1,0 +1,10 @@
+<form action="{% url 'wishlist_toggle' product.id %}" method="post" class="wishlist-form">
+  {% csrf_token %}
+  <button
+    type="submit"
+    class="btn btn-secondary btn-sm"
+    aria-label="Save {{ product.display_name }} to wishlist"
+  >
+    Wishlist
+  </button>
+</form>

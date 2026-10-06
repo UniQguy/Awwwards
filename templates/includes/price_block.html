@@ -1,0 +1,17 @@
+{% load core_tags %}
+<div class="price-block">
+  {% if product.selling_price %}
+    <span class="price-selling">{{ product.selling_price|inr }}</span>
+    {% if product.mrp and product.mrp > product.selling_price %}
+      <span class="price-mrp">{{ product.mrp|inr }}</span>
+      {% with pct=product.mrp|discount_percent:product.selling_price %}
+        {% if pct > 0 %}
+          <span class="discount-badge" aria-label="{{ pct }} percent discount">{{ pct }}% OFF</span>
+        {% endif %}
+      {% endwith %}
+    {% endif %}
+    <span class="inclusive-gst">Inclusive of all taxes</span>
+  {% else %}
+    <span class="text-muted">Price unavailable</span>
+  {% endif %}
+</div>

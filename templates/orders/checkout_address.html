@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Delivery Address — ELECTROCART Checkout{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% include "includes/breadcrumbs.html" %}
+
+  <header style="margin-bottom: 2rem;">
+    <h1>Step 2: Shipping Destination</h1>
+    <p class="text-muted">Enter the destination address where your merchandise will be dispatched.</p>
+  </header>
+
+  <div style="max-width: 680px; margin: 0 auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem;">
+    <form action="{% url 'checkout_address' %}" method="post">
+      {% csrf_token %}
+
+      {% if saved_addresses %}
+        <fieldset style="border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 2rem;">
+          <legend style="font-weight: 700; padding: 0 0.5rem;">Select Saved Address</legend>
+          {% for addr in saved_addresses %}
+            <div style="margin-bottom: 1rem; display: flex; gap: 0.75rem; align-items: flex-start;">
+              <input type="radio" id="addr-{{ addr.id }}" name="address_id" value="{{ addr.id }}" {% if addr.is_default or forloop.first %}checked{% endif %}>
+              <label for="addr-{{ addr.id }}" style="font-size: 0.95rem;">
+                <strong>{{ addr.full_name }}</strong> &bull; {{ addr.phone }}<br>
+                {{ addr.line1 }}{% if addr.line2 %}, {{ addr.line2 }}{% endif %}<br>
+                {{ addr.city }}, {{ addr.state }} &ndash; <strong>{{ addr.pincode }}</strong>
+              </label>
+            </div>
+          {% endfor %}
+        </fieldset>
+
+        <p style="text-align: center; margin-bottom: 1.5rem; font-weight: 600; color: var(--color-text-muted);">
+          &mdash; OR ENTER A NEW ADDRESS &mdash;
+        </p>
+      {% endif %}
+
+      <fieldset style="border: none; padding: 0; margin: 0;">
+        <div class="form-group">
+          <label for="id-full-name" class="form-label">Full Name <span class="required-indicator">*</span></label>
+          <input type="text" id="id-full-name" name="full_name" class="form-control" value="{{ form_data.full_name|default:'' }}" required autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label for="id-phone" class="form-label">Phone Number (10 Digits) <span class="required-indicator">*</span></label>
+          <input type="tel" id="id-phone" name="phone" class="form-control" pattern="[0-9]{10}" maxlength="10" placeholder="9876543210" value="{{ form_data.phone|default:'' }}" required autocomplete="tel">
+        </div>
+
+        <div class="form-group">
+          <label for="id-line1" class="form-label">Address Line 1 <span class="required-indicator">*</span></label>
+          <input type="text" id="id-line1" name="line1" class="form-control" placeholder="House/Flat No., Building, Street" value="{{ form_data.line1|default:'' }}" required autocomplete="address-line1">
+        </div>
+
+        <div class="form-group">
+          <label for="id-line2" class="form-label">Address Line 2 (Optional)</label>
+          <input type="text" id="id-line2" name="line2" class="form-control" placeholder="Area, Sector, Locality" value="{{ form_data.line2|default:'' }}" autocomplete="address-line2">
+        </div>
+
+        <div class="form-group">
+          <label for="id-landmark" class="form-label">Landmark (Optional)</label>
+          <input type="text" id="id-landmark" name="landmark" class="form-control" placeholder="Near metro station, park, etc." value="{{ form_data.landmark|default:'' }}">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label for="id-city" class="form-label">City / Town <span class="required-indicator">*</span></label>
+            <input type="text" id="id-city" name="city" class="form-control" value="{{ form_data.city|default:'' }}" required autocomplete="address-level2">
+          </div>
+
+          <div class="form-group">
+            <label for="id-pincode" class="form-label">PIN Code <span class="required-indicator">*</span></label>
+            <input type="text" id="id-pincode" name="pincode" class="form-control" pattern="[1-9][0-9]{5}" maxlength="6" placeholder="560001" value="{{ form_data.pincode|default:'' }}" required autocomplete="postal-code">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="id-state" class="form-label">State / Union Territory <span class="required-indicator">*</span></label>
+          <select id="id-state" name="state" class="form-control" required autocomplete="address-level1">
+            <option value="">Select State or UT</option>
+            {% for code, name in states %}
+              <option value="{{ code }}" {% if form_data.state == code %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+          <p class="form-help">Determines CGST+SGST vs IGST statutory tax split.</p>
+        </div>
+
+        {% if user.is_authenticated %}
+          <div class="form-group" style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="checkbox" id="id-save-addr" name="save_address" value="1" checked>
+            <label for="id-save-addr" style="font-size: 0.9rem; margin: 0;">Save this address to my profile</label>
+          </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary btn-block" style="padding: 0.75rem; margin-top: 1.5rem;">
+          Review Order &amp; Select Payment &rarr;
+        </button>
+      </fieldset>
+    </form>
+  </div>
+</div>
+{% endblock %}

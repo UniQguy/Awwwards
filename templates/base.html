@@ -1,0 +1,31 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ELECTROCART — Premium Electronics India{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}India's curated consumer electronics destination. Curated headphones, audio, mechanical keyboards, and precision tech.{% endblock %}">
+  <link rel="stylesheet" href="{% static 'css/storefront.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  {% include "includes/header.html" %}
+
+  {% include "includes/messages.html" %}
+
+  <main id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if compare_count > 0 %}
+    {% include "includes/compare_tray.html" %}
+  {% endif %}
+
+  {% include "includes/footer.html" %}
+
+  <script src="{% static 'js/image-fallback.js' %}" defer></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,10 @@
+<form action="{% url 'compare_add' product.id %}" method="post" class="compare-form">
+  {% csrf_token %}
+  <button
+    type="submit"
+    class="btn btn-secondary btn-sm"
+    aria-label="Add {{ product.display_name }} to comparison"
+  >
+    Compare
+  </button>
+</form>

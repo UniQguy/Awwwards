@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Cancelled — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+    <div class="alert alert-warning" style="padding: 2rem; margin-bottom: 2rem;">
+      <h1>Payment Cancelled</h1>
+      <p>The transaction was cancelled before completion. Order #{{ order.order_number }} remains in pending state.</p>
+    </div>
+
+    <a href="{% url 'payments:razorpay_checkout' order_number=order.order_number %}" class="btn btn-primary">Resume Payment</a>
+  </div>
+</div>
+{% endblock %}

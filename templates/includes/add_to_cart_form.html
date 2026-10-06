@@ -1,0 +1,11 @@
+<form action="{% url 'cart_add' product.id %}" method="post" class="add-to-cart-form">
+  {% csrf_token %}
+  <input type="hidden" name="quantity" value="1">
+  <button
+    type="submit"
+    class="btn btn-primary btn-sm"
+    {% if not product.is_purchasable %}disabled aria-disabled="true"{% endif %}
+  >
+    {% if product.is_purchasable %}Add to Cart{% else %}Unavailable{% endif %}
+  </button>
+</form>

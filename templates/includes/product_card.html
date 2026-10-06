@@ -1,0 +1,28 @@
+<article class="product-card" aria-labelledby="product-title-{{ product.id }}">
+  <div class="product-card-img-wrapper">
+    <a href="{% url 'product_detail' slug=product.slug %}" tabindex="-1" aria-hidden="true">
+      {% include "includes/product_image.html" %}
+    </a>
+  </div>
+
+  <div class="product-card-body">
+    <div style="margin-bottom: 0.35rem;">
+      <small class="text-muted">{{ product.parsed_brand }}</small>
+    </div>
+    <h3 class="product-card-title" id="product-title-{{ product.id }}">
+      <a href="{% url 'product_detail' slug=product.slug %}">{{ product.display_name }}</a>
+    </h3>
+
+    {% include "includes/price_block.html" %}
+
+    <div style="margin-bottom: 0.75rem;">
+      {% include "includes/stock_badge.html" %}
+    </div>
+
+    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: auto;">
+      {% include "includes/add_to_cart_form.html" %}
+      {% include "includes/wishlist_form.html" %}
+      {% include "includes/compare_form.html" %}
+    </div>
+  </div>
+</article>

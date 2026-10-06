@@ -1,0 +1,63 @@
+<header class="site-header" role="banner">
+  <div class="container header-inner">
+    <div class="site-brand">
+      <a href="{% url 'home' %}">ELECTROCART</a>
+    </div>
+
+    <form class="search-bar-form" action="{% url 'search_results' %}" method="get" role="search">
+      <label for="site-search-input" class="sr-only">Search products, brands, or categories</label>
+      <input
+        type="search"
+        id="site-search-input"
+        name="q"
+        value="{{ request.GET.q|default:'' }}"
+        class="form-control"
+        placeholder="Search electronics, audio, gear..."
+        required
+        autocomplete="off"
+      >
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <nav aria-label="Account and cart navigation">
+      <ul class="nav-links">
+        <li><a href="{% url 'category_list' %}">Categories</a></li>
+        <li><a href="{% url 'brand_list' %}">Brands</a></li>
+        <li>
+          <a href="{% url 'wishlist_detail' %}" aria-label="Wishlist ({{ wishlist_count }} items)">
+            Wishlist {% if wishlist_count > 0 %}<span class="badge badge-low-stock">({{ wishlist_count }})</span>{% endif %}
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'cart_detail' %}" aria-label="Cart ({{ cart_count }} items)">
+            Cart {% if cart_count > 0 %}<span class="badge badge-in-stock">({{ cart_count }})</span>{% endif %}
+          </a>
+        </li>
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'account_dashboard' %}">My Account</a></li>
+          <li>
+            <form action="{% url 'account_logout' %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-secondary">Logout</button>
+            </form>
+          </li>
+        {% else %}
+          <li><a href="{% url 'account_login' %}">Login</a></li>
+          <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+
+  {% if nav_categories %}
+    <nav class="nav-categories-bar" aria-label="Category navigation">
+      <div class="container">
+        <ul class="category-nav-list">
+          {% for cat in nav_categories %}
+            <li><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </nav>
+  {% endif %}
+</header>

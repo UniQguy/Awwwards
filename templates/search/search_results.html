@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block title %}Search: {{ query|default:"All Products" }} — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% include "includes/breadcrumbs.html" %}
+
+  <header style="margin-bottom: 2rem;">
+    <h1>
+      {% if query %}
+        Search Results for &ldquo;{{ query }}&rdquo;
+      {% else %}
+        Catalog Search
+      {% endif %}
+    </h1>
+    <p class="text-muted">{{ total_count }} product{{ total_count|pluralize }} found</p>
+
+    {% if did_you_mean %}
+      <div class="alert alert-info" style="margin-top: 1rem;">
+        Did you mean: <a href="{% url 'search_results' %}?q={{ did_you_mean|urlencode }}"><strong>{{ did_you_mean }}</strong></a>?
+      </div>
+    {% endif %}
+  </header>
+
+  <div style="display: grid; grid-template-columns: minmax(240px, 280px) 1fr; gap: 2rem; align-items: start;">
+    <!-- Search Facets Sidebar -->
+    <aside aria-label="Search filters">
+      <form method="get" action="{% url 'search_results' %}">
+        <input type="hidden" name="q" value="{{ query }}">
+
+        <fieldset style="border: 1px solid var(--color-border); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+          <legend style="font-weight: 700; padding: 0 0.5rem;">Filter Results</legend>
+
+          <!-- Sort -->
+          <div class="form-group">
+            <label for="search-sort" class="form-label">Sort</label>
+            <select name="sort" id="search-sort" class="form-control">
+              <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Most Popular</option>
+              <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+              <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+              <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Highest Rated</option>
+              <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+            </select>
+          </div>
+
+          <!-- Category Facet -->
+          {% if facets.categories %}
+            <div class="form-group">
+              <label for="filter-category" class="form-label">Category</label>
+              <select name="c" id="filter-category" class="form-control">
+                <option value="">All Categories</option>
+                {% for cat in facets.categories %}
+                  <option value="{{ cat.slug }}" {% if selected_filters.category == cat.slug %}selected{% endif %}>
+                    {{ cat.name }} ({{ cat.product_count }})
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endif %}
+
+          <!-- Brand Facet -->
+          {% if facets.brands %}
+            <div class="form-group">
+              <label for="filter-brand" class="form-label">Brand</label>
+              <select name="brand" id="filter-brand" class="form-control">
+                <option value="">All Brands</option>
+                {% for b in facets.brands %}
+                  <option value="{{ b.parsed_brand }}" {% if selected_filters.brand == b.parsed_brand %}selected{% endif %}>
+                    {{ b.parsed_brand }} ({{ b.count }})
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endif %}
+
+          <!-- Price Min/Max -->
+          <div class="form-group">
+            <label for="search-min-price" class="form-label">Min Price (₹)</label>
+            <input type="number" step="1" name="min_price" id="search-min-price" class="form-control" value="{{ selected_filters.min_price|default:'' }}">
+          </div>
+
+          <div class="form-group">
+            <label for="search-max-price" class="form-label">Max Price (₹)</label>
+            <input type="number" step="1" name="max_price" id="search-max-price" class="form-control" value="{{ selected_filters.max_price|default:'' }}">
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+            <button type="submit" class="btn btn-primary btn-block">Apply</button>
+            <a href="{% url 'search_results' %}?q={{ query|urlencode }}" class="btn btn-secondary">Reset</a>
+          </div>
+        </fieldset>
+      </form>
+    </aside>
+
+    <!-- Product Grid -->
+    <section aria-labelledby="results-heading">
+      <h2 id="results-heading" class="sr-only">Search Product List</h2>
+
+      {% if page_obj %}
+        <div class="grid-3">
+          {% for product in page_obj %}
+            {% include "includes/product_card.html" %}
+          {% endfor %}
+        </div>
+
+        {% include "includes/pagination.html" %}
+      {% else %}
+        <div class="alert alert-info">
+          <p>No products were found matching your criteria.</p>
+          <p>Try searching with broader keywords, checking your spelling, or exploring our <a href="{% url 'category_list' %}">categories</a>.</p>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

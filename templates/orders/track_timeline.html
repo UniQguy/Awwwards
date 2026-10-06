@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block title %}Shipment Tracking #{{ order.order_number }} — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% include "includes/breadcrumbs.html" %}
+
+  <div style="max-width: 720px; margin: 0 auto;">
+    <header style="margin-bottom: 2rem;">
+      <h1>Shipment Progress #{{ order.order_number }}</h1>
+      <p class="text-muted">
+        Carrier: <strong>{{ tracking_info.carrier }}</strong> &bull; Tracking ID: <strong>{{ tracking_info.tracking_number }}</strong>
+      </p>
+    </header>
+
+    <!-- Tracking Status Banner -->
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
+        <div>
+          <span class="text-muted" style="font-size: 0.85rem;">Current Status:</span>
+          <div style="font-size: 1.25rem; font-weight: 700;">
+            {% if tracking_info.is_cancelled %}
+              <span class="text-danger">Cancelled</span>
+            {% elif tracking_info.is_delivered %}
+              <span class="text-success">Delivered Successfully</span>
+            {% else %}
+              <span class="text-success">{{ order.get_status_display }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div>
+          <a href="{% url 'order_invoice' order_number=order.order_number %}" class="btn btn-sm btn-secondary" target="_blank">
+            View GST Invoice
+          </a>
+        </div>
+      </div>
+
+      <!-- Semantic Milestones Timeline -->
+      {% if not tracking_info.is_cancelled %}
+        <ol class="timeline" aria-label="Shipment delivery milestones">
+          {% for step in tracking_info.steps %}
+            <li
+              class="timeline-step {% if step.completed %}completed{% endif %} {% if order.status == step.status %}active{% endif %}"
+              {% if order.status == step.status %}aria-current="step"{% endif %}
+            >
+              <strong>{{ step.label }}</strong>
+              {% if order.status == step.status %}
+                <span class="badge badge-in-stock" style="margin-left: 0.5rem;">Active</span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ol>
+      {% else %}
+        <div class="alert alert-error">
+          This order was cancelled on {{ order.updated_at|date:"F j, Y" }}. Stock has been returned to inventory.
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Audit Event Log -->
+    {% if status_history %}
+      <section style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2.5rem;" aria-labelledby="history-heading">
+        <h2 id="history-heading" style="font-size: 1.15rem; margin-bottom: 1rem;">Tracking Event History</h2>
+        <table class="data-table" style="font-size: 0.85rem;">
+          <caption class="sr-only">Chronological shipment events</caption>
+          <thead>
+            <tr>
+              <th scope="col" style="width: 25%;">Timestamp</th>
+              <th scope="col" style="width: 30%;">Status</th>
+              <th scope="col">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for evt in status_history %}
+              <tr>
+                <td>{{ evt.created_at|date:"d M Y, H:i" }}</td>
+                <td><strong>{{ evt.to_status|title }}</strong></td>
+                <td>{{ evt.notes|default:"Milestone recorded." }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    {% endif %}
+
+    <!-- Destination Summary -->
+    <section style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;" aria-labelledby="dest-heading">
+      <h2 id="dest-heading" style="font-size: 1.15rem; margin-bottom: 0.75rem;">Delivery Destination</h2>
+      <p style="margin: 0; font-size: 0.95rem;">
+        <strong>{{ order.shipping_address_snapshot.full_name }}</strong><br>
+        {{ order.shipping_address_snapshot.line1 }}{% if order.shipping_address_snapshot.line2 %}, {{ order.shipping_address_snapshot.line2 }}{% endif %}<br>
+        {{ order.shipping_address_snapshot.city }}, {{ order.shipping_address_snapshot.state }} &ndash; <strong>{{ order.shipping_address_snapshot.pincode }}</strong>
+      </p>
+    </section>
+  </div>
+</div>
+{% endblock %}

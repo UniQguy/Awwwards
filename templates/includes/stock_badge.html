@@ -1,0 +1,15 @@
+{% if product.inventory %}
+  {% if product.inventory.quantity <= 0 or not product.is_available %}
+    <span class="badge badge-out-of-stock">Out of Stock</span>
+  {% elif product.inventory.is_low_stock %}
+    <span class="badge badge-low-stock">Only {{ product.inventory.quantity }} left</span>
+  {% else %}
+    <span class="badge badge-in-stock">In Stock</span>
+  {% endif %}
+{% else %}
+  {% if product.is_available %}
+    <span class="badge badge-in-stock">Available</span>
+  {% else %}
+    <span class="badge badge-out-of-stock">Out of Stock</span>
+  {% endif %}
+{% endif %}

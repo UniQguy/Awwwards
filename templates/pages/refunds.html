@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Returns & Refunds Policy — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <h1>Returns & Refunds Policy</h1>
+  <p class="text-muted"><small>Last updated: {% now "F j, Y" %}</small></p>
+
+  <section>
+    <h2>1. Cancellation Policy</h2>
+    <p>Orders may be cancelled free of charge at any time prior to warehouse dispatch and invoice generation. Once an order is cancelled, stock holds are instantly released back to inventory and any online payment is reversed.</p>
+  </section>
+
+  <section>
+    <h2>2. Damaged or Defective Items</h2>
+    <p>In the unlikely event that an item arrives physically damaged or defective, please initiate a return request within 48 hours of confirmed delivery with relevant unboxing documentation.</p>
+  </section>
+
+  <section>
+    <h2>3. GST Credit Notes</h2>
+    <p>In accordance with Section 34 of the Central Goods and Services Tax (CGST) Act, whenever an invoiced order is cancelled or refunded, a statutory GST Credit Note is automatically generated referencing the original invoice.</p>
+  </section>
+
+  <section>
+    <h2>4. Warranty & Return Window Notice</h2>
+    <div class="alert alert-info" role="note">
+      <p><strong>[PLACEHOLDER - SUBJECT TO OWNER LEGAL REVIEW]</strong></p>
+      <p>Specific return acceptance windows (e.g., 7 days vs 14 days), manufacturer warranty obligations, and restocking conditions are baseline terms requiring final review by the platform owner.</p>
+    </div>
+  </section>
+</div>
+{% endblock %}

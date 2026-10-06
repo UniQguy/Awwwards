@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Track Your Order — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% include "includes/breadcrumbs.html" %}
+
+  <div style="max-width: 540px; margin: 0 auto;">
+    <header style="text-align: center; margin-bottom: 2rem;">
+      <h1>Track Your Order</h1>
+      <p class="text-muted">Enter your order details below to monitor real-time shipment milestones.</p>
+    </header>
+
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem;">
+      <form action="{% url 'order_track_lookup' %}" method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="id-track-order-num" class="form-label">Order Number <span class="required-indicator">*</span></label>
+          <input
+            type="text"
+            id="id-track-order-num"
+            name="order_number"
+            class="form-control"
+            placeholder="e.g. EC-20261006-XXXX"
+            required
+            autocomplete="off"
+            style="text-transform: uppercase;"
+          >
+          <p class="form-help">Provided in your SMS and order receipt email.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="id-track-contact" class="form-label">Email or 10-Digit Mobile Number <span class="required-indicator">*</span></label>
+          <input
+            type="text"
+            id="id-track-contact"
+            name="contact"
+            class="form-control"
+            placeholder="Email address or phone number"
+            required
+            autocomplete="email tel"
+          >
+          <p class="form-help">Used to verify order ownership.</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="padding: 0.75rem; margin-top: 1.5rem;">
+          Track Shipment &rarr;
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

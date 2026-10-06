@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}404 Not Found — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <h1>404 — Page Not Found</h1>
+  <p>The product, category, or page you were looking for could not be found.</p>
+  <p><a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block title %}My Wishlist — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% include "includes/breadcrumbs.html" %}
+
+  <header style="margin-bottom: 2rem;">
+    <h1>My Wishlist</h1>
+    <p class="text-muted">Saved products for future purchase or comparison.</p>
+  </header>
+
+  {% if items %}
+    <div class="grid-3">
+      {% for item in items %}
+        {% with product=item.product %}
+          <article class="product-card">
+            <div class="product-card-img-wrapper">
+              <a href="{% url 'product_detail' slug=product.slug %}" tabindex="-1" aria-hidden="true">
+                {% include "includes/product_image.html" %}
+              </a>
+            </div>
+
+            <div class="product-card-body">
+              <div style="margin-bottom: 0.35rem;">
+                <small class="text-muted">{{ product.parsed_brand }}</small>
+              </div>
+              <h3 class="product-card-title">
+                <a href="{% url 'product_detail' slug=product.slug %}">{{ product.display_name }}</a>
+              </h3>
+
+              {% include "includes/price_block.html" %}
+
+              <div style="margin-bottom: 0.75rem;">
+                {% include "includes/stock_badge.html" %}
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+                <form action="{% url 'wishlist_move_to_cart' product.id %}" method="post" style="flex: 1;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary btn-sm btn-block" {% if not product.is_purchasable %}disabled{% endif %}>
+                    Move to Cart
+                  </button>
+                </form>
+                <form action="{% url 'wishlist_remove' product.id %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-secondary btn-sm" aria-label="Remove {{ product.display_name }} from wishlist">
+                    &times;
+                  </button>
+                </form>
+              </div>
+            </div>
+          </article>
+        {% endwith %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info" style="text-align: center; padding: 3rem 1.5rem;">
+      <h2>Your Wishlist is Empty</h2>
+      <p style="max-width: 500px; margin: 0 auto 1.5rem auto;">
+        Keep track of items you love by clicking the Wishlist button on any product card.
+      </p>
+      <a href="{% url 'category_list' %}" class="btn btn-primary">Browse Categories</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block title %}{{ product.display_name }} — ELECTROCART{% endblock %}
+{% block meta_description %}{{ product.description|default:product.display_name|truncatechars:150 }}{% endblock %}
+
+{% block extra_head %}
+<!-- JSON-LD Structured Data (Schema.org/Product) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ product.display_name|escapejs }}",
+  "sku": "{{ product.sku|escapejs }}",
+  "brand": {
+    "@type": "Brand",
+    "name": "{{ product.parsed_brand|escapejs }}"
+  },
+  {% if product.media.first and product.media.first.url %}
+  "image": "{{ product.media.first.url }}",
+  {% endif %}
+  "description": "{{ product.description|default:product.display_name|striptags|escapejs }}",
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "INR",
+    "price": "{{ product.selling_price|default:'0.00' }}",
+    "itemCondition": "https://schema.org/NewCondition",
+    "availability": "{% if product.is_purchasable %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+    "seller": {
+      "@type": "Organization",
+      "name": "{{ seller_mode.seller_legal_name|escapejs }}"
+    }
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% include "includes/breadcrumbs.html" %}
+
+  <div style="display: grid; grid-template-columns: minmax(320px, 460px) 1fr; gap: 3rem; margin-bottom: 3.5rem; align-items: start;">
+    <!-- Media / Image Column -->
+    <div>
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; margin-bottom: 1rem;">
+        {% include "includes/product_image.html" with eager=True %}
+      </div>
+
+      {% if media_items|length > 1 %}
+        <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem;">
+          {% for m in media_items %}
+            <div style="width: 72px; height: 72px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 4px; background: #fff; flex-shrink: 0;">
+              <img src="{{ m.url }}" alt="{{ m.alt_text|default:product.display_name }}" width="64" height="64" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Product Summary & Commerce Actions -->
+    <div>
+      <div style="margin-bottom: 0.5rem;">
+        <span class="badge badge-in-stock">{{ product.category.name }}</span>
+        <span class="text-muted" style="margin-left: 0.5rem;">Brand: <strong>{{ product.parsed_brand }}</strong></span>
+      </div>
+
+      <h1 style="font-size: 1.85rem; margin-bottom: 0.75rem;">{{ product.display_name }}</h1>
+
+      {% if product.raw_name != product.display_name %}
+        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">
+          Marketplace Title: <em>{{ product.raw_name }}</em>
+        </p>
+      {% endif %}
+
+      {% include "includes/price_block.html" %}
+
+      <div style="margin-bottom: 1.5rem;">
+        {% include "includes/stock_badge.html" %}
+      </div>
+
+      <!-- Marketplace Rating Provenance -->
+      {% if product.source_rating %}
+        <div style="background: var(--color-surface); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--color-accent); margin-bottom: 1.5rem;">
+          <p style="margin: 0; font-size: 0.9rem;">
+            <strong>Marketplace Rating:</strong> {{ product.source_rating }} / 5.0
+            {% if product.source_rating_count %}
+              <span class="text-muted">({{ product.source_rating_count }} customer ratings recorded)</span>
+            {% endif %}
+          </p>
+          <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: var(--color-text-muted);">
+            Imported from verified public marketplace data. ELECTROCART does not generate artificial reviews.
+          </p>
+        </div>
+      {% endif %}
+
+      <!-- Commerce Purchase Form -->
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem;">
+        <form action="{% url 'cart_add' product.id %}" method="post">
+          {% csrf_token %}
+          <div style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+            <div style="flex: 0 0 120px;">
+              <label for="id-quantity" class="form-label">Quantity</label>
+              <select name="quantity" id="id-quantity" class="form-control" {% if not product.is_purchasable %}disabled{% endif %}>
+                {% for i in "12345678910"|make_list %}
+                  {% if forloop.counter <= max_cart_qty %}
+                    <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <button
+                type="submit"
+                class="btn btn-primary btn-block"
+                style="height: 42px;"
+                {% if not product.is_purchasable %}disabled aria-disabled="true"{% endif %}
+              >
+                {% if product.is_purchasable %}Add to Cart{% else %}Currently Unavailable{% endif %}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          {% include "includes/wishlist_form.html" %}
+          {% include "includes/compare_form.html" %}
+        </div>
+      </div>
+
+      <!-- PIN Code Delivery Estimator -->
+      <section style="border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1.25rem;" aria-labelledby="shipping-estimator-heading">
+        <h3 id="shipping-estimator-heading" style="font-size: 1rem; margin-bottom: 0.5rem;">Estimated Delivery &amp; Serviceability</h3>
+        <form action="{% url 'shipping_check' %}" method="post" style="display: flex; gap: 0.5rem; max-width: 380px;">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <label for="shipping-pincode-input" class="sr-only">Enter 6-digit Indian PIN code</label>
+          <input
+            type="text"
+            id="shipping-pincode-input"
+            name="pincode"
+            class="form-control"
+            placeholder="Enter 6-digit PIN code"
+            pattern="[1-9][0-9]{5}"
+            maxlength="6"
+            value="{{ remembered_pincode }}"
+            required
+          >
+          <button type="submit" class="btn btn-secondary">Check</button>
+        </form>
+
+        {% if delivery_estimate %}
+          <div style="margin-top: 0.75rem;">
+            {% if delivery_estimate.serviceable %}
+              <p class="text-success" style="margin: 0; font-weight: 600;">
+                Delivery available to {{ remembered_pincode }}
+              </p>
+              <p style="margin: 0; font-size: 0.85rem;" class="text-muted">
+                Estimated arrival: {{ delivery_estimate.date_min|date:"D, M j" }} &ndash; {{ delivery_estimate.date_max|date:"D, M j" }}
+                ({{ delivery_estimate.est_days_min }}&ndash;{{ delivery_estimate.est_days_max }} business days)
+                {% if delivery_estimate.cod_allowed %} &bull; Cash on Delivery eligible{% endif %}
+              </p>
+            {% else %}
+              <p class="text-danger" style="margin: 0; font-weight: 600;">
+                Delivery unavailable to {{ remembered_pincode }}
+              </p>
+              <p style="margin: 0; font-size: 0.85rem;" class="text-muted">
+                {{ delivery_estimate.unavailable_reason }}
+              </p>
+            {% endif %}
+          </div>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+
+  <!-- Specifications Table -->
+  {% if specifications %}
+    <section style="margin-bottom: 3.5rem;" aria-labelledby="specs-heading">
+      <h2 id="specs-heading">Technical Specifications</h2>
+      <div class="table-responsive">
+        <table class="spec-table">
+          <caption class="sr-only">Product technical attributes</caption>
+          <thead>
+            <tr>
+              <th scope="col" style="width: 30%;">Attribute</th>
+              <th scope="col">Specification</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for spec in specifications %}
+              <tr>
+                <th scope="row">{{ spec.key }}</th>
+                <td>{{ spec.value }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- Related Products in Category -->
+  {% if related_products %}
+    <section aria-labelledby="related-heading">
+      <h2 id="related-heading">Related Products in {{ product.category.name }}</h2>
+      <div class="grid-4">
+        {% for rel in related_products %}
+          {% with product=rel %}
+            {% include "includes/product_card.html" %}
+          {% endwith %}
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

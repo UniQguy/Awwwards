@@ -50,8 +50,58 @@
 - `/health/` -> `health_check` (`name="health_check"`) -> Returns `{"status": "ok", "service": "electrocart"}`.
 - `/admin/` -> `admin.site.urls` -> Django Administration interface.
 - `/accounts/` -> `allauth.urls` -> Authentication, registration, password management.
+- `/` -> `home` -> Editorial curated homepage with category cards, featured products, and value propositions.
+- `/categories/` -> `category_list` -> Grid of all 10 hardware categories with accent branding.
+- `/c/<slug>/` -> `category_detail` -> Category listing with faceted brand filters and sorting.
+- `/p/<slug>/` -> `product_detail` -> High-impact product page with GST rate breakdown, stock status, delivery check, compare, and wishlist.
+- `/brands/` -> `brand_list` -> Alphabetical brand index directory.
+- `/search/` -> `search_view` -> Tokenized search results with faceted filters and "Did You Mean" suggestions.
+- `/search/suggest/` -> `search_suggest` -> Autocomplete query suggestions.
+- `/cart/` -> `cart_detail` -> Shopping cart breakdown, line item updates, free shipping meter, and coupon engine.
+- `/cart/add/<product_id>/` -> `cart_add` -> POST action adding product to cart with inventory clamping.
+- `/cart/update/<product_id>/` -> `cart_update` -> POST action updating quantity (0 triggers removal).
+- `/cart/remove/<product_id>/` -> `cart_remove` -> POST action removing line item.
+- `/cart/clear/` -> `cart_clear` -> POST action emptying cart.
+- `/cart/coupon/apply/` -> `coupon_apply` -> POST action attaching promo coupon code.
+- `/cart/coupon/remove/` -> `coupon_remove` -> POST action detaching promo coupon code.
+- `/wishlist/` -> `wishlist_detail` -> Customer wishlist view with stock status and instant move-to-cart.
+- `/wishlist/toggle/<product_id>/` -> `wishlist_toggle` -> POST action adding or removing item from wishlist.
+- `/wishlist/move-to-cart/<product_id>/` -> `wishlist_move_to_cart` -> POST action moving saved item to active cart.
+- `/wishlist/remove/<product_id>/` -> `wishlist_remove` -> POST action deleting saved item.
+- `/shipping/check/` -> `shipping_check_pincode` -> PIN code serviceability checker.
+- `/compare/` -> `compare_tray` -> Technical product specification matrix (2 to 4 items).
+- `/compare/add/<product_id>/` -> `compare_add` -> POST action adding product to comparison tray.
+- `/compare/remove/<product_id>/` -> `compare_remove` -> POST action removing product from comparison tray.
+- `/compare/clear/` -> `compare_clear` -> POST action resetting comparison tray.
+- `/checkout/` -> `checkout_start` -> Checkout entry gate directing guests or authenticated members.
+- `/checkout/guest/` -> `checkout_guest_contact` -> POST action capturing guest contact information.
+- `/checkout/address/` -> `checkout_address` -> Address input and PIN code validation with delivery SLA calculation.
+- `/checkout/review/` -> `checkout_review` -> Order review, stock reservation lock, and payment selection (COD / Razorpay).
+- `/checkout/place/` -> `checkout_place` -> Order creation and routing to Razorpay or COD completion.
+- `/orders/<order_number>/success/` -> `order_success` -> Order confirmation page with delivery estimate and invoice link.
+- `/orders/<order_number>/invoice/` -> `order_invoice_view` -> Compliant GST Tax Invoice / Bill of Supply view with print stylesheet.
+- `/orders/track/` -> `track_lookup` -> Public PIN + Order Number tracking lookup.
+- `/orders/<order_number>/track/` -> `order_track` -> Delivery milestone tracking timeline.
+- `/orders/<order_number>/cancel/` -> `order_cancel` -> POST action requesting cancellation and inventory release.
+- `/account/` -> `account_dashboard` -> Customer dashboard with recent orders and primary address.
+- `/account/orders/` -> `account_order_list` -> Complete order history with status badges and invoice links.
+- `/account/orders/<order_number>/` -> `account_order_detail` -> Order detail view.
+- `/account/addresses/` -> `account_address_list` -> Saved address address book with default toggling.
+- `/account/addresses/create/` -> `account_address_form` -> Create shipping destination address.
+- `/account/addresses/<uuid:uuid>/edit/` -> `account_address_form` -> Update existing address.
+- `/account/addresses/<uuid:uuid>/delete/` -> `account_address_delete` -> Remove address.
+- `/account/addresses/<uuid:uuid>/default/` -> `account_address_set_default` -> Make address primary default.
+- `/account/profile/` -> `account_profile` -> Update member name and credentials.
+- `/payments/razorpay/checkout/<order_number>/` -> `razorpay_checkout_page` -> Razorpay checkout page with auto-submitting fallback form.
 - `/payments/razorpay/verify/` -> `razorpay_verify_view` -> POST signature verification and order confirmation.
 - `/payments/razorpay/webhook/` -> `razorpay_webhook_view` -> POST asynchronous webhook event processing with replay protection.
+- `/payments/razorpay/failed/` -> `razorpay_payment_failed` -> Payment failure notice with retry link.
+- `/payments/razorpay/cancelled/` -> `razorpay_payment_cancelled` -> Payment cancellation notice.
+- `/payments/razorpay/pending/` -> `razorpay_payment_pending` -> Asynchronous payment pending notice.
+- `/legal/terms/` -> `terms_view` -> Terms of Service.
+- `/legal/privacy/` -> `privacy_view` -> Privacy Policy.
+- `/legal/shipping/` -> `shipping_policy_view` -> Shipping and Delivery Policy.
+- `/legal/refunds/` -> `refunds_policy_view` -> Cancellation and Returns Policy.
 
 ### 3. Environment Variables
 - `DEBUG`: Boolean (development: `True`, test/prod: `False`).

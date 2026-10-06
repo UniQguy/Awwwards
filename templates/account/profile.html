@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Profile Settings — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% include "includes/breadcrumbs.html" %}
+
+  <header style="margin-bottom: 2rem;">
+    <h1>Profile Settings</h1>
+    <p class="text-muted">Manage your personal contact details.</p>
+  </header>
+
+  <nav aria-label="Account sections" style="margin-bottom: 2rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
+    <ul style="list-style: none; padding: 0; margin: 0; display: flex; gap: 1.5rem;">
+      <li><a href="{% url 'account_dashboard' %}">Dashboard</a></li>
+      <li><a href="{% url 'account_order_list' %}">Order History</a></li>
+      <li><a href="{% url 'account_address_list' %}">Saved Addresses</a></li>
+      <li><a href="{% url 'account_profile' %}" style="font-weight: 700;">Profile Settings</a></li>
+    </ul>
+  </nav>
+
+  <div style="max-width: 500px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem;">
+    <form action="" method="post">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="id-email" class="form-label">Email Address</label>
+        <input type="email" id="id-email" class="form-control" value="{{ user.email }}" disabled aria-disabled="true">
+        <p class="form-help">Email address is your unique member ID and cannot be changed directly.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="id-full-name" class="form-label">Full Name</label>
+        <input type="text" id="id-full-name" name="full_name" class="form-control" value="{{ user.full_name }}" required autocomplete="name">
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Update Profile</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

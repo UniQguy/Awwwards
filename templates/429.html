@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}429 Too Many Requests — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <h1>429 — Too Many Requests</h1>
+  <p>You have made too many requests in a short period. Please wait a moment and try again.</p>
+  <p><a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a></p>
+</div>
+{% endblock %}

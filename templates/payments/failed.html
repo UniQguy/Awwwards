@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Failed — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+    <div class="alert alert-danger" style="padding: 2rem; margin-bottom: 2rem;">
+      <h1>Payment Unsuccessful</h1>
+      <p>Your payment attempt for Order #{{ order.order_number }} could not be completed by the bank or gateway.</p>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+      <a href="{% url 'payments:razorpay_checkout' order_number=order.order_number %}" class="btn btn-primary">Try Again</a>
+      {% if can_cod %}
+        <form action="{% url 'payments:razorpay_switch_cod' order.order_number %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary">Switch to Cash on Delivery</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

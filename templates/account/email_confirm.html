@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Email — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="max-width: 480px; margin: 0 auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem; text-align: center;">
+    <h1>Confirm Email Address</h1>
+
+    {% if confirmation %}
+      <p>Please confirm that <strong>{{ confirmation.email_address.email }}</strong> is an email address for user {{ confirmation.email_address.user }}.</p>
+
+      <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Confirm Email</button>
+      </form>
+    {% else %}
+      <p class="text-danger">This email confirmation link has expired or is invalid.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -43,3 +43,13 @@ DJANGO_VITE["default"]["dev_mode"] = False
 RAZORPAY_KEY_ID = "rzp_test_mock_key_id"
 RAZORPAY_KEY_SECRET = "rzp_test_mock_secret_key"
 RAZORPAY_WEBHOOK_SECRET = "rzp_test_mock_webhook_secret"
+
+# Plain staticfiles storage for tests (no manifest compilation required)
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}

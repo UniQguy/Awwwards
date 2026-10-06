@@ -1,0 +1,54 @@
+<footer class="site-footer" role="contentinfo">
+  <!-- Image assets reference external retailer CDNs for development & preview only. Phase 4 will transition to self-hosted assets. -->
+  <div class="container footer-grid">
+    <div class="footer-col">
+      <h4>ELECTROCART</h4>
+      <p class="text-muted">India's curated destination for consumer electronics and precision accessories.</p>
+      <p class="text-muted"><small>Currency: INR (₹) | Dispatched from {{ seller_mode.seller_state }}</small></p>
+      {% if has_sample_stock %}
+        <p><small class="text-muted">Notice: Stock levels and product availability reflect demonstration data.</small></p>
+      {% endif %}
+    </div>
+
+    <div class="footer-col">
+      <h4>Customer Care</h4>
+      <ul>
+        <li><a href="{% url 'order_track_lookup' %}">Track Your Order</a></li>
+        <li><a href="{% url 'legal_shipping' %}">Shipping & Delivery</a></li>
+        <li><a href="{% url 'legal_refunds' %}">Returns & Refunds</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Catalog</h4>
+      <ul>
+        <li><a href="{% url 'category_list' %}">All Categories</a></li>
+        <li><a href="{% url 'brand_list' %}">Brands Directory</a></li>
+        <li><a href="{% url 'cart_detail' %}">Shopping Cart</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Legal & Regulatory</h4>
+      <ul>
+        <li><a href="{% url 'legal_terms' %}">Terms of Service</a></li>
+        <li><a href="{% url 'legal_privacy' %}">Privacy Policy</a></li>
+      </ul>
+      <p class="text-muted">
+        <small>
+          <strong>{{ seller_mode.seller_legal_name }}</strong><br>
+          {% if seller_mode.seller_address %}{{ seller_mode.seller_address }}<br>{% endif %}
+          {% if seller_mode.is_bill_of_supply %}
+            Composition Dealer / Unregistered. Issuing Bill of Supply.
+          {% else %}
+            GSTIN: {{ seller_mode.seller_gstin }}
+          {% endif %}
+        </small>
+      </p>
+    </div>
+  </div>
+
+  <div class="container footer-legal-notice">
+    <p>&copy; {% now "Y" %} {{ seller_mode.seller_legal_name }}. Built with semantic HTML for maximum accessibility and performance.</p>
+  </div>
+</footer>
