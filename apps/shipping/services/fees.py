@@ -59,3 +59,11 @@ def quote(
         amount_to_free=amount_to_free,
         total_shipping_charges=total_charges,
     )
+
+
+def calculate_shipping_fee(items_total: Decimal) -> Decimal:
+    return quote(items_total).delivery_fee
+
+
+def calculate_cod_fee() -> Decimal:
+    return ShippingConfig.get_solo().cod_fee
