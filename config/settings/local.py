@@ -26,8 +26,9 @@ if SECRET_KEY.startswith("CHANGE_ME"):
         stacklevel=2,
     )
 
-# Enable Vite dev server integration in local mode
-DJANGO_VITE["default"]["dev_mode"] = True
+# Vite dev mode: False by default so runserver works directly from built assets.
+# Set VITE_DEV_MODE=true (e.g. via scripts/dev.ps1) when running vite dev server.
+DJANGO_VITE["default"]["dev_mode"] = os.environ.get("VITE_DEV_MODE", "false").lower() == "true"
 
 # Extend Content Security Policy for Vite development server
 CONTENT_SECURITY_POLICY["DIRECTIVES"]["script-src"] = list(

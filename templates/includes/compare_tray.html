@@ -1,15 +1,12 @@
-<div class="compare-tray" role="region" aria-label="Product comparison tray">
-  <div class="compare-tray-inner">
-    <div>
-      <strong>Compare Products ({{ compare_count }}/3)</strong>
-    </div>
-
-    <div style="display: flex; gap: 0.75rem; align-items: center;">
-      <a href="{% url 'compare_tray' %}" class="btn btn-primary btn-sm">Compare Now</a>
-      <form action="{% url 'compare_clear' %}" method="post" style="display: inline;">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-secondary btn-sm">Clear</button>
-      </form>
-    </div>
+<div class="compare-tray-bar" role="region" aria-label="Product comparison tray">
+  <div class="compare-tray-text">
+    <strong>Compare Products ({{ compare_count }}/3)</strong>
+  </div>
+  <div class="btn-group">
+    <a href="{% url 'compare_tray' %}" class="btn btn-primary btn-sm">Compare Now</a>
+    <form action="{% url 'compare_clear' %}" method="post" class="u-inline-form">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-secondary btn-sm">Clear</button>
+    </form>
   </div>
 </div>

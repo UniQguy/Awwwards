@@ -1,0 +1,339 @@
+@layer reset, tokens, base, layout, components, utilities, print;
+
+@layer tokens {
+  /* ==========================================================================
+     SELF-HOSTED VARIABLE FONTS & METRIC-ADJUSTED FALLBACKS
+     ========================================================================== */
+  @font-face {
+    font-family: 'Fraunces';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/static/fonts/fraunces-latin-full-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: 'Fraunces';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/static/fonts/fraunces-latin-ext-full-normal.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+
+  @font-face {
+    font-family: 'Fraunces';
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/static/fonts/fraunces-latin-full-italic.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: 'Fraunces';
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/static/fonts/fraunces-latin-ext-full-italic.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+
+  @font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('/static/fonts/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('/static/fonts/plus-jakarta-sans-latin-ext-wght-normal.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+
+  @font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: italic;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('/static/fonts/plus-jakarta-sans-latin-wght-italic.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: italic;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('/static/fonts/plus-jakarta-sans-latin-ext-wght-italic.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+
+  /* Metric-adjusted fallback fonts to prevent layout shift */
+  @font-face {
+    font-family: 'Fraunces-Fallback';
+    src: local('Georgia');
+    ascent-override: 95%;
+    descent-override: 25%;
+    size-adjust: 102%;
+  }
+
+  @font-face {
+    font-family: 'Plus-Jakarta-Sans-Fallback';
+    src: local('Arial');
+    ascent-override: 96%;
+    descent-override: 24%;
+    size-adjust: 98%;
+  }
+
+  /* Rupee Glyph Fallback Guard (U+20B9) */
+  @font-face {
+    font-family: 'Rupee-Fallback';
+    src: local('Segoe UI'), local('Arial'), local('sans-serif');
+    unicode-range: U+20B9;
+  }
+
+  /* ==========================================================================
+     GLOBAL TOKENS (INDEPENDENT OF CATEGORY WORLD)
+     ========================================================================== */
+  :root {
+    /* Typography Stacks */
+    --font-display: 'Fraunces', 'Fraunces-Fallback', 'Rupee-Fallback', Georgia, serif;
+    --font-text: 'Plus Jakarta Sans', 'Plus-Jakarta-Sans-Fallback', 'Rupee-Fallback', system-ui, -apple-system, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* Fluid Typography Scale (1.2 to 1.333 ratio, 360px -> 1440px viewport) */
+    --step--2: clamp(0.69rem, 0.66rem + 0.16vw, 0.80rem);
+    --step--1: clamp(0.83rem, 0.79rem + 0.23vw, 0.96rem);
+    --step-0:  clamp(1.00rem, 0.94rem + 0.31vw, 1.15rem);
+    --step-1:  clamp(1.20rem, 1.12rem + 0.42vw, 1.44rem);
+    --step-2:  clamp(1.44rem, 1.33rem + 0.58vw, 1.80rem);
+    --step-3:  clamp(1.73rem, 1.57rem + 0.79vw, 2.25rem);
+    --step-4:  clamp(2.07rem, 1.85rem + 1.10vw, 2.81rem);
+    --step-5:  clamp(2.49rem, 2.18rem + 1.52vw, 3.52rem);
+    --step-6:  clamp(2.99rem, 2.56rem + 2.11vw, 4.40rem);
+    --step-7:  clamp(3.58rem, 3.01rem + 2.89vw, 5.50rem);
+
+    /* 4px Base Spacing Scale */
+    --space-1:  4px;
+    --space-2:  8px;
+    --space-3:  12px;
+    --space-4:  16px;
+    --space-5:  24px;
+    --space-6:  32px;
+    --space-7:  48px;
+    --space-8:  64px;
+    --space-9:  96px;
+    --space-10: 128px;
+    --space-11: 160px;
+    --space-12: 192px;
+
+    /* Container & Gutters */
+    --container-max: 1440px;
+    --gutter: clamp(16px, 4vw, 48px);
+
+    /* Radii */
+    --radius-0: 0px;
+    --radius-1: 2px;
+    --radius-2: 6px;
+    --radius-pill: 9999px;
+
+    /* Elevation */
+    --lift-0: none;
+    --lift-1: 0 1px 0 rgba(28, 25, 23, 0.06), 0 6px 14px -8px rgba(28, 25, 23, 0.22);
+    --lift-2: 0 2px 2px rgba(28, 25, 23, 0.08), 0 12px 24px -10px rgba(28, 25, 23, 0.28);
+
+    /* Motion Tokens */
+    --ease-utility: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-utility: 200ms;
+    --ease-editorial: cubic-bezier(0.25, 1, 0.5, 1);
+    --dur-editorial: 400ms;
+
+    /* Z-Index Stack */
+    --z-deep: -1;
+    --z-base: 0;
+    --z-plate: 1;
+    --z-sticky: 100;
+    --z-header: 500;
+    --z-sheet: 800;
+    --z-dialog: 900;
+    --z-popover: 1000;
+    --z-toast: 1100;
+
+    /* Print Tokens */
+    --print-ink: #000000;
+    --print-paper: #FFFFFF;
+    --print-rule: #CCCCCC;
+
+    /* Backdrop Overlay */
+    --world-overlay: rgba(28, 25, 23, 0.4);
+
+    /* Shared Status Tokens (Verified WCAG AA 4.5:1 on tint and on every world) */
+    --color-success: #1C4728;
+    --color-success-tint: #EAF2EB;
+    --color-warning: #5C3E08;
+    --color-warning-tint: #F9F3E5;
+    --color-danger: #7D2117;
+    --color-danger-tint: #F9EBEA;
+    --color-info: #1A4363;
+    --color-info-tint: #EBF1F6;
+
+    /* Default World Tokens (Earphones & Headphones — Warm Clay) */
+    --world-bg: #F5F2EB;
+    --world-surface: #EDE8DE;
+    --world-accent: #9E3D24;
+    --world-text: #1C1917;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+
+    /* Focus Ring Token */
+    --focus-ring: 2px solid var(--world-accent);
+    --focus-offset: 3px;
+  }
+
+  /* ==========================================================================
+     THE 10 FROZEN CATEGORY MONOGRAPH PALETTES
+     Authority: scripts/verify_contrast.py
+     ========================================================================== */
+
+  /* 1. Earphones & Headphones (Default Warm Clay) */
+  [data-world="earphones-headphones"],
+  :root:not([data-world]) {
+    --world-bg: #F5F2EB;
+    --world-surface: #EDE8DE;
+    --world-accent: #9E3D24;
+    --world-text: #1C1917;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+  }
+
+  /* 2. Speakers */
+  [data-world="speakers"] {
+    --world-bg: #F2EFE9;
+    --world-surface: #E8E3DA;
+    --world-accent: #7C4A2D;
+    --world-text: #1A1816;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+  }
+
+  /* 3. Smartphones */
+  [data-world="smartphones"] {
+    --world-bg: #EBF0ED;
+    --world-surface: #DEE7E2;
+    --world-accent: #1B5E4B;
+    --world-text: #111C18;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+  }
+
+  /* 4. Smartwatches & Bands */
+  [data-world="smartwatches-bands"] {
+    --world-bg: #EDECE8;
+    --world-surface: #E2E0D8;
+    --world-accent: #2C5282;
+    --world-text: #14171A;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+  }
+
+  /* 5. Cameras */
+  [data-world="cameras"] {
+    --world-bg: #F0EDE6;
+    --world-surface: #E5E0D5;
+    --world-accent: #8C3A27;
+    --world-text: #1A1715;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+  }
+
+  /* 6. Televisions */
+  [data-world="tvs"] {
+    --world-bg: #ECEEF0;
+    --world-surface: #DFE3E6;
+    --world-accent: #1E3A5F;
+    --world-text: #11161B;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+  }
+
+  /* 7. Keyboards & Mice */
+  [data-world="keyboards-mice"] {
+    --world-bg: #EEECE8;
+    --world-surface: #E3DFD8;
+    --world-accent: #5C4A36;
+    --world-text: #181613;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+  }
+
+  /* 8. Cables, Chargers & Powerbanks */
+  [data-world="cables-chargers-powerbanks"] {
+    --world-bg: #EEF0E8;
+    --world-surface: #E1E6D8;
+    --world-accent: #3B5E2B;
+    --world-text: #151B12;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+  }
+
+  /* 9. Cases & Protectors */
+  [data-world="cases-protectors"] {
+    --world-bg: #F1EDE8;
+    --world-surface: #E6DFD6;
+    --world-accent: #824C59;
+    --world-text: #1C1618;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+  }
+
+  /* 10. Other Tech */
+  [data-world="other"] {
+    --world-bg: #EFEFEA;
+    --world-surface: #E3E3DC;
+    --world-accent: #3E4A52;
+    --world-text: #161819;
+    --world-muted: #544E48;
+    --world-white: #FFFFFF;
+    --world-rule: color-mix(in srgb, var(--world-text) 14%, var(--world-bg));
+    --world-field-border: var(--world-muted);
+    --world-accent-hover: color-mix(in srgb, var(--world-accent) 88%, var(--world-text));
+  }
+}

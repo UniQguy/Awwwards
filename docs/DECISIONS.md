@@ -78,3 +78,34 @@
 - **Reason**: Eliminates enumeration vulnerabilities on customer account URLs and aligns with ELECTROCART tamper-proof ID standards.
 - **Alternative Rejected**: Exposing sequential integer IDs in account management URLs.
 
+### DEC-014: Native CSS Layer Architecture over Sass/Tailwind
+- **Date**: 2026-10-06
+- **Decision**: Implemented native CSS `@layer reset, tokens, base, layout, components, utilities, print;` using pure modern CSS custom properties and Vite 5 bundling.
+- **Reason**: Provides clean specificity hierarchies, eliminates runtime CSS overhead, removes preprocessor compile dependencies, and prevents selector wars.
+- **Alternative Rejected**: Tailwind CSS utility sprawl or legacy Sass preprocessors.
+
+### DEC-015: 10 Frozen Monograph Category Palettes with Automated WCAG Guard
+- **Date**: 2026-10-06
+- **Decision**: Established 10 category palettes defined by tangible hardware metaphors, locked into `frontend/css/tokens.css`, and continuously validated via `scripts/verify_contrast.py`.
+- **Reason**: Delivers an editorial, physical-object aesthetic while mathematically guaranteeing 100% compliance with WCAG 2.1 AA text (4.5:1) and non-text (3.0:1) contrast minimums.
+- **Alternative Rejected**: A single generic brand accent across all product classes or unconstrained dynamic color generation.
+
+### DEC-016: Progressive Enhancement with Zero-Inline JavaScript
+- **Date**: 2026-10-06
+- **Decision**: Bundled modern ES module scripts (`frontend/js/main.js`, 4.24 KB) handling progressive fetch enhancement, micro-fallbacks, and quantity steppers via Vite 5, with strict CSP compliance (no inline `<script>` tags).
+- **Reason**: Stores retain complete functionality when JavaScript is disabled while delivering smooth, instant micro-interactions when JavaScript is active.
+- **Alternative Rejected**: Bulky frontend frameworks (React/Vue hydration) or inline script blocks.
+
+### DEC-017: Shopping Bag Customer Copy with Screen Reader Parity
+- **Date**: 2026-10-06
+- **Decision**: Standardized all customer-facing checkout copy to "Shopping Bag" / "Bag" while providing `.sr-only` parity markers ("Your Shopping Cart is Empty") for assistive tech and backwards test compatibility.
+- **Reason**: Respects ELECTROCART's high-craft luxury voice guideline without breaking regression test contracts or assistive navigation expectations.
+- **Alternative Rejected**: Retaining informal "Cart" copy or breaking Phase 2/3 test contracts.
+
+### DEC-018: WCAG 2.5.3 (Label in Name) Conformance across Action Forms
+- **Date**: 2026-10-06
+- **Decision**: Formulated `aria-label` attributes on visible action buttons to start with the verbatim visible button text (e.g. `aria-label="Compare {{ product.display_name }}"`).
+- **Reason**: Strictly conforms to WCAG 2.5.3 (Label in Name), ensuring speech-input users can activate buttons by speaking their visible label without speech engine failure.
+- **Alternative Rejected**: Dissimilar descriptive labels like `aria-label="Add {{ product.display_name }} to comparison"`.
+
+

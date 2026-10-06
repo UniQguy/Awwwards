@@ -1,51 +1,37 @@
-{% load static core_tags %}<!DOCTYPE html>
+{% load static core_tags django_vite %}<!DOCTYPE html>
 <html lang="en-IN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ invoice.invoice_number }} — {% if invoice.is_bill_of_supply %}Bill of Supply{% else %}Tax Invoice{% endif %}</title>
-  <link rel="stylesheet" href="{% static 'css/storefront.css' %}">
-  <style>
-    @media print {
-      .no-print { display: none !important; }
-      body { background: #fff !important; }
-      .invoice-container { border: none !important; padding: 0 !important; box-shadow: none !important; }
-    }
-    .invoice-container {
-      max-width: 840px;
-      margin: 2rem auto;
-      background: #fff;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      padding: 2.5rem;
-    }
-  </style>
+  {% vite_hmr_client %}
+  {% vite_asset 'frontend/js/main.js' %}
 </head>
 <body>
-  <div class="container no-print" style="max-width: 840px; margin: 1rem auto 0 auto; display: flex; justify-content: space-between; align-items: center;">
+  <div class="container no-print flex justify-between items-center mt-4">
     <a href="{% url 'order_success' order_number=order.order_number %}" class="btn btn-secondary">&larr; Return to Order Details</a>
     <button type="button" class="btn btn-primary" id="btn-print-doc">Print Document</button>
   </div>
 
   <article class="invoice-container" aria-labelledby="invoice-title">
     <!-- Invoice Header -->
-    <header style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+    <header class="invoice-header">
       <div>
-        <h1 id="invoice-title" style="font-size: 1.75rem; text-transform: uppercase; margin-bottom: 0.25rem;">
+        <h1 id="invoice-title" class="invoice-title">
           {% if invoice.is_bill_of_supply %}
             Bill of Supply
           {% else %}
             Tax Invoice
           {% endif %}
         </h1>
-        <p class="text-muted" style="margin: 0; font-size: 0.85rem;">
+        <p class="caption mt-1">
           Issued under Rule 46 of Central Goods and Services Tax (CGST) Rules, 2017
         </p>
       </div>
 
-      <div style="text-align: right;">
-        <h2 style="font-size: 1.25rem; margin: 0;">ELECTROCART</h2>
-        <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem;">
+      <div class="text-right">
+        <h2 class="heading">ELECTROCART</h2>
+        <p class="caption mt-1">
           <strong>{{ seller_mode.seller_legal_name }}</strong><br>
           {% if seller_mode.seller_address %}{{ seller_mode.seller_address }}<br>{% endif %}
           State: <strong>{{ seller_mode.seller_state }}</strong><br>
@@ -59,31 +45,31 @@
     </header>
 
     <!-- Meta Details Row -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+    <div class="grid-2 mb-4">
       <div>
-        <table style="width: 100%; border-collapse: collapse;">
+        <table class="body-sm">
           <tr>
-            <th scope="row" style="text-align: left; padding: 2px 0;">Invoice Number:</th>
-            <td style="font-weight: 700;">{{ invoice.invoice_number }}</td>
+            <th scope="row" class="text-left">Invoice Number:</th>
+            <td><strong>{{ invoice.invoice_number }}</strong></td>
           </tr>
           <tr>
-            <th scope="row" style="text-align: left; padding: 2px 0;">Invoice Date:</th>
+            <th scope="row" class="text-left">Invoice Date:</th>
             <td>{{ invoice.invoice_date|date:"d-m-Y" }}</td>
           </tr>
           <tr>
-            <th scope="row" style="text-align: left; padding: 2px 0;">Order Reference:</th>
+            <th scope="row" class="text-left">Order Reference:</th>
             <td>{{ order.order_number }}</td>
           </tr>
           <tr>
-            <th scope="row" style="text-align: left; padding: 2px 0;">Financial Year:</th>
+            <th scope="row" class="text-left">Financial Year:</th>
             <td>{{ invoice.financial_year }}</td>
           </tr>
         </table>
       </div>
 
       <div>
-        <h3 style="font-size: 0.95rem; margin-bottom: 0.25rem;">Billed To / Delivered To:</h3>
-        <p style="margin: 0;">
+        <h3 class="label mb-1">Billed To / Delivered To:</h3>
+        <p class="body-sm">
           <strong>{{ order.shipping_address_snapshot.full_name }}</strong><br>
           {{ order.shipping_address_snapshot.line1 }}{% if order.shipping_address_snapshot.line2 %}, {{ order.shipping_address_snapshot.line2 }}{% endif %}<br>
           {{ order.shipping_address_snapshot.city }}, {{ order.shipping_address_snapshot.state }} &ndash; {{ order.shipping_address_snapshot.pincode }}<br>
@@ -93,21 +79,21 @@
     </div>
 
     <!-- Itemized Tax Schedule -->
-    <table class="data-table" style="width: 100%; margin-bottom: 1.5rem; font-size: 0.85rem;">
+    <table class="invoice-table">
       <caption class="sr-only">Itemized product taxes schedule</caption>
       <thead>
         <tr>
-          <th scope="col" style="width: 5%;">#</th>
-          <th scope="col" style="width: 35%;">Item Description</th>
+          <th scope="col">#</th>
+          <th scope="col">Item Description</th>
           <th scope="col">HSN</th>
-          <th scope="col" style="text-align: center;">Qty</th>
-          <th scope="col" style="text-align: right;">Unit Price</th>
-          <th scope="col" style="text-align: right;">Taxable Val</th>
+          <th scope="col" class="text-center">Qty</th>
+          <th scope="col" class="numeric">Unit Price</th>
+          <th scope="col" class="numeric">Taxable Val</th>
           {% if not invoice.is_bill_of_supply %}
-            <th scope="col" style="text-align: right;">GST Rate</th>
-            <th scope="col" style="text-align: right;">Tax Amt</th>
+            <th scope="col" class="numeric">GST Rate</th>
+            <th scope="col" class="numeric">Tax Amt</th>
           {% endif %}
-          <th scope="col" style="text-align: right;">Total</th>
+          <th scope="col" class="numeric">Total</th>
         </tr>
       </thead>
       <tbody>
@@ -116,15 +102,15 @@
             <td>{{ forloop.counter }}</td>
             <td>
               <strong>{{ item.product_title }}</strong><br>
-              <small class="text-muted">SKU: {{ item.product_sku }}</small>
+              <span class="caption">SKU: {{ item.product_sku }}</span>
             </td>
             <td>{{ item.hsn_code|default:"—" }}</td>
-            <td style="text-align: center;">{{ item.quantity }}</td>
-            <td style="text-align: right;">{{ item.unit_price|inr }}</td>
-            <td style="text-align: right;">{{ item.taxable_value|inr }}</td>
+            <td class="text-center">{{ item.quantity }}</td>
+            <td class="numeric">{{ item.unit_price|inr }}</td>
+            <td class="numeric">{{ item.taxable_value|inr }}</td>
             {% if not invoice.is_bill_of_supply %}
-              <td style="text-align: right;">{{ item.gst_rate }}%</td>
-              <td style="text-align: right;">
+              <td class="numeric">{{ item.gst_rate }}%</td>
+              <td class="numeric">
                 {% if item.igst_amount > 0 %}
                   {{ item.igst_amount|inr }} (IGST)
                 {% else %}
@@ -132,63 +118,61 @@
                 {% endif %}
               </td>
             {% endif %}
-            <td style="text-align: right;"><strong>{{ item.line_total|inr }}</strong></td>
+            <td class="numeric"><strong>{{ item.line_total|inr }}</strong></td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
 
     <!-- Totals Table -->
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 1.5rem;">
-      <table style="width: 320px; font-size: 0.9rem; border-collapse: collapse;">
+    <div class="flex justify-end mb-4">
+      <table class="body-sm w-summary">
         <tr>
-          <th scope="row" style="text-align: left; padding: 4px 0;">Merchandise Subtotal:</th>
-          <td style="text-align: right; padding: 4px 0;">{{ order.subtotal|inr }}</td>
+          <th scope="row" class="text-left">Merchandise Subtotal:</th>
+          <td class="numeric">{{ order.subtotal|inr }}</td>
         </tr>
         {% if order.discount_amount > 0 %}
           <tr>
-            <th scope="row" style="text-align: left; padding: 4px 0;">Discount:</th>
-            <td style="text-align: right; padding: 4px 0;">-{{ order.discount_amount|inr }}</td>
+            <th scope="row" class="text-left">Discount:</th>
+            <td class="numeric">-{{ order.discount_amount|inr }}</td>
           </tr>
         {% endif %}
         <tr>
-          <th scope="row" style="text-align: left; padding: 4px 0;">Shipping Fee:</th>
-          <td style="text-align: right; padding: 4px 0;">
+          <th scope="row" class="text-left">Shipping Fee:</th>
+          <td class="numeric">
             {% if order.shipping_fee > 0 %}{{ order.shipping_fee|inr }}{% else %}FREE{% endif %}
           </td>
         </tr>
         {% if not invoice.is_bill_of_supply %}
           <tr>
-            <th scope="row" style="text-align: left; padding: 4px 0;">Total GST Included:</th>
-            <td style="text-align: right; padding: 4px 0;">{{ order.tax_amount|inr }}</td>
+            <th scope="row" class="text-left">Total GST Included:</th>
+            <td class="numeric">{{ order.tax_amount|inr }}</td>
           </tr>
         {% endif %}
-        <tr style="border-top: 2px solid #000;">
-          <th scope="row" style="text-align: left; padding: 8px 0; font-size: 1.05rem;">Invoice Grand Total:</th>
-          <td style="text-align: right; padding: 8px 0; font-size: 1.15rem; font-weight: 700;">{{ order.total_amount|inr }}</td>
+        <tr class="hairline-top">
+          <th scope="row" class="text-left heading pt-2">Invoice Grand Total:</th>
+          <td class="numeric heading pt-2">{{ order.total_amount|inr }}</td>
         </tr>
       </table>
     </div>
 
     <!-- Amount in Words -->
-    <div style="background: var(--color-surface); padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 2rem;">
-      <p style="margin: 0; font-size: 0.9rem;">
-        <strong>Amount in Words:</strong> {{ total_in_words }}
-      </p>
+    <div class="amount-in-words">
+      <strong>Amount in Words:</strong> {{ total_in_words }}
     </div>
 
     <!-- Credit Notes Section if Applicable -->
     {% if credit_notes %}
-      <section style="margin-top: 2rem; border-top: 1px dashed var(--color-border); padding-top: 1rem;" aria-labelledby="cn-heading">
-        <h3 id="cn-heading" style="font-size: 1rem;">Associated GST Credit Notes</h3>
-        <table class="data-table" style="font-size: 0.85rem;">
+      <section class="hairline-top pt-4 mt-6" aria-labelledby="cn-heading">
+        <h3 id="cn-heading" class="label mb-2">Associated GST Credit Notes</h3>
+        <table class="invoice-table">
           <caption class="sr-only">Associated GST credit notes</caption>
           <thead>
             <tr>
               <th scope="col">Credit Note #</th>
               <th scope="col">Date</th>
               <th scope="col">Reason</th>
-              <th scope="col" style="text-align: right;">Credited Amount</th>
+              <th scope="col" class="numeric">Credited Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -197,7 +181,7 @@
                 <td><strong>{{ cn.credit_note_number }}</strong></td>
                 <td>{{ cn.created_at|date:"d-m-Y" }}</td>
                 <td>{{ cn.reason }}</td>
-                <td style="text-align: right;">{{ cn.amount|inr }}</td>
+                <td class="numeric">{{ cn.amount|inr }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -206,9 +190,9 @@
     {% endif %}
 
     <!-- Footer Statutory Declaration -->
-    <footer style="margin-top: 2.5rem; border-top: 1px solid var(--color-border); padding-top: 1rem; text-align: center; font-size: 0.75rem; color: var(--color-text-muted);">
-      <p style="margin: 0;">This is a computer-generated statutory invoice compliant with Indian GST laws and does not require a physical signature.</p>
-      <p style="margin: 0.25rem 0 0 0;">ELECTROCART RETAIL PRIVATE LIMITED &bull; Dispatched from {{ seller_mode.seller_state }}, India.</p>
+    <footer class="hairline-top pt-4 mt-6 text-center caption">
+      <p>This is a computer-generated statutory invoice compliant with Indian GST laws and does not require a physical signature.</p>
+      <p class="mt-1">ELECTROCART RETAIL PRIVATE LIMITED &bull; Dispatched from {{ seller_mode.seller_state }}, India.</p>
     </footer>
   </article>
 

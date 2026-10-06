@@ -1,0 +1,62 @@
+@layer components {
+  .price-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-block: var(--space-1);
+  }
+
+  .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .price-current {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--world-text);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  .price-current .currency-symbol {
+    font-size: 0.85em;
+    vertical-align: 0.05em;
+    margin-right: 1px;
+  }
+
+  .price-mrp-wrapper {
+    font-size: var(--step--1);
+    color: var(--world-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .price-mrp-struck {
+    text-decoration: line-through;
+  }
+
+  .price-savings-text {
+    font-size: var(--step--2);
+    color: var(--color-success);
+    font-weight: 500;
+  }
+
+  .price-tax-note {
+    font-size: var(--step--2);
+    color: var(--world-muted);
+    line-height: 1.2;
+  }
+
+  /* Large variant for Product Detail hero */
+  .price-block-lg .price-current {
+    font-size: var(--step-3);
+  }
+
+  .price-block-lg .price-mrp-wrapper {
+    font-size: var(--step-0);
+  }
+}

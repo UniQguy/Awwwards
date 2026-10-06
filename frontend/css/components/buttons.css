@@ -1,0 +1,156 @@
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-2) var(--space-5);
+    font-family: var(--font-text);
+    font-size: var(--step--1);
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    border-radius: var(--radius-1);
+    cursor: pointer;
+    transition: transform var(--dur-utility) var(--ease-utility),
+                background-color var(--dur-utility) var(--ease-utility),
+                border-color var(--dur-utility) var(--ease-utility),
+                color var(--dur-utility) var(--ease-utility);
+    border: 1px solid transparent;
+  }
+
+  .btn:hover:not(:disabled):not([aria-busy="true"]) {
+    transform: translateY(-1px);
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    background-color: var(--world-accent);
+    color: var(--world-white);
+    border-color: var(--world-accent);
+  }
+
+  .btn-primary:hover:not(:disabled):not([aria-busy="true"]) {
+    background-color: var(--world-accent-hover);
+    border-color: var(--world-accent-hover);
+    color: var(--world-white);
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    background-color: transparent;
+    color: var(--world-text);
+    border-color: var(--world-text);
+  }
+
+  .btn-secondary:hover:not(:disabled):not([aria-busy="true"]) {
+    background-color: var(--world-surface);
+    color: var(--world-accent);
+    border-color: var(--world-accent);
+  }
+
+  /* Quiet Button */
+  .btn-quiet {
+    background-color: transparent;
+    color: var(--world-text);
+    border-color: transparent;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding-inline: var(--space-2);
+  }
+
+  .btn-quiet:hover:not(:disabled):not([aria-busy="true"]) {
+    color: var(--world-accent);
+    background-color: transparent;
+    transform: none;
+  }
+
+  /* Destructive Button */
+  .btn-destructive,
+  .btn-danger {
+    background-color: var(--color-danger);
+    color: var(--world-white);
+    border-color: var(--color-danger);
+  }
+
+  .btn-destructive:hover:not(:disabled):not([aria-busy="true"]),
+  .btn-danger:hover:not(:disabled):not([aria-busy="true"]) {
+    background-color: var(--color-danger);
+    color: var(--world-white);
+  }
+
+  /* Icon Button (44px Minimum Touch Target) */
+  .btn-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: var(--radius-1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Sizes */
+  .btn-sm {
+    min-height: 36px;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--step--2);
+  }
+
+  .btn-lg {
+    min-height: 52px;
+    padding: var(--space-3) var(--space-6);
+    font-size: var(--step-0);
+  }
+
+  .btn-block {
+    display: flex;
+    width: 100%;
+  }
+
+  /* Disabled State */
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Loading State (aria-busy="true") */
+  .btn[aria-busy="true"] {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+  }
+
+  .btn[aria-busy="true"]::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: calc(50% - 10px);
+    left: calc(50% - 10px);
+    border: 2px solid var(--world-white);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: btn-spin 0.8s linear infinite;
+  }
+
+  @keyframes btn-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Button Groups */
+  .btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+}

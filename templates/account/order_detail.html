@@ -7,41 +7,41 @@
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 1rem;">
+  <header class="flex justify-between items-baseline flex-wrap gap-4 mb-6">
     <div>
-      <h1>Order #{{ order.order_number }}</h1>
-      <p class="text-muted">Placed on {{ order.created_at|date:"F j, Y, g:i A" }} &bull; Status: <span class="badge badge-in-stock">{{ order.get_status_display }}</span></p>
+      <h1 class="display-l">Order #{{ order.order_number }}</h1>
+      <p class="caption mt-1">Placed on {{ order.created_at|date:"F j, Y, g:i A" }} &bull; Status: <span class="badge badge-in-stock">{{ order.get_status_display }}</span></p>
     </div>
-    <div style="display: flex; gap: 0.75rem;">
+    <div class="btn-group">
       <a href="{% url 'order_track_timeline' order_number=order.order_number %}" class="btn btn-primary btn-sm">Track Shipment</a>
       <a href="{% url 'order_invoice' order_number=order.order_number %}" class="btn btn-secondary btn-sm" target="_blank">Print GST Invoice</a>
     </div>
   </header>
 
-  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2.5rem; align-items: start;">
+  <div class="checkout-grid-review">
     <div>
-      <section style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;" aria-labelledby="items-heading">
-        <h2 id="items-heading" style="font-size: 1.15rem; margin-bottom: 1rem;">Items Ordered</h2>
-        <table class="data-table">
+      <section class="checkout-card mb-6" aria-labelledby="items-heading">
+        <h2 id="items-heading" class="heading mb-4">Items Ordered</h2>
+        <table class="spec-table">
           <caption class="sr-only">List of purchased items</caption>
           <thead>
             <tr>
               <th scope="col">Product</th>
-              <th scope="col" style="text-align: right;">Unit Price</th>
-              <th scope="col" style="text-align: center;">Qty</th>
-              <th scope="col" style="text-align: right;">Total</th>
+              <th scope="col" class="text-right">Unit Price</th>
+              <th scope="col" class="text-center">Qty</th>
+              <th scope="col" class="text-right">Total</th>
             </tr>
           </thead>
           <tbody>
             {% for item in order.items.all %}
               <tr>
                 <td>
-                  <strong><a href="{% url 'product_detail' slug=item.product.slug %}">{{ item.product_title }}</a></strong>
-                  <div class="text-muted"><small>SKU: {{ item.product_sku }} &bull; HSN: {{ item.hsn_code }}</small></div>
+                  <strong class="body-sm"><a href="{% url 'product_detail' slug=item.product.slug %}">{{ item.product_title }}</a></strong>
+                  <div class="caption">SKU: {{ item.product_sku }} &bull; HSN: {{ item.hsn_code }}</div>
                 </td>
-                <td style="text-align: right;">{{ item.unit_price|inr }}</td>
-                <td style="text-align: center;">{{ item.quantity }}</td>
-                <td style="text-align: right;"><strong>{{ item.line_total|inr }}</strong></td>
+                <td class="text-right body-sm">{{ item.unit_price|inr }}</td>
+                <td class="text-center body-sm">{{ item.quantity }}</td>
+                <td class="text-right body-sm"><strong>{{ item.line_total|inr }}</strong></td>
               </tr>
             {% endfor %}
           </tbody>
@@ -50,16 +50,16 @@
 
       <!-- Status History Milestones -->
       {% if order.status_history.exists %}
-        <section style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;" aria-labelledby="audit-heading">
-          <h2 id="audit-heading" style="font-size: 1.15rem; margin-bottom: 1rem;">Status Audit Log</h2>
-          <ul style="list-style: none; padding: 0; margin: 0;">
+        <section class="checkout-card mb-6" aria-labelledby="audit-heading">
+          <h2 id="audit-heading" class="heading mb-4">Status Audit Log</h2>
+          <ul class="flex flex-col gap-2">
             {% for evt in order.status_history.all %}
-              <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; font-size: 0.9rem;">
+              <li class="flex justify-between hairline-bottom pb-2 body-sm">
                 <div>
                   <strong>{{ evt.to_status|title }}</strong>
-                  {% if evt.notes %}<div class="text-muted"><small>{{ evt.notes }}</small></div>{% endif %}
+                  {% if evt.notes %}<div class="caption text-muted">{{ evt.notes }}</div>{% endif %}
                 </div>
-                <div class="text-muted"><small>{{ evt.created_at|date:"d M Y, H:i" }}</small></div>
+                <div class="caption text-muted">{{ evt.created_at|date:"d M Y, H:i" }}</div>
               </li>
             {% endfor %}
           </ul>
@@ -68,9 +68,9 @@
 
       <!-- Cancellation Form -->
       {% if order.status != 'cancelled' and order.status != 'delivered' and order.status != 'refunded' %}
-        <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;">
-          <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Cancel Order</h3>
-          <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">
+        <div class="checkout-card">
+          <h3 class="label mb-2">Cancel Order</h3>
+          <p class="caption mb-4">
             You can cancel this order before warehouse dispatch. Stock will be restocked immediately.
           </p>
           <form action="{% url 'order_cancel' order_number=order.order_number %}" method="post">
@@ -83,33 +83,32 @@
 
     <!-- Right Summary Sidebar -->
     <aside aria-label="Order financial breakdown">
-      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem;">
-        <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Payment Summary</h3>
-        <dl style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem 1rem; margin: 0; font-size: 0.95rem;">
+      <div class="checkout-card mb-4">
+        <h3 class="label mb-3">Payment Summary</h3>
+        <dl class="summary-totals-dl mb-4">
           <dt>Subtotal</dt>
-          <dd style="margin: 0; text-align: right;">{{ order.subtotal|inr }}</dd>
+          <dd>{{ order.subtotal|inr }}</dd>
 
           {% if order.discount_amount > 0 %}
             <dt class="text-success">Discount</dt>
-            <dd style="margin: 0; text-align: right;" class="text-success">-{{ order.discount_amount|inr }}</dd>
+            <dd class="text-success">-{{ order.discount_amount|inr }}</dd>
           {% endif %}
 
           <dt>Shipping</dt>
-          <dd style="margin: 0; text-align: right;">{% if order.shipping_fee > 0 %}{{ order.shipping_fee|inr }}{% else %}<span class="text-success">FREE</span>{% endif %}</dd>
+          <dd>{% if order.shipping_fee > 0 %}{{ order.shipping_fee|inr }}{% else %}<span class="text-success">FREE</span>{% endif %}</dd>
 
-          <dt style="font-size: 0.85rem; color: var(--color-text-muted);">GST Included</dt>
-          <dd style="margin: 0; text-align: right; font-size: 0.85rem; color: var(--color-text-muted);">{{ order.tax_amount|inr }}</dd>
-
-          <dt style="font-weight: 700; border-top: 2px solid var(--color-border); padding-top: 0.5rem;">Total</dt>
-          <dd style="font-weight: 700; color: var(--color-accent); border-top: 2px solid var(--color-border); padding-top: 0.5rem; margin: 0; text-align: right;">
-            {{ order.total_amount|inr }}
-          </dd>
+          <dt class="caption">GST Included</dt>
+          <dd class="caption">{{ order.tax_amount|inr }}</dd>
         </dl>
+        <div class="summary-grand-total">
+          <span class="total-label">Total</span>
+          <span class="total-amount">{{ order.total_amount|inr }}</span>
+        </div>
       </div>
 
-      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;">
-        <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;">Delivery Destination</h3>
-        <p style="margin: 0; font-size: 0.9rem;">
+      <div class="checkout-card">
+        <h3 class="label mb-2">Delivery Destination</h3>
+        <p class="body-sm">
           <strong>{{ order.shipping_address_snapshot.full_name }}</strong> &bull; {{ order.shipping_address_snapshot.phone }}<br>
           {{ order.shipping_address_snapshot.line1 }}<br>
           {{ order.shipping_address_snapshot.city }}, {{ order.shipping_address_snapshot.state }} &ndash; {{ order.shipping_address_snapshot.pincode }}

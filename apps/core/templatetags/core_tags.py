@@ -95,3 +95,15 @@ def savings(mrp: Any, selling_price: Any) -> str:
     except Exception:
         pass
     return ""
+
+
+@register.filter(name="colour_hex")
+def colour_hex(name: Any) -> str:
+    """
+    Return mapped hex colour for an electronics finish or empty string.
+    """
+    if not name:
+        return ""
+    from apps.catalog.data.colour_map import get_colour_hex
+    return get_colour_hex(str(name)) or ""
+

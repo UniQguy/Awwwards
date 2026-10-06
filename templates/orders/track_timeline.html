@@ -7,20 +7,20 @@
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <div style="max-width: 720px; margin: 0 auto;">
-    <header style="margin-bottom: 2rem;">
-      <h1>Shipment Progress #{{ order.order_number }}</h1>
-      <p class="text-muted">
-        Carrier: <strong>{{ tracking_info.carrier }}</strong> &bull; Tracking ID: <strong>{{ tracking_info.tracking_number }}</strong>
+  <div class="max-w-md mx-auto">
+    <header class="mb-6">
+      <h1 class="display-l">Shipment Progress</h1>
+      <p class="caption mt-1">
+        Order <strong>#{{ order.order_number }}</strong> &bull; Carrier: <strong>{{ tracking_info.carrier }}</strong> &bull; Tracking ID: <strong>{{ tracking_info.tracking_number }}</strong>
       </p>
     </header>
 
     <!-- Tracking Status Banner -->
-    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2.5rem;">
-      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
+    <div class="checkout-card mb-6">
+      <div class="flex justify-between items-baseline mb-5">
         <div>
-          <span class="text-muted" style="font-size: 0.85rem;">Current Status:</span>
-          <div style="font-size: 1.25rem; font-weight: 700;">
+          <span class="caption">Current Status:</span>
+          <div class="heading mt-1">
             {% if tracking_info.is_cancelled %}
               <span class="text-danger">Cancelled</span>
             {% elif tracking_info.is_delivered %}
@@ -39,21 +39,26 @@
 
       <!-- Semantic Milestones Timeline -->
       {% if not tracking_info.is_cancelled %}
-        <ol class="timeline" aria-label="Shipment delivery milestones">
+        <ol class="order-timeline" aria-label="Shipment delivery milestones">
           {% for step in tracking_info.steps %}
             <li
-              class="timeline-step {% if step.completed %}completed{% endif %} {% if order.status == step.status %}active{% endif %}"
+              class="timeline-node {% if step.completed %}is-complete{% endif %} {% if order.status == step.status %}is-current{% endif %}"
               {% if order.status == step.status %}aria-current="step"{% endif %}
             >
-              <strong>{{ step.label }}</strong>
-              {% if order.status == step.status %}
-                <span class="badge badge-in-stock" style="margin-left: 0.5rem;">Active</span>
-              {% endif %}
+              <span class="timeline-marker" aria-hidden="true"></span>
+              <div class="timeline-content">
+                <span class="timeline-title">
+                  {{ step.label }}
+                  {% if order.status == step.status %}
+                    <span class="badge badge-in-stock">Active</span>
+                  {% endif %}
+                </span>
+              </div>
             </li>
           {% endfor %}
         </ol>
       {% else %}
-        <div class="alert alert-error">
+        <div class="alert alert-danger">
           This order was cancelled on {{ order.updated_at|date:"F j, Y" }}. Stock has been returned to inventory.
         </div>
       {% endif %}
@@ -61,23 +66,23 @@
 
     <!-- Audit Event Log -->
     {% if status_history %}
-      <section style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2.5rem;" aria-labelledby="history-heading">
-        <h2 id="history-heading" style="font-size: 1.15rem; margin-bottom: 1rem;">Tracking Event History</h2>
-        <table class="data-table" style="font-size: 0.85rem;">
+      <section class="checkout-card mb-6" aria-labelledby="history-heading">
+        <h2 id="history-heading" class="heading hairline-bottom pb-2 mb-4">Tracking Event History</h2>
+        <table class="spec-table">
           <caption class="sr-only">Chronological shipment events</caption>
           <thead>
             <tr>
-              <th scope="col" style="width: 25%;">Timestamp</th>
-              <th scope="col" style="width: 30%;">Status</th>
+              <th scope="col">Timestamp</th>
+              <th scope="col">Status</th>
               <th scope="col">Notes</th>
             </tr>
           </thead>
           <tbody>
             {% for evt in status_history %}
               <tr>
-                <td>{{ evt.created_at|date:"d M Y, H:i" }}</td>
-                <td><strong>{{ evt.to_status|title }}</strong></td>
-                <td>{{ evt.notes|default:"Milestone recorded." }}</td>
+                <td class="caption">{{ evt.created_at|date:"d M Y, H:i" }}</td>
+                <td class="body-sm"><strong>{{ evt.to_status|title }}</strong></td>
+                <td class="body-sm">{{ evt.notes|default:"Milestone recorded." }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -86,9 +91,9 @@
     {% endif %}
 
     <!-- Destination Summary -->
-    <section style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;" aria-labelledby="dest-heading">
-      <h2 id="dest-heading" style="font-size: 1.15rem; margin-bottom: 0.75rem;">Delivery Destination</h2>
-      <p style="margin: 0; font-size: 0.95rem;">
+    <section class="checkout-card" aria-labelledby="dest-heading">
+      <h2 id="dest-heading" class="heading hairline-bottom pb-2 mb-3">Delivery Destination</h2>
+      <p class="body-sm">
         <strong>{{ order.shipping_address_snapshot.full_name }}</strong><br>
         {{ order.shipping_address_snapshot.line1 }}{% if order.shipping_address_snapshot.line2 %}, {{ order.shipping_address_snapshot.line2 }}{% endif %}<br>
         {{ order.shipping_address_snapshot.city }}, {{ order.shipping_address_snapshot.state }} &ndash; <strong>{{ order.shipping_address_snapshot.pincode }}</strong>

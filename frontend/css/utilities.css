@@ -1,0 +1,156 @@
+@layer utilities {
+  /* Typography Utilities */
+  .display-xl {
+    font-family: var(--font-display);
+    font-size: var(--step-6);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-feature-settings: "opsz" 72;
+  }
+
+  .display-l {
+    font-family: var(--font-display);
+    font-size: var(--step-5);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-feature-settings: "opsz" 48;
+  }
+
+  .display-m {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    font-feature-settings: "opsz" 36;
+  }
+
+  .heading {
+    font-family: var(--font-text);
+    font-size: var(--step-2);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  .subhead {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-1);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .label {
+    font-family: var(--font-text);
+    font-size: var(--step--1);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .body {
+    font-family: var(--font-text);
+    font-size: var(--step-0);
+    line-height: 1.6;
+    max-width: 62ch;
+  }
+
+  .body-sm {
+    font-family: var(--font-text);
+    font-size: var(--step--1);
+    line-height: 1.5;
+  }
+
+  .price {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    color: var(--world-text);
+  }
+
+  .price-mrp {
+    font-family: var(--font-text);
+    font-size: var(--step--1);
+    color: var(--world-muted);
+    text-decoration: line-through;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .caption {
+    font-family: var(--font-text);
+    font-size: var(--step--2);
+    line-height: 1.4;
+    color: var(--world-muted);
+  }
+
+  /* Color Utilities */
+  .text-muted { color: var(--world-muted); }
+  .text-accent { color: var(--world-accent); }
+  .text-success { color: var(--color-success); }
+  .text-warning { color: var(--color-warning); }
+  .text-danger { color: var(--color-danger); }
+  .text-info { color: var(--color-info); }
+
+  /* Surface and Background Helpers */
+  .bg-surface {
+    background-color: var(--world-surface);
+  }
+
+  .border-rule {
+    border: 1px solid var(--world-rule);
+  }
+
+  .hairline-top {
+    border-top: 1px solid var(--world-rule);
+  }
+
+  .hairline-bottom {
+    border-bottom: 1px solid var(--world-rule);
+  }
+
+  /* Screen Reader Accessible Utility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .text-center { text-align: center; }
+  .text-right { text-align: right; }
+  .text-left { text-align: left; }
+
+  .u-inline-form { display: inline; }
+  .inline-flex { display: inline-flex; }
+
+  /* Spacing Helpers */
+  .mb-2 { margin-bottom: var(--space-2); }
+  .mb-3 { margin-bottom: var(--space-3); }
+  .mb-4 { margin-bottom: var(--space-4); }
+  .mb-5 { margin-bottom: var(--space-5); }
+  .mb-6 { margin-bottom: var(--space-6); }
+  .mb-8 { margin-bottom: var(--space-8); }
+  .mt-1 { margin-top: var(--space-1); }
+  .mt-2 { margin-top: var(--space-2); }
+  .mt-4 { margin-top: var(--space-4); }
+  .mt-auto { margin-top: auto; }
+  .mx-auto { margin-inline: auto; }
+  .p-4 { padding: var(--space-4); }
+  .p-6 { padding: var(--space-6); }
+  .pb-2 { padding-bottom: var(--space-2); }
+  .max-w-md { max-width: 680px; }
+  .w-qty { flex: 0 0 120px; width: 120px; }
+  .w-summary { width: 320px; max-width: 100%; }
+}
+

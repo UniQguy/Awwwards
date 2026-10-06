@@ -1,15 +1,21 @@
-{% load static %}<!DOCTYPE html>
+{% load static django_vite %}<!DOCTYPE html>
 <html lang="en-IN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}ELECTROCART — Premium Electronics India{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}India's curated consumer electronics destination. Curated headphones, audio, mechanical keyboards, and precision tech.{% endblock %}">
-  <link rel="stylesheet" href="{% static 'css/storefront.css' %}">
+  <link rel="preload" href="{% static 'fonts/fraunces-latin-full-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/plus-jakarta-sans-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  {% vite_hmr_client %}
+  {% vite_asset 'frontend/js/main.js' %}
   {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body data-world="{% block data_world %}{{ active_world|default:'earphones-headphones' }}{% endblock %}">
   <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div id="header-sentinel" aria-hidden="true"></div>
+
+  {% include "includes/sprite.html" %}
 
   {% include "includes/header.html" %}
 
@@ -25,7 +31,8 @@
 
   {% include "includes/footer.html" %}
 
-  <script src="{% static 'js/image-fallback.js' %}" defer></script>
+  <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>

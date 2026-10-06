@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load core_tags %}
 
+{% block data_world %}{{ product.category.accent_key }}{% endblock %}
 {% block title %}{{ product.display_name }} — ELECTROCART{% endblock %}
 {% block meta_description %}{{ product.description|default:product.display_name|truncatechars:150 }}{% endblock %}
 
@@ -39,18 +40,18 @@
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <div style="display: grid; grid-template-columns: minmax(320px, 460px) 1fr; gap: 3rem; margin-bottom: 3.5rem; align-items: start;">
+  <div class="product-hero-layout">
     <!-- Media / Image Column -->
     <div>
-      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; margin-bottom: 1rem;">
+      <div class="product-plate-hero">
         {% include "includes/product_image.html" with eager=True %}
       </div>
 
       {% if media_items|length > 1 %}
-        <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem;">
+        <div class="product-thumbnails">
           {% for m in media_items %}
-            <div style="width: 72px; height: 72px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 4px; background: #fff; flex-shrink: 0;">
-              <img src="{{ m.url }}" alt="{{ m.alt_text|default:product.display_name }}" width="64" height="64" style="width: 100%; height: 100%; object-fit: contain;">
+            <div class="product-thumbnail-item">
+              <img src="{{ m.url }}" alt="{{ m.alt_text|default:product.display_name }}" width="64" height="64">
             </div>
           {% endfor %}
         </div>
@@ -59,47 +60,49 @@
 
     <!-- Product Summary & Commerce Actions -->
     <div>
-      <div style="margin-bottom: 0.5rem;">
+      <div class="flex items-center gap-2 mb-2">
         <span class="badge badge-in-stock">{{ product.category.name }}</span>
-        <span class="text-muted" style="margin-left: 0.5rem;">Brand: <strong>{{ product.parsed_brand }}</strong></span>
+        <span class="caption">Brand: <strong class="text-accent">{{ product.parsed_brand }}</strong></span>
       </div>
 
-      <h1 style="font-size: 1.85rem; margin-bottom: 0.75rem;">{{ product.display_name }}</h1>
+      <h1 class="display-m mb-3">{{ product.display_name }}</h1>
 
       {% if product.raw_name != product.display_name %}
-        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">
+        <p class="caption mb-4">
           Marketplace Title: <em>{{ product.raw_name }}</em>
         </p>
       {% endif %}
 
       {% include "includes/price_block.html" %}
 
-      <div style="margin-bottom: 1.5rem;">
+      <div class="mt-4 mb-4">
         {% include "includes/stock_badge.html" %}
       </div>
 
       <!-- Marketplace Rating Provenance -->
       {% if product.source_rating %}
-        <div style="background: var(--color-surface); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--color-accent); margin-bottom: 1.5rem;">
-          <p style="margin: 0; font-size: 0.9rem;">
+        <div class="product-provenance-box">
+          <p class="body-sm">
             <strong>Marketplace Rating:</strong> {{ product.source_rating }} / 5.0
             {% if product.source_rating_count %}
               <span class="text-muted">({{ product.source_rating_count }} customer ratings recorded)</span>
             {% endif %}
           </p>
-          <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: var(--color-text-muted);">
+          <p class="caption mt-1">
             Imported from verified public marketplace data. ELECTROCART does not generate artificial reviews.
           </p>
         </div>
       {% endif %}
 
       <!-- Commerce Purchase Form -->
-      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem;">
-        <form action="{% url 'cart_add' product.id %}" method="post">
+      <div class="product-purchase-box">
+        <form action="{% url 'cart_add' product.id %}" method="post" data-fetch-enhance>
           {% csrf_token %}
-          <div style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
-            <div style="flex: 0 0 120px;">
-              <label for="id-quantity" class="form-label">Quantity</label>
+          <div class="flex gap-4 items-baseline mb-4">
+            <div class="w-qty">
+              <label for="id-quantity" class="form-label">
+                <span>Quantity</span>
+              </label>
               <select name="quantity" id="id-quantity" class="form-control" {% if not product.is_purchasable %}disabled{% endif %}>
                 {% for i in "12345678910"|make_list %}
                   {% if forloop.counter <= max_cart_qty %}
@@ -108,29 +111,28 @@
                 {% endfor %}
               </select>
             </div>
-            <div style="flex: 1;">
+            <div class="flex-1">
               <button
                 type="submit"
                 class="btn btn-primary btn-block"
-                style="height: 42px;"
                 {% if not product.is_purchasable %}disabled aria-disabled="true"{% endif %}
               >
-                {% if product.is_purchasable %}Add to Cart{% else %}Currently Unavailable{% endif %}
+                {% if product.is_purchasable %}Add to Bag{% else %}Currently Unavailable{% endif %}
               </button>
             </div>
           </div>
         </form>
 
-        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <div class="btn-group">
           {% include "includes/wishlist_form.html" %}
           {% include "includes/compare_form.html" %}
         </div>
       </div>
 
       <!-- PIN Code Delivery Estimator -->
-      <section style="border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1.25rem;" aria-labelledby="shipping-estimator-heading">
-        <h3 id="shipping-estimator-heading" style="font-size: 1rem; margin-bottom: 0.5rem;">Estimated Delivery &amp; Serviceability</h3>
-        <form action="{% url 'shipping_check' %}" method="post" style="display: flex; gap: 0.5rem; max-width: 380px;">
+      <section class="pincode-estimator-box" aria-labelledby="shipping-estimator-heading">
+        <h2 id="shipping-estimator-heading" class="label mb-2">Estimated Delivery &amp; Serviceability</h2>
+        <form action="{% url 'shipping_check' %}" method="post" class="flex gap-2 max-w-md" data-fetch-enhance>
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ request.path }}">
           <label for="shipping-pincode-input" class="sr-only">Enter 6-digit Indian PIN code</label>
@@ -149,21 +151,21 @@
         </form>
 
         {% if delivery_estimate %}
-          <div style="margin-top: 0.75rem;">
+          <div class="mt-3">
             {% if delivery_estimate.serviceable %}
-              <p class="text-success" style="margin: 0; font-weight: 600;">
-                Delivery available to {{ remembered_pincode }}
+              <p class="text-success body-sm">
+                <strong>Delivery available to PIN {{ remembered_pincode }}</strong>
               </p>
-              <p style="margin: 0; font-size: 0.85rem;" class="text-muted">
+              <p class="caption mt-1">
                 Estimated arrival: {{ delivery_estimate.date_min|date:"D, M j" }} &ndash; {{ delivery_estimate.date_max|date:"D, M j" }}
                 ({{ delivery_estimate.est_days_min }}&ndash;{{ delivery_estimate.est_days_max }} business days)
                 {% if delivery_estimate.cod_allowed %} &bull; Cash on Delivery eligible{% endif %}
               </p>
             {% else %}
-              <p class="text-danger" style="margin: 0; font-weight: 600;">
-                Delivery unavailable to {{ remembered_pincode }}
+              <p class="text-danger body-sm">
+                <strong>Delivery unavailable to PIN {{ remembered_pincode }}</strong>
               </p>
-              <p style="margin: 0; font-size: 0.85rem;" class="text-muted">
+              <p class="caption mt-1">
                 {{ delivery_estimate.unavailable_reason }}
               </p>
             {% endif %}
@@ -173,24 +175,24 @@
     </div>
   </div>
 
-  <!-- Specifications Table -->
+  <!-- Technical Specifications Table -->
   {% if specifications %}
-    <section style="margin-bottom: 3.5rem;" aria-labelledby="specs-heading">
-      <h2 id="specs-heading">Technical Specifications</h2>
-      <div class="table-responsive">
+    <section class="mb-8" aria-labelledby="specs-heading">
+      <h2 id="specs-heading" class="heading mb-4">Technical Specifications</h2>
+      <div class="spec-table-wrapper">
         <table class="spec-table">
           <caption class="sr-only">Product technical attributes</caption>
           <thead>
             <tr>
-              <th scope="col" style="width: 30%;">Attribute</th>
+              <th scope="col">Attribute</th>
               <th scope="col">Specification</th>
             </tr>
           </thead>
           <tbody>
             {% for spec in specifications %}
               <tr>
-                <th scope="row">{{ spec.key }}</th>
-                <td>{{ spec.value }}</td>
+                <th scope="row" class="spec-key">{{ spec.key }}</th>
+                <td class="spec-val">{{ spec.value }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -202,8 +204,8 @@
   <!-- Related Products in Category -->
   {% if related_products %}
     <section aria-labelledby="related-heading">
-      <h2 id="related-heading">Related Products in {{ product.category.name }}</h2>
-      <div class="grid-4">
+      <h2 id="related-heading" class="heading mb-4">Related in {{ product.category.name }}</h2>
+      <div class="grid-catalog">
         {% for rel in related_products %}
           {% with product=rel %}
             {% include "includes/product_card.html" %}

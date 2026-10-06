@@ -11,22 +11,22 @@
     </ol>
   </nav>
 
-  <header style="margin-bottom: 2rem;">
-    <h1>Product Categories</h1>
-    <p class="text-muted">Browse curated consumer electronics by specialized category worlds.</p>
+  <header class="mb-6">
+    <h1 class="display-l">Product Categories</h1>
+    <p class="subhead mt-2">Browse curated consumer electronics by specialized monograph category worlds.</p>
   </header>
 
   <div class="grid-3">
     {% for cat in categories %}
-      <article class="product-card">
-        <h3><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></h3>
-        <p class="text-muted"><small>{{ cat.product_count }} active products</small></p>
+      <article class="product-card p-6">
+        <h2 class="heading"><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></h2>
+        <span class="card-brand mt-1">{{ cat.product_count }} active products</span>
         {% if cat.description %}
-          <p>{{ cat.description }}</p>
+          <p class="body-sm text-muted mt-2">{{ cat.description }}</p>
         {% endif %}
-        <p style="margin-top: auto;">
+        <div class="card-actions-row mt-auto">
           <a href="{% url 'category_detail' slug=cat.slug %}" class="btn btn-secondary btn-sm">Browse {{ cat.name }} &rarr;</a>
-        </p>
+        </div>
       </article>
     {% endfor %}
   </div>

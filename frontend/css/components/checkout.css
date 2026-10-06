@@ -1,0 +1,97 @@
+@layer components {
+  /* Three-Step Checkout Indicator */
+  .checkout-stepper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+    border-bottom: 1px solid var(--world-rule);
+    padding-bottom: var(--space-4);
+  }
+
+  .checkout-step-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--step--1);
+    color: var(--world-muted);
+  }
+
+  .checkout-step-item[aria-current="step"] {
+    color: var(--world-text);
+    font-weight: 600;
+  }
+
+  .step-index-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--world-rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--step--2);
+    font-weight: 600;
+  }
+
+  .checkout-step-item[aria-current="step"] .step-index-circle {
+    background-color: var(--world-accent);
+    border-color: var(--world-accent);
+    color: var(--world-white);
+  }
+
+  .step-connector {
+    flex: 1 1 auto;
+    height: 1px;
+    background-color: var(--world-rule);
+  }
+
+  /* Held-Until Stock Hold Notice */
+  .stock-hold-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-1);
+    margin-bottom: var(--space-6);
+    font-size: var(--step--1);
+  }
+
+  /* Checkout Grids and Cards */
+  .checkout-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  @media (min-width: 860px) {
+    .checkout-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-8);
+    }
+  }
+
+  .checkout-grid-review {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  @media (min-width: 960px) {
+    .checkout-grid-review {
+      grid-template-columns: 1fr 380px;
+      gap: var(--space-8);
+    }
+  }
+
+  .checkout-card {
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-2);
+    padding: var(--space-6);
+  }
+}

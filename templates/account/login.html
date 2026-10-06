@@ -4,10 +4,10 @@
 
 {% block content %}
 <div class="container section">
-  <div style="max-width: 440px; margin: 0 auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem;">
-    <header style="text-align: center; margin-bottom: 1.5rem;">
-      <h1>Sign In</h1>
-      <p class="text-muted">Access your ELECTROCART member account.</p>
+  <div class="checkout-card max-w-md mx-auto">
+    <header class="text-center mb-6">
+      <h1 class="display-l">Sign In</h1>
+      <p class="subhead mt-1">Access your ELECTROCART member account.</p>
     </header>
 
     {% include "includes/form_errors.html" %}
@@ -22,17 +22,17 @@
         {% include "includes/field.html" with field=field %}
       {% endfor %}
 
-      <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
-        <a href="{% url 'account_reset_password' %}" class="text-muted" style="font-size: 0.85rem;">Forgot Password?</a>
+      <div class="flex justify-end mb-4">
+        <a href="{% url 'account_reset_password' %}" class="caption text-muted">Forgot Password?</a>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-block" style="padding: 0.75rem;">
+      <button type="submit" class="btn btn-primary btn-block">
         Sign In
       </button>
     </form>
 
-    <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--color-border); padding-top: 1rem; font-size: 0.9rem;">
-      Don't have an account? <a href="{% url 'account_signup' %}{% if redirect_field_value %}?next={{ redirect_field_value }}{% endif %}">Sign Up</a>
+    <div class="hairline-top pt-4 mt-6 text-center body-sm">
+      Don't have an account? <a href="{% url 'account_signup' %}{% if redirect_field_value %}?next={{ redirect_field_value }}{% endif %}" class="text-accent">Sign Up</a>
     </div>
   </div>
 </div>

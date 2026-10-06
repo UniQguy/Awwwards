@@ -6,64 +6,68 @@
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem;">
+  <div class="flex justify-between items-baseline mb-6">
     <div>
-      <h1>Saved Addresses</h1>
-      <p class="text-muted">Manage your shipping and billing delivery destinations.</p>
+      <h1 class="display-l">Saved Addresses</h1>
+      <p class="subhead mt-1">Manage your shipping and billing delivery destinations.</p>
     </div>
     <a href="{% url 'account_address_create' %}" class="btn btn-primary">+ Add New Address</a>
   </div>
 
-  <nav aria-label="Account sections" style="margin-bottom: 2rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
-    <ul style="list-style: none; padding: 0; margin: 0; display: flex; gap: 1.5rem;">
-      <li><a href="{% url 'account_dashboard' %}">Dashboard</a></li>
-      <li><a href="{% url 'account_order_list' %}">Order History</a></li>
-      <li><a href="{% url 'account_address_list' %}" style="font-weight: 700;">Saved Addresses</a></li>
-      <li><a href="{% url 'account_profile' %}">Profile Settings</a></li>
-    </ul>
-  </nav>
+  <div class="account-layout">
+    <nav aria-label="Account sections">
+      <ul class="account-nav-list">
+        <li><a href="{% url 'account_dashboard' %}" class="account-nav-link">Dashboard</a></li>
+        <li><a href="{% url 'account_order_list' %}" class="account-nav-link">Order History</a></li>
+        <li><a href="{% url 'account_address_list' %}" class="account-nav-link" aria-current="page">Saved Addresses</a></li>
+        <li><a href="{% url 'account_profile' %}" class="account-nav-link">Profile Settings</a></li>
+      </ul>
+    </nav>
 
-  {% if addresses %}
-    <div class="grid-2">
-      {% for addr in addresses %}
-        <article style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column;">
-          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem;">
-            <h3 style="font-size: 1.1rem; margin: 0;">{{ addr.full_name }}</h3>
-            {% if addr.is_default %}
-              <span class="badge badge-in-stock">Default</span>
-            {% endif %}
-          </div>
+    <div>
+      {% if addresses %}
+        <div class="grid-2">
+          {% for addr in addresses %}
+            <article class="checkout-card flex flex-col">
+              <div class="flex justify-between items-baseline mb-2">
+                <h3 class="label">{{ addr.full_name }}</h3>
+                {% if addr.is_default %}
+                  <span class="badge badge-in-stock">Default</span>
+                {% endif %}
+              </div>
 
-          <p style="font-size: 0.95rem; margin-bottom: 1.25rem; flex: 1 0 auto;">
-            {{ addr.line1 }}{% if addr.line2 %}, {{ addr.line2 }}{% endif %}<br>
-            {% if addr.landmark %}Landmark: {{ addr.landmark }}<br>{% endif %}
-            {{ addr.city }}, {{ addr.state }} &ndash; <strong>{{ addr.pincode }}</strong><br>
-            Mobile: {{ addr.phone }}
-          </p>
+              <p class="body-sm mb-4 flex-1">
+                {{ addr.line1 }}{% if addr.line2 %}, {{ addr.line2 }}{% endif %}<br>
+                {% if addr.landmark %}Landmark: {{ addr.landmark }}<br>{% endif %}
+                {{ addr.city }}, {{ addr.state }} &ndash; <strong>{{ addr.pincode }}</strong><br>
+                Mobile: {{ addr.phone }}
+              </p>
 
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; border-top: 1px solid var(--color-border); padding-top: 0.75rem;">
-            <a href="{% url 'account_address_edit' uuid=addr.uuid %}" class="btn btn-sm btn-secondary">Edit</a>
+              <div class="flex gap-2 flex-wrap hairline-top pt-3">
+                <a href="{% url 'account_address_edit' uuid=addr.uuid %}" class="btn btn-sm btn-secondary">Edit</a>
 
-            {% if not addr.is_default %}
-              <form action="{% url 'account_address_set_default' uuid=addr.uuid %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-secondary">Set as Default</button>
-              </form>
-            {% endif %}
+                {% if not addr.is_default %}
+                  <form action="{% url 'account_address_set_default' uuid=addr.uuid %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-secondary">Set as Default</button>
+                  </form>
+                {% endif %}
 
-            <form action="{% url 'account_address_delete' uuid=addr.uuid %}" method="post" style="margin-left: auto;">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-            </form>
-          </div>
-        </article>
-      {% endfor %}
+                <form action="{% url 'account_address_delete' uuid=addr.uuid %}" method="post" class="mt-auto">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info">
+          <p>You have no saved addresses yet.</p>
+          <p class="mt-2"><a href="{% url 'account_address_create' %}" class="btn btn-primary btn-sm">Add Address</a></p>
+        </div>
+      {% endif %}
     </div>
-  {% else %}
-    <div class="alert alert-info">
-      <p>You have no saved addresses yet.</p>
-      <p><a href="{% url 'account_address_create' %}" class="btn btn-primary btn-sm">Add Address</a></p>
-    </div>
-  {% endif %}
+  </div>
 </div>
 {% endblock %}

@@ -1,59 +1,85 @@
 {% extends "base.html" %}
 {% load core_tags %}
 
-{% block title %}Checkout — ELECTROCART{% endblock %}
+{% block title %}Express Checkout — ELECTROCART{% endblock %}
 
 {% block content %}
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <header style="margin-bottom: 2rem;">
-    <h1>Express Checkout</h1>
-    <p class="text-muted">Choose your preferred checkout method to proceed with your order.</p>
+  <nav class="checkout-stepper" aria-label="Checkout progression">
+    <div class="checkout-step-item" aria-current="step">
+      <span class="step-index-circle">1</span>
+      <span>Sign In / Guest</span>
+    </div>
+    <div class="step-connector" aria-hidden="true"></div>
+    <div class="checkout-step-item">
+      <span class="step-index-circle">2</span>
+      <span>Delivery Address</span>
+    </div>
+    <div class="step-connector" aria-hidden="true"></div>
+    <div class="checkout-step-item">
+      <span class="step-index-circle">3</span>
+      <span>Review &amp; Pay</span>
+    </div>
+  </nav>
+
+  <header class="mb-6">
+    <h1 class="display-l">Express Checkout</h1>
+    <p class="subhead mt-1">Choose your preferred checkout method to proceed with your order.</p>
   </header>
 
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;">
+  <div class="checkout-grid">
     <!-- Guest Checkout Column -->
-    <section style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem;" aria-labelledby="guest-checkout-heading">
-      <h2 id="guest-checkout-heading" style="font-size: 1.25rem; margin-bottom: 0.5rem;">Guest Checkout</h2>
-      <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">
+    <section class="checkout-card" aria-labelledby="guest-checkout-heading">
+      <h2 id="guest-checkout-heading" class="heading mb-2">Guest Checkout</h2>
+      <p class="body-sm text-muted mb-5">
         No account required. We only ask for your contact details to send invoice and shipping tracking.
       </p>
 
       <form action="{% url 'checkout_guest' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
-          <label for="id-guest-name" class="form-label">Full Name <span class="required-indicator">*</span></label>
+          <label for="id-guest-name" class="form-label">
+            <span>Full Name</span>
+            <span class="form-required" aria-hidden="true">*</span>
+          </label>
           <input type="text" id="id-guest-name" name="full_name" class="form-control" placeholder="e.g. Rahul Sharma" required autocomplete="name">
         </div>
 
         <div class="form-group">
-          <label for="id-guest-email" class="form-label">Email Address <span class="required-indicator">*</span></label>
+          <label for="id-guest-email" class="form-label">
+            <span>Email Address</span>
+            <span class="form-required" aria-hidden="true">*</span>
+          </label>
           <input type="email" id="id-guest-email" name="email" class="form-control" placeholder="rahul@example.com" required autocomplete="email">
           <p class="form-help">Order confirmation and GST tax invoice will be sent here.</p>
         </div>
 
         <div class="form-group">
-          <label for="id-guest-phone" class="form-label">Mobile Number (10 Digits) <span class="required-indicator">*</span></label>
+          <label for="id-guest-phone" class="form-label">
+            <span>Mobile Number (10 Digits)</span>
+            <span class="form-required" aria-hidden="true">*</span>
+          </label>
           <input type="tel" id="id-guest-phone" name="phone" class="form-control" pattern="[0-9]{10}" maxlength="10" placeholder="9876543210" required autocomplete="tel">
           <p class="form-help">Required by courier for delivery coordination.</p>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" style="padding: 0.75rem; margin-top: 1.5rem;">
+        <button type="submit" class="btn btn-primary btn-block mt-4">
           Continue to Delivery Address &rarr;
         </button>
       </form>
     </section>
 
     <!-- Member Login Column -->
-    <section style="background: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem;" aria-labelledby="member-heading">
-      <h2 id="member-heading" style="font-size: 1.25rem; margin-bottom: 0.5rem;">Existing Member</h2>
-      <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">
+    <section class="checkout-card" aria-labelledby="member-heading">
+      <h2 id="member-heading" class="heading mb-2">Existing Member</h2>
+      <p class="body-sm text-muted mb-5">
         Sign in to quickly access your saved delivery addresses and track your orders.
       </p>
 
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <a href="{% url 'account_login' %}?next={% url 'checkout_address' %}" class="btn btn-primary btn-block" style="padding: 0.75rem;">
+      <div class="flex flex-col gap-3">
+        <a href="{% url 'account_login' %}?next={% url 'checkout_address' %}" class="btn btn-primary btn-block">
           Sign In to Your Account
         </a>
         <a href="{% url 'account_signup' %}?next={% url 'checkout_address' %}" class="btn btn-secondary btn-block">
@@ -61,13 +87,13 @@
         </a>
       </div>
 
-      <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
-        <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Order Total</h3>
-        <p style="font-size: 1.25rem; font-weight: 700; color: var(--color-accent); margin: 0;">
+      <div class="hairline-top pt-4 mt-6">
+        <h3 class="label mb-2">Order Total</h3>
+        <p class="price text-accent">
           {{ summary.grand_total|inr }}
         </p>
-        <p class="text-muted" style="font-size: 0.85rem; margin-top: 0.25rem;">
-          {{ cart.total_items }} item{{ cart.total_items|pluralize }} in cart
+        <p class="caption mt-1">
+          {{ cart.total_items }} item{{ cart.total_items|pluralize }} in bag
         </p>
       </div>
     </section>

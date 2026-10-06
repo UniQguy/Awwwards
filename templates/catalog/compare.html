@@ -7,11 +7,11 @@
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem;">
+  <div class="flex justify-between items-baseline mb-6">
     <div>
-      <h1>Product Comparison</h1>
+      <h1 class="display-l">Product Comparison</h1>
       {% if common_category %}
-        <p class="text-muted">Comparing products in <strong>{{ common_category.name }}</strong> (Max 3 items)</p>
+        <p class="subhead mt-1">Comparing products in <strong>{{ common_category.name }}</strong> (Max 3 items)</p>
       {% endif %}
     </div>
 
@@ -24,24 +24,24 @@
   </div>
 
   {% if compared_products %}
-    <div class="table-responsive">
-      <table class="spec-table" style="table-layout: fixed;">
+    <div class="compare-container">
+      <table class="compare-table">
         <caption class="sr-only">Side by side product comparison matrix</caption>
         <thead>
           <tr>
-            <th scope="col" style="width: 25%;">Feature</th>
+            <th scope="col">Feature</th>
             {% for prod in compared_products %}
-              <th scope="col" style="text-align: center; vertical-align: top;">
-                <div style="margin-bottom: 0.5rem; max-width: 150px; margin-left: auto; margin-right: auto;">
+              <th scope="col" class="text-center">
+                <div class="mb-2 mx-auto max-w-md">
                   {% include "includes/product_image.html" with product=prod %}
                 </div>
-                <div style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                <div class="heading mb-2">
                   <a href="{% url 'product_detail' slug=prod.slug %}">{{ prod.display_name }}</a>
                 </div>
                 {% include "includes/price_block.html" with product=prod %}
-                <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; justify-content: center;">
+                <div class="flex gap-2 justify-center mt-3">
                   {% include "includes/add_to_cart_form.html" with product=prod %}
-                  <form action="{% url 'compare_remove' product_id=prod.id %}" method="post" style="display: inline;">
+                  <form action="{% url 'compare_remove' product_id=prod.id %}" method="post" class="u-inline-form">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-secondary" aria-label="Remove {{ prod.display_name }} from comparison">&times;</button>
                   </form>
@@ -54,20 +54,20 @@
           <tr>
             <th scope="row">Brand</th>
             {% for prod in compared_products %}
-              <td style="text-align: center;">{{ prod.parsed_brand }}</td>
+              <td class="text-center">{{ prod.parsed_brand }}</td>
             {% endfor %}
           </tr>
           <tr>
             <th scope="row">Availability</th>
             {% for prod in compared_products %}
-              <td style="text-align: center;">{% include "includes/stock_badge.html" with product=prod %}</td>
+              <td class="text-center">{% include "includes/stock_badge.html" with product=prod %}</td>
             {% endfor %}
           </tr>
           {% for key, row_values in spec_matrix.items %}
             <tr>
               <th scope="row">{{ key }}</th>
               {% for prod in compared_products %}
-                <td style="text-align: center;">
+                <td class="text-center">
                   {% for pid, val in row_values.items %}
                     {% if pid == prod.id %}{{ val }}{% endif %}
                   {% endfor %}
@@ -81,8 +81,8 @@
   {% else %}
     <div class="alert alert-info">
       <p>No products are currently in your comparison tray.</p>
-      <p>Browse categories and click "Compare" on any item to view side-by-side technical specifications.</p>
-      <p><a href="{% url 'category_list' %}" class="btn btn-primary btn-sm">Browse Categories</a></p>
+      <p class="caption mt-1">Browse categories and click "Compare" on any item to view side-by-side technical specifications.</p>
+      <p class="mt-4"><a href="{% url 'category_list' %}" class="btn btn-primary btn-sm">Browse Categories</a></p>
     </div>
   {% endif %}
 </div>

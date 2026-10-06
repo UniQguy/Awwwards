@@ -1,8 +1,22 @@
 {% if messages %}
   <div class="container messages-container" aria-live="polite">
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'info' }}" role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}">
-        {{ message }}
+      <div class="alert alert-{{ message.tags|default:'info' }}" role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}" data-alert>
+        <span class="alert-icon" aria-hidden="true">
+          {% if message.tags == 'success' %}
+            <svg class="icon icon-sm"><use href="#icon-check"></use></svg>
+          {% elif message.tags == 'error' or message.tags == 'danger' %}
+            <svg class="icon icon-sm"><use href="#icon-alert"></use></svg>
+          {% else %}
+            <svg class="icon icon-sm"><use href="#icon-info"></use></svg>
+          {% endif %}
+        </span>
+        <div class="alert-content">
+          {{ message }}
+        </div>
+        <button type="button" class="alert-dismiss-btn" aria-label="Dismiss message">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-close"></use></svg>
+        </button>
       </div>
     {% endfor %}
   </div>

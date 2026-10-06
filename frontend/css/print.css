@@ -1,0 +1,115 @@
+@layer print {
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 15mm;
+    }
+
+    *,
+    *::before,
+    *::after {
+      background: transparent !important;
+      color: var(--print-ink) !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+    }
+
+    body {
+      font-family: var(--font-text);
+      font-size: 10pt;
+      line-height: 1.4;
+      background: var(--print-paper) !important;
+      color: var(--print-ink) !important;
+    }
+
+    /* Suppress interactive navigation, buttons, skip links, headers, footers */
+    .site-header,
+    .site-footer,
+    .skip-link,
+    .btn,
+    button,
+    nav,
+    .messages-container,
+    .no-print,
+    [role="search"],
+    [data-no-print] {
+      display: none !important;
+    }
+
+    /* Professional Tabular Invoice Layout */
+    .invoice-container {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+    }
+
+    .invoice-header {
+      font-family: var(--font-display);
+      border-bottom: 2pt solid var(--print-ink);
+      padding-bottom: 10pt;
+      margin-bottom: 15pt;
+    }
+
+    .invoice-title {
+      font-size: 18pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-block: 12pt;
+      page-break-inside: auto;
+    }
+
+    .invoice-table tr {
+      page-break-inside: avoid;
+      page-break-after: auto;
+    }
+
+    .invoice-table th,
+    .invoice-table td {
+      border-bottom: 0.5pt solid var(--print-rule);
+      padding: 6pt 4pt;
+      font-size: 9pt;
+    }
+
+    .invoice-table th {
+      border-top: 1pt solid var(--print-ink);
+      border-bottom: 1pt solid var(--print-ink);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 8pt;
+      letter-spacing: 0.05em;
+    }
+
+    .invoice-table td.numeric,
+    .invoice-table th.numeric {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .invoice-totals {
+      page-break-inside: avoid;
+      margin-top: 15pt;
+      border-top: 1.5pt solid var(--print-ink);
+      padding-top: 8pt;
+    }
+
+    .amount-in-words {
+      font-style: italic;
+      margin-top: 10pt;
+      padding: 6pt;
+      border: 0.5pt solid var(--print-rule);
+      font-size: 8.5pt;
+    }
+
+    a[href]::after {
+      content: "";
+    }
+  }
+}

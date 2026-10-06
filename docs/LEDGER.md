@@ -123,3 +123,14 @@
 - **Sequential Invoicing**: Invoices and Credit Notes follow Indian financial year (April 1 - March 31) series (`EC-INV-YYYY-YY-XXXXX`, `EC-CN-YYYY-YY-XXXXX`) guaranteed gap-free via atomic database locks.
 - **Stock Reservation**: 15-minute TTL holds during cart exploration, 30-minute holds during online gateway payment checkout. Released automatically on expiry or order cancellation.
 - **Single Default Address**: Each customer can have at most one default address at any time, guaranteed at both model save and database constraint layers.
+
+### 5. Frontend & Design System Architecture (Phase 4)
+- **Layer Architecture**: Native CSS `@layer reset, tokens, base, layout, components, utilities, print;` eliminating specificity wars and `!important` directives.
+- **Monograph Worlds**: 10 category worlds with frozen accents (`--color-accent`), surfaces (`--color-surface`), and borders (`--color-border`) driven by `data-world="<category-slug>"`.
+- **Fluid Typographic Scale**: `--step--2` through `--step-7` powered by CSS `clamp()` interpolating between 390px (mobile) and 1440px (desktop).
+- **Geometric Spacing Scale**: Strict 4px base increment (`--space-1` to `--space-24`).
+- **Asset Pipeline**: Vite 5 bundling ES modules and CSS into `static/dist/` (`styles-*.css` 54.15 kB < 60 KB, `main-*.js` 4.24 kB < 25 KB).
+- **Icon System**: Vector SVG sprite at `static/icons/sprite.svg` with 21 geometric symbols + brand mark.
+- **Hardware Finish Swatches**: `apps/catalog/data/colour_map.py` and template filter `colour_hex` for authentic product swatch rendering.
+- **Accessibility & Contrast**: 100% WCAG 2.1 AA compliance (0 violations) across all 70 color pairings, status alerts, focus rings, and axe-core Playwright checks.
+

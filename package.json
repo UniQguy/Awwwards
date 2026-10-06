@@ -1,0 +1,18 @@
+{
+  "name": "electrocart",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^5.4.14"
+  },
+  "dependencies": {
+    "@fontsource-variable/fraunces": "^5.1.1",
+    "@fontsource-variable/plus-jakarta-sans": "^5.1.1",
+    "axe-core": "^4.10.2"
+  }
+}

@@ -1,0 +1,195 @@
+@layer components {
+  /* Free Delivery Meter */
+  .free-delivery-meter {
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-2);
+    padding: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  .meter-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--step--1);
+    margin-bottom: var(--space-2);
+  }
+
+  .meter-progress-track {
+    background-color: var(--world-rule);
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .meter-progress-fill {
+    height: 100%;
+    background-color: var(--world-accent);
+    transition: width var(--dur-editorial) var(--ease-editorial);
+  }
+
+  /* Cart Layout */
+  .cart-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  @media (min-width: 1024px) {
+    .cart-grid-layout {
+      grid-template-columns: 1fr 380px;
+      gap: var(--space-8);
+    }
+  }
+
+  /* Cart Line Item */
+  .cart-line-item {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--world-rule);
+  }
+
+  .cart-item-thumbnail {
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+    background-color: var(--world-surface);
+    border-radius: var(--radius-1);
+    padding: var(--space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cart-item-thumbnail-sm {
+    width: 56px;
+    height: 56px;
+  }
+
+  .cart-item-thumbnail img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+
+  .cart-item-details {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .cart-item-name {
+    font-size: var(--step-0);
+    font-weight: 500;
+    color: var(--world-text);
+    text-decoration: none;
+  }
+
+  .cart-item-name:hover {
+    color: var(--world-accent);
+  }
+
+  /* Stepper (flanked by minus and plus buttons) */
+  .quantity-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-1);
+    background-color: var(--world-bg);
+  }
+
+  .stepper-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--world-text);
+    background-color: transparent;
+  }
+
+  .stepper-btn:hover {
+    background-color: var(--world-surface);
+    color: var(--world-accent);
+  }
+
+  .stepper-input {
+    width: 44px;
+    height: 32px;
+    border: none;
+    text-align: center;
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+    background-color: transparent;
+    color: var(--world-text);
+  }
+
+  .stepper-input:focus {
+    outline: none;
+  }
+
+  /* Sticky Summary Card */
+  .cart-summary-card {
+    position: sticky;
+    top: 88px;
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-2);
+    padding: var(--space-6);
+  }
+
+  .summary-title {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--world-rule);
+  }
+
+  .summary-totals-dl {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-3);
+    font-size: var(--step--1);
+    margin-bottom: var(--space-6);
+  }
+
+  .summary-totals-dl dt {
+    color: var(--world-muted);
+  }
+
+  .summary-totals-dl dd {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  .summary-grand-total {
+    border-top: 2px solid var(--world-rule);
+    padding-top: var(--space-4);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-6);
+  }
+
+  .summary-grand-total .total-label {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 600;
+  }
+
+  .summary-grand-total .total-amount {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-weight: 700;
+    color: var(--world-accent);
+  }
+}

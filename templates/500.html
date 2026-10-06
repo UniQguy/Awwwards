@@ -1,27 +1,29 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="en-IN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>500 Server Error — ELECTROCART</title>
-  <link rel="stylesheet" href="/static/css/storefront.css">
 </head>
-<body>
+<body data-world="earphones-headphones">
   <header class="site-header">
     <div class="container header-inner">
-      <div class="site-brand">
-        <a href="/">ELECTROCART</a>
-      </div>
+      <a href="/" class="site-brand">
+        <span class="brand-name">ELECTROCART</span>
+      </a>
     </div>
   </header>
   <main id="main-content" class="container section">
-    <h1>500 — Server Error</h1>
-    <p>Something went wrong on our end while processing your request.</p>
-    <p>Our engineering team has been notified. Please try again shortly or return to our home page.</p>
-    <p><a href="/" class="btn btn-primary">Return to Homepage</a></p>
+    <div class="empty-state-card text-center">
+      <h1 class="empty-state-title">500 — Server Error</h1>
+      <p class="empty-state-desc">Something unexpected occurred while processing your request. Our engineering team has been notified. Please try again shortly.</p>
+      <div class="empty-state-actions">
+        <a href="/" class="btn btn-primary">Return to Homepage</a>
+      </div>
+    </div>
   </main>
   <footer class="site-footer">
-    <div class="container footer-legal-notice">
+    <div class="container text-center caption">
       <p>&copy; ELECTROCART. All rights reserved.</p>
     </div>
   </footer>

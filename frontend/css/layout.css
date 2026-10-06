@@ -1,0 +1,129 @@
+@layer layout {
+  .container {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .section {
+    padding-block: clamp(var(--space-6), 6vw, var(--space-9));
+  }
+
+  .section-sm {
+    padding-block: var(--space-4);
+  }
+
+  /* 12-Column Responsive Grid */
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 768px) {
+    .grid-12 {
+      grid-template-columns: repeat(8, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-12 {
+      grid-template-columns: repeat(12, 1fr);
+      gap: var(--space-6);
+    }
+  }
+
+  /* 6-Column Asymmetric Grid (Phase 5 Editorial Helper) */
+  .grid-asymmetric {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 768px) {
+    .grid-asymmetric {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-asymmetric {
+      grid-template-columns: repeat(6, 1fr);
+      gap: var(--space-6);
+    }
+  }
+
+  /* 2-Column and 3-Column Utility Grids */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 768px) {
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 640px) {
+    .grid-3 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-6);
+    }
+  }
+
+  /* 4-Column Product Catalog Grid */
+  .grid-catalog {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 1024px) {
+    .grid-catalog {
+      gap: var(--space-6);
+    }
+  }
+
+  /* Brand Directory Grid */
+  .grid-brands {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+
+  /* Flexbox Utilities */
+  .flex { display: flex; }
+  .flex-col { display: flex; flex-direction: column; }
+  .items-center { align-items: center; }
+  .items-start { align-items: flex-start; }
+  .items-baseline { align-items: baseline; }
+  .justify-between { justify-content: space-between; }
+  .justify-center { justify-content: center; }
+  .justify-end { justify-content: flex-end; }
+  .flex-wrap { flex-wrap: wrap; }
+  .flex-1 { flex: 1 1 0%; }
+
+  .gap-1 { gap: var(--space-1); }
+  .gap-2 { gap: var(--space-2); }
+  .gap-3 { gap: var(--space-3); }
+  .gap-4 { gap: var(--space-4); }
+  .gap-5 { gap: var(--space-5); }
+  .gap-6 { gap: var(--space-6); }
+}

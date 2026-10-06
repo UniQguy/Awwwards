@@ -1,63 +1,75 @@
 <header class="site-header" role="banner">
   <div class="container header-inner">
-    <div class="site-brand">
-      <a href="{% url 'home' %}">ELECTROCART</a>
+    <div class="flex items-center gap-4">
+      <a href="{% url 'home' %}" class="site-brand" aria-label="ELECTROCART Home">
+        <svg class="brand-logo-mark" aria-hidden="true"><use href="#icon-brand-mark"></use></svg>
+        <span class="brand-name">ELECTROCART</span>
+      </a>
+
+      <details class="shop-menu-details">
+        <summary class="shop-menu-summary" aria-haspopup="true">
+          <span>Shop</span>
+          <svg class="icon icon-xs" aria-hidden="true"><use href="#icon-chevron"></use></svg>
+        </summary>
+        <div class="shop-dropdown-panel" role="region" aria-label="Shop categories">
+          <ul>
+            <li><a href="{% url 'category_list' %}">All Categories</a></li>
+            <li><a href="{% url 'brand_list' %}">Brands Directory</a></li>
+            {% for cat in nav_categories %}
+              <li><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </details>
     </div>
 
-    <form class="search-bar-form" action="{% url 'search_results' %}" method="get" role="search">
+    <form class="header-search-form" action="{% url 'search_results' %}" method="get" role="search">
       <label for="site-search-input" class="sr-only">Search products, brands, or categories</label>
+      <svg class="header-search-icon icon icon-sm" aria-hidden="true"><use href="#icon-search"></use></svg>
       <input
         type="search"
         id="site-search-input"
         name="q"
         value="{{ request.GET.q|default:'' }}"
-        class="form-control"
+        class="header-search-input"
         placeholder="Search electronics, audio, gear..."
         required
         autocomplete="off"
       >
-      <button type="submit" class="btn btn-primary">Search</button>
     </form>
 
-    <nav aria-label="Account and cart navigation">
-      <ul class="nav-links">
-        <li><a href="{% url 'category_list' %}">Categories</a></li>
-        <li><a href="{% url 'brand_list' %}">Brands</a></li>
-        <li>
-          <a href="{% url 'wishlist_detail' %}" aria-label="Wishlist ({{ wishlist_count }} items)">
-            Wishlist {% if wishlist_count > 0 %}<span class="badge badge-low-stock">({{ wishlist_count }})</span>{% endif %}
-          </a>
-        </li>
-        <li>
-          <a href="{% url 'cart_detail' %}" aria-label="Cart ({{ cart_count }} items)">
-            Cart {% if cart_count > 0 %}<span class="badge badge-in-stock">({{ cart_count }})</span>{% endif %}
-          </a>
-        </li>
-        {% if user.is_authenticated %}
-          <li><a href="{% url 'account_dashboard' %}">My Account</a></li>
-          <li>
-            <form action="{% url 'account_logout' %}" method="post" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-sm btn-secondary">Logout</button>
-            </form>
-          </li>
-        {% else %}
-          <li><a href="{% url 'account_login' %}">Login</a></li>
-          <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
-        {% endif %}
-      </ul>
+    <nav class="header-nav" aria-label="Account and bag navigation">
+      <a href="{% url 'wishlist_detail' %}" class="header-nav-link" aria-label="Wishlist ({{ wishlist_count }} items)">
+        <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-heart"></use></svg>
+        <span class="sr-only">Wishlist</span>
+        {% if wishlist_count > 0 %}<span class="bag-badge" aria-hidden="true">({{ wishlist_count }})</span>{% endif %}
+      </a>
+
+      {% if user.is_authenticated %}
+        <a href="{% url 'account_dashboard' %}" class="header-nav-link" aria-label="My Account">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-user"></use></svg>
+          <span class="sr-only">My Account</span>
+        </a>
+        <form action="{% url 'account_logout' %}" method="post" class="u-inline-form">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-secondary" aria-label="Sign out">Sign out</button>
+        </form>
+      {% else %}
+        <a href="{% url 'account_login' %}" class="header-nav-link" aria-label="Sign in">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-user"></use></svg>
+          <span class="sr-only">Sign in</span>
+        </a>
+      {% endif %}
+
+      <a href="{% url 'cart_detail' %}" class="header-nav-link" aria-label="Bag ({{ cart_count }} items)">
+        <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-bag"></use></svg>
+        <span>Bag</span>
+        <span class="bag-badge">({{ cart_count }})</span>
+      </a>
     </nav>
   </div>
 
-  {% if nav_categories %}
-    <nav class="nav-categories-bar" aria-label="Category navigation">
-      <div class="container">
-        <ul class="category-nav-list">
-          {% for cat in nav_categories %}
-            <li><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></li>
-          {% endfor %}
-        </ul>
-      </div>
-    </nav>
-  {% endif %}
+  <div class="free-delivery-hairline">
+    <div class="free-delivery-hairline-fill"></div>
+  </div>
 </header>

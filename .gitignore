@@ -61,4 +61,4 @@ Desktop.ini
 htmlcov/
 .pytest_cache/
 reports/
-data/
+/data/

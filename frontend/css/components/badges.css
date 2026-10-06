@@ -1,0 +1,64 @@
+@layer components {
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 2px var(--space-2);
+    font-family: var(--font-text);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: var(--radius-1);
+    border: 1px solid var(--world-rule);
+    background-color: transparent;
+    color: var(--world-text);
+    line-height: 1.2;
+  }
+
+  .badge-in-stock {
+    border-color: var(--color-success);
+    color: var(--color-success);
+  }
+
+  .badge-low-stock {
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+  }
+
+  .badge-out-of-stock {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+
+  /* Filter Chip (with remove button) */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--step--2);
+    font-weight: 500;
+    color: var(--world-text);
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+  }
+
+  .chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    color: var(--world-muted);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .chip-remove:hover {
+    color: var(--world-accent);
+  }
+}

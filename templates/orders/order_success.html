@@ -5,21 +5,19 @@
 
 {% block content %}
 <div class="container section">
-  <div style="max-width: 760px; margin: 0 auto;">
-    <div style="background: var(--color-success-bg); border: 1px solid var(--color-success-text); border-radius: var(--radius-md); padding: 2rem; text-align: center; margin-bottom: 2.5rem;">
-      <h1 style="color: var(--color-success-text); font-size: 1.85rem; margin-bottom: 0.5rem;">
-        &check; Order Placed Successfully!
-      </h1>
-      <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">
+  <div class="max-w-md mx-auto">
+    <div class="alert alert-success text-center p-6 mb-6">
+      <h1 class="display-m mb-2">Order Placed Successfully!</h1>
+      <p class="body mb-2">
         Thank you for choosing ELECTROCART. Your order reference is <strong>#{{ order.order_number }}</strong>.
       </p>
-      <p class="text-muted" style="margin: 0; font-size: 0.9rem;">
+      <p class="caption">
         A confirmation receipt has been sent to <strong>{{ order.recipient_email }}</strong>.
       </p>
     </div>
 
     <!-- Quick Action Links -->
-    <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 2.5rem; flex-wrap: wrap;">
+    <div class="flex gap-4 justify-center flex-wrap mb-8">
       <a href="{% url 'order_track_timeline' order_number=order.order_number %}" class="btn btn-primary">
         Track Shipment &rarr;
       </a>
@@ -29,19 +27,19 @@
     </div>
 
     <!-- Order Summary Details -->
-    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.75rem; margin-bottom: 2rem;">
-      <h2 style="font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">Order Specifications</h2>
+    <section class="checkout-card mb-6" aria-labelledby="order-specs-heading">
+      <h2 id="order-specs-heading" class="heading hairline-bottom pb-2 mb-4">Order Specifications</h2>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; font-size: 0.95rem;">
+      <div class="grid-2 mb-5">
         <div>
-          <p style="margin: 0 0 0.5rem 0;"><strong>Status:</strong> <span class="badge badge-in-stock">{{ order.get_status_display }}</span></p>
-          <p style="margin: 0 0 0.5rem 0;"><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
-          <p style="margin: 0 0 0.5rem 0;"><strong>Payment Status:</strong> {{ order.get_payment_status_display }}</p>
-          <p style="margin: 0;"><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y, g:i A" }}</p>
+          <p class="body-sm mb-1"><strong>Status:</strong> <span class="badge badge-in-stock">{{ order.get_status_display }}</span></p>
+          <p class="body-sm mb-1"><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+          <p class="body-sm mb-1"><strong>Payment Status:</strong> {{ order.get_payment_status_display }}</p>
+          <p class="body-sm"><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y, g:i A" }}</p>
         </div>
         <div>
-          <strong>Shipping Destination:</strong>
-          <p style="margin: 0.25rem 0 0 0;">
+          <strong class="body-sm">Shipping Destination:</strong>
+          <p class="body-sm mt-1">
             {{ order.shipping_address_snapshot.full_name }} &bull; {{ order.shipping_address_snapshot.phone }}<br>
             {{ order.shipping_address_snapshot.line1 }}<br>
             {{ order.shipping_address_snapshot.city }}, {{ order.shipping_address_snapshot.state }} &ndash; {{ order.shipping_address_snapshot.pincode }}
@@ -49,63 +47,63 @@
         </div>
       </div>
 
-      <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem;">Merchandise Items</h3>
-      <table class="data-table" style="margin-bottom: 1.5rem;">
+      <h3 class="label mb-3">Merchandise Items</h3>
+      <table class="spec-table mb-5">
         <caption class="sr-only">Items included in order</caption>
         <thead>
           <tr>
             <th scope="col">Product</th>
-            <th scope="col" style="text-align: right;">Unit Price</th>
-            <th scope="col" style="text-align: center;">Qty</th>
-            <th scope="col" style="text-align: right;">Line Total</th>
+            <th scope="col" class="text-right">Unit Price</th>
+            <th scope="col" class="text-center">Qty</th>
+            <th scope="col" class="text-right">Line Total</th>
           </tr>
         </thead>
         <tbody>
           {% for item in order.items.all %}
             <tr>
               <td>
-                <strong>{{ item.product_title }}</strong>
-                <div class="text-muted"><small>SKU: {{ item.product_sku }} &bull; HSN: {{ item.hsn_code }} ({{ item.gst_rate }}% GST)</small></div>
+                <strong class="body-sm">{{ item.product_title }}</strong>
+                <div class="caption">SKU: {{ item.product_sku }} &bull; HSN: {{ item.hsn_code }} ({{ item.gst_rate }}% GST)</div>
               </td>
-              <td style="text-align: right;">{{ item.unit_price|inr }}</td>
-              <td style="text-align: center;">{{ item.quantity }}</td>
-              <td style="text-align: right;"><strong>{{ item.line_total|inr }}</strong></td>
+              <td class="text-right body-sm">{{ item.unit_price|inr }}</td>
+              <td class="text-center body-sm">{{ item.quantity }}</td>
+              <td class="text-right body-sm"><strong>{{ item.line_total|inr }}</strong></td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
 
-      <dl style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem 1rem; margin: 0; font-size: 0.95rem;">
+      <dl class="summary-totals-dl mb-4">
         <dt>Subtotal</dt>
-        <dd style="margin: 0; text-align: right;">{{ order.subtotal|inr }}</dd>
+        <dd>{{ order.subtotal|inr }}</dd>
 
         {% if order.discount_amount > 0 %}
           <dt class="text-success">Discount Applied</dt>
-          <dd style="margin: 0; text-align: right;" class="text-success">-{{ order.discount_amount|inr }}</dd>
+          <dd class="text-success">-{{ order.discount_amount|inr }}</dd>
         {% endif %}
 
         <dt>Shipping Fee</dt>
-        <dd style="margin: 0; text-align: right;">
+        <dd>
           {% if order.shipping_fee > 0 %}{{ order.shipping_fee|inr }}{% else %}<span class="text-success">FREE</span>{% endif %}
         </dd>
 
-        <dt style="font-size: 0.85rem; color: var(--color-text-muted);">GST Tax</dt>
-        <dd style="margin: 0; text-align: right; font-size: 0.85rem; color: var(--color-text-muted);">
+        <dt class="caption">GST Tax</dt>
+        <dd class="caption">
           Included ({{ order.tax_amount|inr }})
         </dd>
-
-        <dt style="font-size: 1.15rem; font-weight: 700; border-top: 2px solid var(--color-border); padding-top: 0.5rem;">Total Paid / Payable</dt>
-        <dd style="margin: 0; text-align: right; font-size: 1.25rem; font-weight: 700; color: var(--color-accent); border-top: 2px solid var(--color-border); padding-top: 0.5rem;">
-          {{ order.total_amount|inr }}
-        </dd>
       </dl>
-    </div>
+
+      <div class="summary-grand-total">
+        <span class="total-label">Total Paid / Payable</span>
+        <span class="total-amount">{{ order.total_amount|inr }}</span>
+      </div>
+    </section>
 
     <!-- Order Cancellation Option (if state permits) -->
     {% if order.status != 'cancelled' and order.status != 'delivered' and order.status != 'refunded' %}
-      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
-        <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Need to cancel this order?</h3>
-        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">
+      <div class="checkout-card text-center">
+        <h3 class="label mb-2">Need to cancel this order?</h3>
+        <p class="caption mb-4">
           You can cancel this order prior to warehouse departure. Inventory reservations will be instantly restored.
         </p>
         <form action="{% url 'order_cancel' order_number=order.order_number %}" method="post">
@@ -114,7 +112,7 @@
         </form>
       </div>
     {% elif order.status == 'cancelled' %}
-      <div class="alert alert-error" style="text-align: center;">
+      <div class="alert alert-danger text-center">
         <strong>This order has been cancelled.</strong>
         {% if order.credit_notes.exists %}
           A statutory GST Credit Note has been generated.

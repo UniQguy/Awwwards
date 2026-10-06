@@ -11,8 +11,8 @@
     >
   {% else %}
     <div class="image-fallback-plate" role="img" aria-label="{{ product.display_name }}">
-      <span class="fallback-title">ELECTROCART</span>
-      <span class="fallback-category">{{ product.category.name }}</span>
+      <span class="image-fallback-initial">{{ product.display_name|slice:":1" }}</span>
+      <span class="image-fallback-text">{{ product.category.name }}</span>
     </div>
   {% endif %}
 {% endwith %}

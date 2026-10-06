@@ -1,0 +1,101 @@
+@layer components {
+  .site-footer {
+    background-color: var(--world-surface);
+    color: var(--world-text);
+    border-top: 1px solid var(--world-rule);
+    padding-top: clamp(var(--space-8), 8vw, var(--space-11));
+    padding-bottom: var(--space-8);
+    margin-top: clamp(var(--space-8), 10vw, var(--space-12));
+  }
+
+  .footer-colophon-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+    margin-bottom: clamp(var(--space-8), 8vw, var(--space-11));
+  }
+
+  @media (min-width: 768px) {
+    .footer-colophon-grid {
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: var(--space-8);
+    }
+  }
+
+  .footer-col h2,
+  .footer-col h4,
+  .footer-col .footer-col-title {
+    font-size: var(--step--1);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-4);
+    color: var(--world-text);
+  }
+
+  .footer-col ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .footer-col a {
+    font-size: var(--step--1);
+    color: var(--world-muted);
+    text-decoration: none;
+    transition: color var(--dur-utility) var(--ease-utility);
+  }
+
+  .footer-col a:hover {
+    color: var(--world-accent);
+  }
+
+  .footer-col p {
+    font-size: var(--step--1);
+    color: var(--world-muted);
+    line-height: 1.6;
+    margin-bottom: var(--space-3);
+  }
+
+  .footer-meta-note {
+    font-size: var(--step--2);
+    color: var(--world-muted);
+    border-top: 1px solid var(--world-rule);
+    padding-top: var(--space-4);
+    margin-top: var(--space-4);
+    line-height: 1.5;
+  }
+
+  .footer-bottom-brand {
+    border-top: 1px solid var(--world-rule);
+    padding-top: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: center;
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .footer-bottom-brand {
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+    }
+  }
+
+  .footer-display-wordmark {
+    font-family: var(--font-display);
+    font-size: clamp(var(--step-4), 6vw, var(--step-6));
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--world-text);
+    text-decoration: none;
+  }
+
+  .footer-legal-copy {
+    font-size: var(--step--2);
+    color: var(--world-muted);
+  }
+}

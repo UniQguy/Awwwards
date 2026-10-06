@@ -1,0 +1,167 @@
+@layer components {
+  .filter-panel-aside {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .filter-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    border-bottom: 1px solid var(--world-rule);
+    padding-bottom: var(--space-5);
+  }
+
+  .filter-legend {
+    font-size: var(--step--1);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--world-text);
+    margin-bottom: var(--space-2);
+  }
+
+  /* Log-Scaled Price Bracket Histogram */
+  .bracket-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .bracket-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--step--1);
+    color: var(--world-text);
+    text-decoration: none;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-1);
+    position: relative;
+  }
+
+  .bracket-row:hover {
+    background-color: var(--world-surface);
+    color: var(--world-accent);
+  }
+
+  .bracket-row.is-active {
+    background-color: var(--world-surface);
+    color: var(--world-accent);
+    font-weight: 600;
+  }
+
+  .bracket-histogram-bar {
+    position: absolute;
+    bottom: 0;
+    left: var(--space-2);
+    height: 2px;
+    background-color: var(--world-accent);
+    border-radius: 1px;
+    opacity: 0.6;
+  }
+
+  .bracket-count {
+    font-size: var(--step--2);
+    color: var(--world-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Mobile Filter Dialog Bottom Sheet */
+  .filter-dialog {
+    border: none;
+    padding: 0;
+    background-color: var(--world-bg);
+    color: var(--world-text);
+    max-width: 480px;
+    width: 100%;
+    margin-top: auto;
+    border-top: 1px solid var(--world-rule);
+    border-radius: var(--radius-2) var(--radius-2) 0 0;
+    box-shadow: var(--lift-2);
+  }
+
+  .filter-dialog::backdrop {
+    background-color: var(--world-overlay);
+    backdrop-filter: blur(2px);
+  }
+
+  .filter-dialog-inner {
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .filter-dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--world-rule);
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .filter-dialog-footer {
+    display: flex;
+    gap: var(--space-3);
+    border-top: 1px solid var(--world-rule);
+    padding-top: var(--space-4);
+    margin-top: var(--space-4);
+  }
+
+  /* Catalog Layout (Filter Rail + Product Grid) */
+  .catalog-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  @media (min-width: 860px) {
+    .catalog-layout {
+      grid-template-columns: minmax(240px, 280px) 1fr;
+      gap: var(--space-8);
+    }
+  }
+
+  /* Price Histogram Visualization */
+  .histogram-chart {
+    background-color: var(--world-surface);
+    padding: var(--space-4);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-1);
+    margin-top: var(--space-5);
+  }
+
+  .histogram-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 70px;
+    padding-top: var(--space-2);
+  }
+
+  .histogram-bar {
+    flex: 1;
+    background-color: var(--world-accent);
+    min-height: 2px;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .histogram-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--step--2);
+    color: var(--world-muted);
+    margin-top: var(--space-1);
+  }
+}

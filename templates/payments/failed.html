@@ -4,13 +4,13 @@
 
 {% block content %}
 <div class="container section">
-  <div style="max-width: 600px; margin: 0 auto; text-align: center;">
-    <div class="alert alert-danger" style="padding: 2rem; margin-bottom: 2rem;">
-      <h1>Payment Unsuccessful</h1>
-      <p>Your payment attempt for Order #{{ order.order_number }} could not be completed by the bank or gateway.</p>
+  <div class="max-w-md mx-auto text-center">
+    <div class="alert alert-danger p-6 mb-6">
+      <h1 class="display-l mb-2">Payment Unsuccessful</h1>
+      <p class="body-sm">Your payment attempt for Order #{{ order.order_number }} could not be completed by the bank or gateway.</p>
     </div>
 
-    <div style="display: flex; gap: 1rem; justify-content: center;">
+    <div class="flex gap-4 justify-center flex-wrap">
       <a href="{% url 'payments:razorpay_checkout' order_number=order.order_number %}" class="btn btn-primary">Try Again</a>
       {% if can_cod %}
         <form action="{% url 'payments:razorpay_switch_cod' order.order_number %}" method="post">

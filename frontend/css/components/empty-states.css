@@ -1,0 +1,43 @@
+@layer components {
+  .empty-state-card {
+    text-align: center;
+    padding: clamp(var(--space-8), 10vw, var(--space-12)) var(--space-4);
+    max-width: 600px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .empty-state-mark {
+    width: 48px;
+    height: 48px;
+    color: var(--world-muted);
+    stroke: currentColor;
+    margin-bottom: var(--space-2);
+  }
+
+  .empty-state-title {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--world-text);
+  }
+
+  .empty-state-desc {
+    font-size: var(--step-0);
+    color: var(--world-muted);
+    line-height: 1.6;
+    max-width: 48ch;
+  }
+
+  .empty-state-actions {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    margin-top: var(--space-2);
+  }
+}

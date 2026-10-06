@@ -4,13 +4,13 @@
 
 {% block content %}
 <div class="container section">
-  <div style="max-width: 440px; margin: 0 auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem; text-align: center;">
-    <h1>Sign Out</h1>
-    <p class="text-muted" style="margin-bottom: 1.5rem;">Are you sure you want to sign out of your account?</p>
+  <div class="checkout-card max-w-md mx-auto text-center">
+    <h1 class="display-l mb-2">Sign Out</h1>
+    <p class="body-sm text-muted mb-6">Are you sure you want to sign out of your account?</p>
 
     <form method="post" action="{% url 'account_logout' %}">
       {% csrf_token %}
-      <div style="display: flex; gap: 1rem; justify-content: center;">
+      <div class="flex gap-4 justify-center">
         <button type="submit" class="btn btn-primary">Sign Out</button>
         <a href="{% url 'account_dashboard' %}" class="btn btn-secondary">Cancel</a>
       </div>

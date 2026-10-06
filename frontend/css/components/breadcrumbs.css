@@ -1,0 +1,113 @@
+@layer components {
+  /* Breadcrumbs */
+  .breadcrumbs {
+    padding-block: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .breadcrumbs ol {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    font-size: var(--step--1);
+    color: var(--world-muted);
+  }
+
+  .breadcrumbs li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .breadcrumbs li + li::before {
+    content: "/";
+    color: var(--world-rule);
+    font-size: var(--step--2);
+  }
+
+  .breadcrumbs a {
+    color: var(--world-muted);
+    text-decoration: none;
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--world-accent);
+  }
+
+  .breadcrumbs [aria-current="page"] {
+    color: var(--world-text);
+    font-weight: 500;
+  }
+
+  /* Pagination */
+  .pagination-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-block: var(--space-8);
+  }
+
+  .pagination-list {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .pagination-item {
+    min-width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2);
+    font-size: var(--step--1);
+    font-weight: 500;
+    color: var(--world-text);
+    text-decoration: none;
+    border-radius: var(--radius-1);
+    border: 1px solid var(--world-rule);
+    background-color: var(--world-bg);
+    transition: background-color var(--dur-utility) var(--ease-utility),
+                border-color var(--dur-utility) var(--ease-utility);
+  }
+
+  .pagination-item:hover:not([aria-current="page"]) {
+    border-color: var(--world-accent);
+    color: var(--world-accent);
+    background-color: var(--world-surface);
+  }
+
+  .pagination-item[aria-current="page"] {
+    background-color: var(--world-accent);
+    border-color: var(--world-accent);
+    color: var(--world-white);
+    font-weight: 600;
+  }
+
+  /* Product Page Anchored Tabs (Non-JS Functional) */
+  .product-tabs-bar {
+    display: flex;
+    gap: var(--space-6);
+    border-bottom: 1px solid var(--world-rule);
+    margin-block: var(--space-8) var(--space-6);
+  }
+
+  .product-tab-link {
+    padding-bottom: var(--space-3);
+    font-size: var(--step-0);
+    font-weight: 600;
+    color: var(--world-muted);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: color var(--dur-utility) var(--ease-utility),
+                border-color var(--dur-utility) var(--ease-utility);
+  }
+
+  .product-tab-link:hover,
+  .product-tab-link.is-active,
+  .product-tab-link:target {
+    color: var(--world-accent);
+    border-bottom-color: var(--world-accent);
+  }
+}

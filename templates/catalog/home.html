@@ -5,27 +5,27 @@
 
 {% block content %}
 <div class="container section">
-  <header style="margin-bottom: 2.5rem; text-align: center;">
-    <h1>Curated Electronics &amp; Accessories</h1>
-    <p style="font-size: 1.15rem; max-width: 680px; margin: 0 auto 1rem auto; color: var(--color-text-muted);">
+  <header class="text-center mb-8">
+    <h1 class="display-l">Curated Electronics &amp; Accessories</h1>
+    <p class="subhead max-w-md mx-auto mt-2">
       An editorial catalog of precision personal audio, tactile mechanical gear, monitors, and photography instruments.
     </p>
-    <p class="text-muted">
-      <small>Exploring {{ total_products_count }} curated products across {{ categories_count }} dedicated worlds.</small>
+    <p class="caption mt-2">
+      Exploring {{ total_products_count }} curated products across {{ categories_count }} dedicated worlds.
     </p>
   </header>
 
   {% if featured_collections %}
     {% for collection in featured_collections %}
-      <section style="margin-bottom: 3.5rem;" aria-labelledby="coll-title-{{ collection.id }}">
-        <div style="margin-bottom: 1.25rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem;">
-          <h2 id="coll-title-{{ collection.id }}">{{ collection.title }}</h2>
+      <section class="section-sm" aria-labelledby="coll-title-{{ collection.id }}">
+        <div class="hairline-bottom mb-5 pb-2">
+          <h2 class="heading" id="coll-title-{{ collection.id }}">{{ collection.title }}</h2>
           {% if collection.intro %}
-            <p class="text-muted">{{ collection.intro }}</p>
+            <p class="body-sm text-muted">{{ collection.intro }}</p>
           {% endif %}
         </div>
 
-        <div class="grid-4">
+        <div class="grid-catalog">
           {% for item in collection.featured_items.all %}
             {% with product=item.product %}
               {% include "includes/product_card.html" %}
@@ -36,21 +36,21 @@
     {% endfor %}
   {% endif %}
 
-  <section aria-labelledby="sec-all-categories">
-    <div style="margin-bottom: 1.25rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem;">
-      <h2 id="sec-all-categories">Browse by Category</h2>
+  <section class="section-sm" aria-labelledby="sec-all-categories">
+    <div class="hairline-bottom mb-5 pb-2">
+      <h2 class="heading" id="sec-all-categories">Browse by Category</h2>
     </div>
 
     <div class="grid-3">
       {% for cat in categories %}
-        <article class="product-card" style="text-align: center; padding: 2rem 1.5rem;">
-          <h3><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></h3>
+        <article class="product-card text-center p-6">
+          <h3 class="heading"><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></h3>
           {% if cat.description %}
-            <p class="text-muted"><small>{{ cat.description|truncatewords:20 }}</small></p>
+            <p class="caption mt-2">{{ cat.description|truncatewords:20 }}</p>
           {% endif %}
-          <p style="margin-top: auto;">
+          <div class="card-actions-row justify-center mt-4">
             <a href="{% url 'category_detail' slug=cat.slug %}" class="btn btn-secondary btn-sm">Explore Collection &rarr;</a>
-          </p>
+          </div>
         </article>
       {% endfor %}
     </div>

@@ -7,37 +7,54 @@
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <header style="margin-bottom: 2rem;">
-    <h1>Step 3: Review &amp; Payment</h1>
-    <p class="text-muted">Review your order details, destination, and select payment method.</p>
+  <nav class="checkout-stepper" aria-label="Checkout progression">
+    <div class="checkout-step-item">
+      <span class="step-index-circle">1</span>
+      <span>Sign In / Guest</span>
+    </div>
+    <div class="step-connector" aria-hidden="true"></div>
+    <div class="checkout-step-item">
+      <span class="step-index-circle">2</span>
+      <span>Delivery Address</span>
+    </div>
+    <div class="step-connector" aria-hidden="true"></div>
+    <div class="checkout-step-item" aria-current="step">
+      <span class="step-index-circle">3</span>
+      <span>Review &amp; Pay</span>
+    </div>
+  </nav>
+
+  <header class="mb-6">
+    <h1 class="display-l">Review &amp; Payment</h1>
+    <p class="subhead mt-1">Review your order details, destination, and select payment method.</p>
   </header>
 
   <!-- Stock Hold Notice -->
-  <div class="alert alert-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+  <div class="stock-hold-banner">
     <span>
       <strong>Stock Hold Active:</strong> Your merchandise is temporarily reserved for <strong>{{ hold_minutes }} minutes</strong>.
     </span>
-    <small class="text-muted">Safe Checkout</small>
+    <span class="caption">Safe Checkout</span>
   </div>
 
-  <div style="display: grid; grid-template-columns: 1fr minmax(320px, 380px); gap: 2.5rem; align-items: start;">
+  <div class="checkout-grid-review">
     <!-- Main Form and Details -->
     <div>
       <!-- Address Summary Card -->
-      <section style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;" aria-labelledby="shipping-summary-heading">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
-          <h2 id="shipping-summary-heading" style="font-size: 1.15rem; margin: 0;">Dispatched To</h2>
+      <section class="checkout-card mb-6" aria-labelledby="shipping-summary-heading">
+        <div class="flex justify-between items-baseline mb-3">
+          <h2 id="shipping-summary-heading" class="heading">Dispatched To</h2>
           <a href="{% url 'checkout_address' %}" class="btn btn-sm btn-secondary">Edit Destination</a>
         </div>
 
-        <p style="margin: 0; font-size: 0.95rem;">
+        <p class="body-sm">
           <strong>{{ address.full_name }}</strong> &bull; {{ address.phone }}<br>
           {{ address.line1 }}{% if address.line2 %}, {{ address.line2 }}{% endif %}<br>
           {{ address.city }}, {{ address.state }} &ndash; <strong>{{ address.pincode }}</strong>
         </p>
 
         {% if estimate %}
-          <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--color-border); font-size: 0.85rem;" class="text-muted">
+          <div class="caption hairline-top pt-3 mt-3">
             Estimated Delivery: <strong>{{ estimate.date_min|date:"D, M j" }} &ndash; {{ estimate.date_max|date:"D, M j" }}</strong>
             ({{ estimate.est_days_min }}&ndash;{{ estimate.est_days_max }} business days)
           </div>
@@ -45,76 +62,74 @@
       </section>
 
       <!-- Items Summary -->
-      <section style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;" aria-labelledby="items-summary-heading">
-        <h2 id="items-summary-heading" style="font-size: 1.15rem; margin-bottom: 1rem;">Order Items ({{ cart.total_items }})</h2>
-        <ul style="list-style: none; padding: 0; margin: 0;">
+      <section class="checkout-card mb-6" aria-labelledby="items-summary-heading">
+        <h2 id="items-summary-heading" class="heading mb-4">Bag Items ({{ cart.total_items }})</h2>
+        <div>
           {% for item in cart.items.all %}
-            <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--color-border);">
-              <div style="display: flex; gap: 0.75rem; align-items: center;">
-                <div style="width: 48px; height: 48px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 2px; background: #fff; flex-shrink: 0;">
+            <article class="flex justify-between items-center hairline-bottom pb-3 mb-3">
+              <div class="flex items-center gap-3">
+                <div class="cart-item-thumbnail cart-item-thumbnail-sm">
                   {% include "includes/product_image.html" with product=item.product %}
                 </div>
                 <div>
-                  <strong>{{ item.product.display_name }}</strong>
-                  <div class="text-muted"><small>Qty: {{ item.quantity }} &times; {{ item.product.selling_price|inr }}</small></div>
+                  <strong class="body-sm">{{ item.product.display_name }}</strong>
+                  <div class="caption">Qty: {{ item.quantity }} &times; {{ item.product.selling_price|inr }}</div>
                 </div>
               </div>
               <div>
-                <strong>{% widthratio item.product.selling_price 1 item.quantity as line_tot %}{{ line_tot|inr }}</strong>
+                <strong class="price">{% widthratio item.product.selling_price 1 item.quantity as line_tot %}{{ line_tot|inr }}</strong>
               </div>
-            </li>
+            </article>
           {% endfor %}
-        </ul>
+        </div>
       </section>
 
       <!-- Payment Method Selection Form -->
-      <section style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;" aria-labelledby="payment-method-heading">
-        <h2 id="payment-method-heading" style="font-size: 1.15rem; margin-bottom: 1rem;">Payment Method</h2>
+      <section class="checkout-card" aria-labelledby="payment-method-heading">
+        <h2 id="payment-method-heading" class="heading mb-4">Payment Method</h2>
 
         <form action="{% url 'checkout_place' %}" method="post">
           {% csrf_token %}
 
-          <fieldset style="border: none; padding: 0; margin: 0 0 1.5rem 0;">
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <fieldset class="filter-fieldset mb-5">
+            <div class="flex flex-col gap-3">
               <!-- COD Option -->
-              <div style="border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1rem; background: #fff;">
-                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
-                  <input type="radio" id="pay-cod" name="payment_method" value="cod" {% if can_cod %}checked{% else %}disabled{% endif %}>
-                  <label for="pay-cod" style="cursor: pointer;">
-                    <strong>Cash on Delivery (COD)</strong>
-                    <div class="text-muted" style="font-size: 0.85rem;">
-                      Pay in cash or UPI QR code upon physical delivery to your doorstep.
+              <label class="radio-card" for="pay-cod">
+                <input type="radio" id="pay-cod" name="payment_method" value="cod" {% if can_cod %}checked{% else %}disabled{% endif %}>
+                <div>
+                  <strong>Cash on Delivery (COD)</strong>
+                  <div class="caption mt-1">
+                    Pay in cash or UPI QR code upon physical delivery to your doorstep.
+                  </div>
+                  {% if not can_cod %}
+                    <div class="text-danger caption mt-1">
+                      Unavailable for this PIN code or order value exceeds ₹50,000 threshold.
                     </div>
-                    {% if not can_cod %}
-                      <div class="text-danger" style="font-size: 0.8rem; margin-top: 0.25rem;">
-                        Unavailable for this PIN code or order value exceeds ₹50,000 threshold.
-                      </div>
-                    {% endif %}
-                  </label>
+                  {% endif %}
                 </div>
-              </div>
+              </label>
 
               <!-- Razorpay Option -->
-              <div style="border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1rem; background: #fff;">
-                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
-                  <input type="radio" id="pay-rp" name="payment_method" value="razorpay" {% if not can_cod %}checked{% endif %}>
-                  <label for="pay-rp" style="cursor: pointer;">
-                    <strong>Online Payment (Razorpay)</strong>
-                    <div class="text-muted" style="font-size: 0.85rem;">
-                      UPI (Google Pay, PhonePe, Paytm), Credit &amp; Debit Cards, NetBanking.
-                    </div>
-                  </label>
+              <label class="radio-card" for="pay-rp">
+                <input type="radio" id="pay-rp" name="payment_method" value="razorpay" {% if not can_cod %}checked{% endif %}>
+                <div>
+                  <strong>Online Payment (Razorpay)</strong>
+                  <div class="caption mt-1">
+                    UPI (Google Pay, PhonePe, Paytm), Credit &amp; Debit Cards, NetBanking.
+                  </div>
                 </div>
-              </div>
+              </label>
             </div>
           </fieldset>
 
           <div class="form-group">
-            <label for="id-order-notes" class="form-label">Delivery Instructions (Optional)</label>
+            <label for="id-order-notes" class="form-label">
+              <span>Delivery Instructions (Optional)</span>
+            </label>
             <textarea id="id-order-notes" name="notes" class="form-control" rows="2" placeholder="Gate access code, landmark hints, preferred delivery hours..."></textarea>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-block" style="padding: 0.85rem; font-size: 1.1rem; margin-top: 1.5rem;">
+          <button type="submit" class="btn btn-primary btn-block btn-lg mt-4">
             Place Order ({{ summary.grand_total|inr }}) &rarr;
           </button>
         </form>
@@ -122,20 +137,20 @@
     </div>
 
     <!-- Right Sidebar Financial Summary -->
-    <aside aria-label="Final financial breakdown" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;">
-      <h2 style="font-size: 1.15rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">Final Total</h2>
+    <aside aria-label="Final financial breakdown" class="cart-summary-card">
+      <h2 class="summary-title">Final Total</h2>
 
-      <dl style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem 1rem; margin: 0 0 1.5rem 0; font-size: 0.95rem;">
+      <dl class="summary-totals-dl">
         <dt>Items Subtotal</dt>
-        <dd style="margin: 0; text-align: right;">{{ summary.subtotal|inr }}</dd>
+        <dd>{{ summary.subtotal|inr }}</dd>
 
         {% if summary.applied_discount > 0 %}
           <dt class="text-success">Coupon Savings</dt>
-          <dd style="margin: 0; text-align: right;" class="text-success">-{{ summary.applied_discount|inr }}</dd>
+          <dd class="text-success">-{{ summary.applied_discount|inr }}</dd>
         {% endif %}
 
         <dt>Delivery Fee</dt>
-        <dd style="margin: 0; text-align: right;">
+        <dd>
           {% if summary.shipping_fee > 0 %}
             {{ summary.shipping_fee|inr }}
           {% else %}
@@ -143,18 +158,18 @@
           {% endif %}
         </dd>
 
-        <dt style="font-size: 0.85rem; color: var(--color-text-muted);">GST Tax</dt>
-        <dd style="margin: 0; text-align: right; font-size: 0.85rem; color: var(--color-text-muted);">
+        <dt class="caption">GST Tax</dt>
+        <dd class="caption">
           Included ({{ summary.tax_amount|inr }})
         </dd>
       </dl>
 
-      <div style="border-top: 2px solid var(--color-border); padding-top: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: baseline;">
-        <strong style="font-size: 1.15rem;">Payable Total</strong>
-        <strong style="font-size: 1.5rem; color: var(--color-accent);">{{ summary.grand_total|inr }}</strong>
+      <div class="summary-grand-total">
+        <span class="total-label">Payable Total</span>
+        <span class="total-amount">{{ summary.grand_total|inr }}</span>
       </div>
 
-      <div class="alert alert-info" style="font-size: 0.8rem; margin: 0;">
+      <div class="alert alert-info caption">
         A compliant GST Tax Invoice or Bill of Supply with sequential numbering will be automatically generated upon order completion.
       </div>
     </aside>

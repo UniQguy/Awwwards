@@ -1,54 +1,52 @@
 <footer class="site-footer" role="contentinfo">
-  <!-- Image assets reference external retailer CDNs for development & preview only. Phase 4 will transition to self-hosted assets. -->
-  <div class="container footer-grid">
-    <div class="footer-col">
-      <h4>ELECTROCART</h4>
-      <p class="text-muted">India's curated destination for consumer electronics and precision accessories.</p>
-      <p class="text-muted"><small>Currency: INR (₹) | Dispatched from {{ seller_mode.seller_state }}</small></p>
-      {% if has_sample_stock %}
-        <p><small class="text-muted">Notice: Stock levels and product availability reflect demonstration data.</small></p>
-      {% endif %}
-    </div>
+  <div class="container">
+    <div class="footer-colophon-grid">
+      <div class="footer-col">
+        <h2 class="footer-col-title">About Electrocart</h2>
+        <p>A calm, considered destination for precision electronics and audio equipment in India.</p>
+        <p class="caption">Prices in Indian Rupee (₹). Dispatched from {{ seller_mode.seller_state }}.</p>
+        <div class="footer-meta-note">
+          <strong>Notice:</strong> Demonstration catalog. All brand trademarks belong to their respective owners.
+        </div>
+      </div>
 
-    <div class="footer-col">
-      <h4>Customer Care</h4>
-      <ul>
-        <li><a href="{% url 'order_track_lookup' %}">Track Your Order</a></li>
-        <li><a href="{% url 'legal_shipping' %}">Shipping & Delivery</a></li>
-        <li><a href="{% url 'legal_refunds' %}">Returns & Refunds</a></li>
-      </ul>
-    </div>
+      <div class="footer-col">
+        <h2 class="footer-col-title">Customer Care</h2>
+        <ul>
+          <li><a href="{% url 'order_track_lookup' %}">Track Your Order</a></li>
+          <li><a href="{% url 'legal_shipping' %}">Shipping &amp; Delivery</a></li>
+          <li><a href="{% url 'legal_refunds' %}">Returns &amp; Refunds</a></li>
+          <li><a href="{% url 'legal_terms' %}">Terms of Service</a></li>
+          <li><a href="{% url 'legal_privacy' %}">Privacy Policy</a></li>
+        </ul>
+      </div>
 
-    <div class="footer-col">
-      <h4>Catalog</h4>
-      <ul>
-        <li><a href="{% url 'category_list' %}">All Categories</a></li>
-        <li><a href="{% url 'brand_list' %}">Brands Directory</a></li>
-        <li><a href="{% url 'cart_detail' %}">Shopping Cart</a></li>
-      </ul>
-    </div>
-
-    <div class="footer-col">
-      <h4>Legal & Regulatory</h4>
-      <ul>
-        <li><a href="{% url 'legal_terms' %}">Terms of Service</a></li>
-        <li><a href="{% url 'legal_privacy' %}">Privacy Policy</a></li>
-      </ul>
-      <p class="text-muted">
-        <small>
-          <strong>{{ seller_mode.seller_legal_name }}</strong><br>
-          {% if seller_mode.seller_address %}{{ seller_mode.seller_address }}<br>{% endif %}
-          {% if seller_mode.is_bill_of_supply %}
-            Composition Dealer / Unregistered. Issuing Bill of Supply.
-          {% else %}
-            GSTIN: {{ seller_mode.seller_gstin }}
+      <div class="footer-col">
+        <h2 class="footer-col-title">Catalog &amp; Compliance</h2>
+        <ul>
+          <li><a href="{% url 'category_list' %}">All Categories</a></li>
+          <li><a href="{% url 'brand_list' %}">Brands Directory</a></li>
+          <li><a href="{% url 'cart_detail' %}">Shopping Bag</a></li>
+        </ul>
+        <div class="footer-meta-note">
+          <p><strong>{{ seller_mode.seller_legal_name }}</strong></p>
+          {% if seller_mode.seller_address %}
+            <p>{{ seller_mode.seller_address }}</p>
           {% endif %}
-        </small>
-      </p>
+          <p>
+            {% if seller_mode.is_bill_of_supply %}
+              Composition Dealer / Unregistered. Issuing Bill of Supply.
+            {% else %}
+              GSTIN: {{ seller_mode.seller_gstin }}
+            {% endif %}
+          </p>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="container footer-legal-notice">
-    <p>&copy; {% now "Y" %} {{ seller_mode.seller_legal_name }}. Built with semantic HTML for maximum accessibility and performance.</p>
+    <div class="footer-bottom-brand">
+      <a href="{% url 'home' %}" class="footer-display-wordmark">ELECTROCART</a>
+      <p class="footer-legal-copy">&copy; {% now "Y" %} {{ seller_mode.seller_legal_name }}. Crafted with semantic HTML &amp; native web standards.</p>
+    </div>
   </div>
 </footer>

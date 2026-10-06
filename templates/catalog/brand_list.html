@@ -6,31 +6,31 @@
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <header style="margin-bottom: 2rem;">
-    <h1>Brand Directory</h1>
-    <p class="text-muted">Explore consumer electronics by recognized manufacturers and design houses.</p>
+  <header class="mb-6">
+    <h1 class="display-l">Brand Directory</h1>
+    <p class="subhead mt-2">Explore consumer electronics by recognized manufacturers and design houses.</p>
   </header>
 
   <!-- Alphabetical Quick Jump Navigation -->
-  <nav aria-label="Brand index quick jump" style="margin-bottom: 2rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+  <nav aria-label="Brand index quick jump" class="flex gap-2 flex-wrap mb-8">
     {% for letter, brands in brands_grouped %}
-      <a href="#brand-section-{{ letter }}" class="btn btn-secondary btn-sm" style="min-width: 36px;">{{ letter }}</a>
+      <a href="#brand-section-{{ letter }}" class="btn btn-secondary btn-sm">{{ letter }}</a>
     {% endfor %}
   </nav>
 
   <div>
     {% for letter, brands in brands_grouped %}
-      <section id="brand-section-{{ letter }}" style="margin-bottom: 2.5rem;" aria-labelledby="heading-letter-{{ letter }}">
-        <h2 id="heading-letter-{{ letter }}" style="border-bottom: 2px solid var(--color-border); padding-bottom: 0.25rem;">
+      <section id="brand-section-{{ letter }}" class="mb-8" aria-labelledby="heading-letter-{{ letter }}">
+        <h2 id="heading-letter-{{ letter }}" class="heading hairline-bottom pb-2 mb-4">
           {{ letter }}
         </h2>
-        <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
+        <ul class="grid-brands">
           {% for b in brands %}
             <li>
-              <a href="{% url 'search_results' %}?brand={{ b.name|urlencode }}">
+              <a href="{% url 'search_results' %}?brand={{ b.name|urlencode }}" class="body-sm">
                 {{ b.name }}
               </a>
-              <span class="text-muted" style="font-size: 0.85rem;">({{ b.count }})</span>
+              <span class="caption">({{ b.count }})</span>
             </li>
           {% endfor %}
         </ul>

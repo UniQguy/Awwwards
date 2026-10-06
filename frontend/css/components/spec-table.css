@@ -1,0 +1,51 @@
+@layer components {
+  .spec-table-wrapper {
+    margin-block: var(--space-6);
+  }
+
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  .spec-table caption {
+    text-align: left;
+    font-size: var(--step--2);
+    color: var(--world-muted);
+    padding-bottom: var(--space-3);
+  }
+
+  .spec-row {
+    border-bottom: 1px solid var(--world-rule);
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 2fr;
+    padding-block: var(--space-3);
+    gap: var(--space-4);
+  }
+
+  .spec-key {
+    color: var(--world-muted);
+    font-weight: 500;
+  }
+
+  .spec-val {
+    color: var(--world-text);
+  }
+
+  .spec-row.is-highlight {
+    background-color: var(--world-surface);
+    padding-inline: var(--space-2);
+    border-left: 2px solid var(--world-accent);
+  }
+
+  .spec-highlight-marker {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--world-accent);
+    margin-right: var(--space-1);
+    vertical-align: 0.1em;
+  }
+}

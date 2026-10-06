@@ -4,8 +4,13 @@
 
 {% block content %}
 <div class="container section">
-  <h1>429 — Too Many Requests</h1>
-  <p>You have made too many requests in a short period. Please wait a moment and try again.</p>
-  <p><a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a></p>
+  <div class="empty-state-card">
+    <svg class="empty-state-mark" aria-hidden="true"><use href="#icon-alert"></use></svg>
+    <h1 class="empty-state-title">429 — Too Many Requests</h1>
+    <p class="empty-state-desc">You have made too many requests in a short period. Please wait a moment and try again.</p>
+    <div class="empty-state-actions">
+      <a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a>
+    </div>
+  </div>
 </div>
 {% endblock %}

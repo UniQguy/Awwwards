@@ -1,0 +1,101 @@
+@layer base {
+  body {
+    background-color: var(--world-bg);
+    color: var(--world-text);
+    font-family: var(--font-text);
+    font-size: var(--step-0);
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1;
+    scrollbar-gutter: stable;
+    transition: background-color var(--dur-utility) var(--ease-utility),
+                color var(--dur-utility) var(--ease-utility);
+  }
+
+  ::selection {
+    background-color: var(--world-accent);
+    color: var(--world-white);
+  }
+
+  /* Accessible Focus Rings */
+  :focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* Skip Link */
+  .skip-link {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    z-index: var(--z-toast);
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--world-accent);
+    color: var(--world-white);
+    font-weight: 600;
+    font-size: var(--step--1);
+    border-radius: var(--radius-1);
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform var(--dur-utility) var(--ease-utility);
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid var(--world-text);
+    outline-offset: 2px;
+  }
+
+  /* Link Styling */
+  a {
+    color: var(--world-text);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: color var(--dur-utility) var(--ease-utility);
+  }
+
+  a:hover {
+    color: var(--world-accent);
+  }
+
+  /* Hairlines & Dividers */
+  hr {
+    border: none;
+    border-top: 1px solid var(--world-rule);
+    margin-block: var(--space-6);
+  }
+
+  /* Headings Hierarchy */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--world-text);
+    font-weight: 600;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  p {
+    max-width: 62ch;
+  }
+
+  /* Tabular Numerals on Numeric and Table Contexts */
+  .tabular-nums,
+  table,
+  .price,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Reduced Motion Override */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

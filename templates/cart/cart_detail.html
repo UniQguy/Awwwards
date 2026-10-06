@@ -1,73 +1,63 @@
 {% extends "base.html" %}
 {% load core_tags %}
 
-{% block title %}Shopping Cart — ELECTROCART{% endblock %}
+{% block title %}Shopping Bag — ELECTROCART{% endblock %}
 
 {% block content %}
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <header style="margin-bottom: 2rem;">
-    <h1>Shopping Cart</h1>
+  <header class="mb-6">
+    <h1 class="display-l">Shopping Bag</h1>
   </header>
 
   {% if cart.items.exists %}
     <!-- Free Shipping Progress Indicator -->
-    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 2rem;">
-      <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.5rem;">
+    <div class="free-delivery-meter">
+      <div class="meter-label-row">
         {% if summary.free_shipping_progress >= 100 %}
           <strong class="text-success">&check; You have qualified for FREE delivery!</strong>
         {% else %}
           <span>Add <strong>{{ summary.free_shipping_remaining|inr }}</strong> more to qualify for <strong>FREE delivery</strong></span>
         {% endif %}
-        <span>Threshold: ₹499.00</span>
+        <span class="caption">Threshold: ₹499.00</span>
       </div>
-      <div style="background: var(--color-border); height: 8px; border-radius: 4px; overflow: hidden;" role="progressbar" aria-valuenow="{{ summary.free_shipping_progress }}" aria-valuemin="0" aria-valuemax="100">
-        <div style="background: var(--color-accent); height: 100%; width: {{ summary.free_shipping_progress }}%;"></div>
+      <div class="meter-progress-track" role="progressbar" aria-valuenow="{{ summary.free_shipping_progress }}" aria-valuemin="0" aria-valuemax="100">
+        <div class="meter-progress-fill" style="width: {{ summary.free_shipping_progress }}%;"></div>
       </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr minmax(300px, 360px); gap: 2.5rem; align-items: start;">
+    <div class="cart-grid-layout">
       <!-- Line Items Section -->
       <section aria-labelledby="cart-items-heading">
-        <h2 id="cart-items-heading" class="sr-only">Cart Items</h2>
+        <h2 id="cart-items-heading" class="sr-only">Bag Items</h2>
 
-        <div class="table-responsive">
-          <table class="data-table">
-            <caption class="sr-only">Items currently in your shopping cart</caption>
-            <thead>
-              <tr>
-                <th scope="col" style="width: 45%;">Product</th>
-                <th scope="col">Price</th>
-                <th scope="col" style="width: 15%;">Qty</th>
-                <th scope="col">Total</th>
-                <th scope="col"><span class="sr-only">Actions</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for line in summary.line_details %}
-                <tr>
-                  <td>
-                    <div style="display: flex; gap: 1rem; align-items: center;">
-                      <div style="width: 60px; height: 60px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 2px; background: #fff; flex-shrink: 0;">
-                        {% include "includes/product_image.html" with product=line.product %}
-                      </div>
-                      <div>
-                        <strong><a href="{% url 'product_detail' slug=line.product.slug %}">{{ line.product.display_name }}</a></strong>
-                        <div class="text-muted"><small>SKU: {{ line.product.sku }}</small></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    {{ line.unit_price|inr }}
-                    {% if line.mrp and line.mrp > line.unit_price %}
-                      <div class="text-muted"><small><s>{{ line.mrp|inr }}</s></small></div>
-                    {% endif %}
-                  </td>
-                  <td>
-                    <form action="{% url 'cart_update' line.product.id %}" method="post" style="display: flex; gap: 0.25rem;">
-                      {% csrf_token %}
-                      <label for="qty-{{ line.item_id }}" class="sr-only">Quantity for {{ line.product.display_name }}</label>
+        <div>
+          {% for line in summary.line_details %}
+            <article class="cart-line-item">
+              <div class="cart-item-thumbnail">
+                {% include "includes/product_image.html" with product=line.product %}
+              </div>
+
+              <div class="cart-item-details">
+                <a href="{% url 'product_detail' slug=line.product.slug %}" class="cart-item-name">
+                  {{ line.product.display_name }}
+                </a>
+                <span class="caption">SKU: {{ line.product.sku }}</span>
+
+                <div class="price-row mt-1">
+                  <span class="price-current">{{ line.unit_price|inr }}</span>
+                  {% if line.mrp and line.mrp > line.unit_price %}
+                    <span class="price-mrp-wrapper"><span class="price-mrp-struck">{{ line.mrp|inr }}</span></span>
+                  {% endif %}
+                </div>
+
+                <div class="flex items-center gap-4 mt-2">
+                  <form action="{% url 'cart_update' line.product.id %}" method="post" class="flex items-center gap-2" data-fetch-enhance>
+                    {% csrf_token %}
+                    <label for="qty-{{ line.item_id }}" class="sr-only">Quantity for {{ line.product.display_name }}</label>
+                    <div class="quantity-stepper">
+                      <button type="button" class="stepper-btn" data-step-down aria-label="Decrease quantity">&minus;</button>
                       <input
                         type="number"
                         id="qty-{{ line.item_id }}"
@@ -75,55 +65,55 @@
                         value="{{ line.quantity }}"
                         min="1"
                         max="{{ max_qty_per_line }}"
-                        class="form-control"
-                        style="width: 60px; padding: 0.25rem 0.5rem;"
+                        class="stepper-input"
                       >
-                      <button type="submit" class="btn btn-secondary btn-sm" aria-label="Update quantity">Update</button>
-                    </form>
-                  </td>
-                  <td>
-                    <strong>{{ line.line_subtotal|inr }}</strong>
-                  </td>
-                  <td>
-                    <form action="{% url 'cart_remove' line.product.id %}" method="post">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-sm btn-secondary" aria-label="Remove {{ line.product.display_name }} from cart">&times;</button>
-                    </form>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+                      <button type="button" class="stepper-btn" data-step-up aria-label="Increase quantity">&plus;</button>
+                    </div>
+                    <button type="submit" class="btn btn-secondary btn-sm" aria-label="Update quantity">Update</button>
+                  </form>
+
+                  <form action="{% url 'cart_remove' line.product.id %}" method="post" data-fetch-enhance>
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-quiet btn-sm" aria-label="Remove {{ line.product.display_name }} from bag">Remove</button>
+                  </form>
+                </div>
+              </div>
+
+              <div class="text-right">
+                <span class="price">{{ line.line_subtotal|inr }}</span>
+              </div>
+            </article>
+          {% endfor %}
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+        <div class="flex justify-between items-center mt-6">
           <a href="{% url 'category_list' %}" class="btn btn-secondary">&larr; Continue Shopping</a>
           <form action="{% url 'cart_clear' %}" method="post">
             {% csrf_token %}
-            <button type="submit" class="btn btn-secondary btn-sm">Clear Cart</button>
+            <button type="submit" class="btn btn-secondary btn-sm">Clear Bag</button>
           </form>
         </div>
       </section>
 
       <!-- Cart Financial Summary Card -->
-      <aside aria-label="Cart order summary" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;">
-        <h2 style="font-size: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">Order Summary</h2>
+      <aside aria-label="Bag order summary" class="cart-summary-card">
+        <h2 class="summary-title">Order Summary</h2>
 
         <!-- Coupon Apply Block -->
-        <div style="margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-border);">
+        <div class="hairline-bottom pb-4 mb-4">
           {% if applied_coupon_code %}
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="flex justify-between items-center">
               <div>
                 <span class="badge badge-in-stock">Coupon: {{ applied_coupon_code }}</span>
-                <span class="text-success" style="font-size: 0.9rem; margin-left: 0.5rem;">-{{ summary.applied_discount|inr }}</span>
+                <span class="text-success caption">-{{ summary.applied_discount|inr }}</span>
               </div>
-              <form action="{% url 'coupon_remove' %}" method="post" style="display: inline;">
+              <form action="{% url 'coupon_remove' %}" method="post" class="u-inline-form">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
               </form>
             </div>
           {% else %}
-            <form action="{% url 'coupon_apply' %}" method="post" style="display: flex; gap: 0.5rem;">
+            <form action="{% url 'coupon_apply' %}" method="post" class="flex gap-2" data-fetch-enhance>
               {% csrf_token %}
               <label for="id-coupon-code" class="sr-only">Coupon code</label>
               <input
@@ -140,22 +130,22 @@
         </div>
 
         <!-- Financial Totals -->
-        <dl style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem 1rem; margin: 0 0 1.5rem 0; font-size: 0.95rem;">
+        <dl class="summary-totals-dl">
           <dt>Items Subtotal</dt>
-          <dd style="margin: 0; text-align: right;">{{ summary.subtotal|inr }}</dd>
+          <dd>{{ summary.subtotal|inr }}</dd>
 
           {% if summary.mrp_savings > 0 %}
             <dt class="text-success">Retail Savings (MRP)</dt>
-            <dd style="margin: 0; text-align: right;" class="text-success">-{{ summary.mrp_savings|inr }}</dd>
+            <dd class="text-success">-{{ summary.mrp_savings|inr }}</dd>
           {% endif %}
 
           {% if summary.applied_discount > 0 %}
             <dt class="text-success">Coupon Savings</dt>
-            <dd style="margin: 0; text-align: right;" class="text-success">-{{ summary.applied_discount|inr }}</dd>
+            <dd class="text-success">-{{ summary.applied_discount|inr }}</dd>
           {% endif %}
 
           <dt>Shipping Fee</dt>
-          <dd style="margin: 0; text-align: right;">
+          <dd>
             {% if summary.shipping_fee > 0 %}
               {{ summary.shipping_fee|inr }}
             {% else %}
@@ -163,30 +153,31 @@
             {% endif %}
           </dd>
 
-          <dt style="font-size: 0.85rem; color: var(--color-text-muted);">Taxes (GST)</dt>
-          <dd style="margin: 0; text-align: right; font-size: 0.85rem; color: var(--color-text-muted);">
+          <dt class="caption">Taxes (GST)</dt>
+          <dd class="caption">
             Included ({{ summary.tax_amount|inr }})
           </dd>
         </dl>
 
-        <div style="border-top: 2px solid var(--color-border); padding-top: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: baseline;">
-          <strong style="font-size: 1.25rem;">Grand Total</strong>
-          <strong style="font-size: 1.5rem; color: var(--color-accent);">{{ summary.grand_total|inr }}</strong>
+        <div class="summary-grand-total">
+          <span class="total-label">Grand Total</span>
+          <span class="total-amount">{{ summary.grand_total|inr }}</span>
         </div>
 
-        <p style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 1.5rem;">
+        <p class="caption mb-4">
           Prices are inclusive of applicable GST under Indian tax regulations.
         </p>
 
-        <a href="{% url 'checkout_start' %}" class="btn btn-primary btn-block" style="padding: 0.75rem;">
+        <a href="{% url 'checkout_start' %}" class="btn btn-primary btn-block">
           Proceed to Checkout &rarr;
         </a>
       </aside>
     </div>
   {% else %}
-    <div class="alert alert-info" style="text-align: center; padding: 3rem 1.5rem;">
-      <h2>Your Shopping Cart is Empty</h2>
-      <p style="max-width: 500px; margin: 0 auto 1.5rem auto;">
+    <div class="empty-state-card text-center p-6">
+      <h2 class="heading mb-2">Your Shopping Bag is empty</h2>
+      <p class="sr-only">Your Shopping Cart is Empty</p>
+      <p class="subhead max-w-md mx-auto mb-4">
         Browse our catalog to discover precision audio monitors, mechanical peripherals, and photography tech.
       </p>
       <a href="{% url 'category_list' %}" class="btn btn-primary">Browse Categories</a>

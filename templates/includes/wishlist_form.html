@@ -1,4 +1,4 @@
-<form action="{% url 'wishlist_toggle' product.id %}" method="post" class="wishlist-form">
+<form action="{% url 'wishlist_toggle' product.id %}" method="post" class="wishlist-form" data-fetch-enhance>
   {% csrf_token %}
   <button
     type="submit"

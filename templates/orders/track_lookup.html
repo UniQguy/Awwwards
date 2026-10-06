@@ -6,18 +6,21 @@
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <div style="max-width: 540px; margin: 0 auto;">
-    <header style="text-align: center; margin-bottom: 2rem;">
-      <h1>Track Your Order</h1>
-      <p class="text-muted">Enter your order details below to monitor real-time shipment milestones.</p>
+  <div class="max-w-md mx-auto">
+    <header class="text-center mb-6">
+      <h1 class="display-l">Track Your Order</h1>
+      <p class="subhead mt-1">Enter your order details below to monitor real-time shipment milestones.</p>
     </header>
 
-    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem;">
+    <div class="checkout-card">
       <form action="{% url 'order_track_lookup' %}" method="post">
         {% csrf_token %}
 
         <div class="form-group">
-          <label for="id-track-order-num" class="form-label">Order Number <span class="required-indicator">*</span></label>
+          <label for="id-track-order-num" class="form-label">
+            <span>Order Number</span>
+            <span class="form-required" aria-hidden="true">*</span>
+          </label>
           <input
             type="text"
             id="id-track-order-num"
@@ -26,13 +29,15 @@
             placeholder="e.g. EC-20261006-XXXX"
             required
             autocomplete="off"
-            style="text-transform: uppercase;"
           >
           <p class="form-help">Provided in your SMS and order receipt email.</p>
         </div>
 
         <div class="form-group">
-          <label for="id-track-contact" class="form-label">Email or 10-Digit Mobile Number <span class="required-indicator">*</span></label>
+          <label for="id-track-contact" class="form-label">
+            <span>Email or 10-Digit Mobile Number</span>
+            <span class="form-required" aria-hidden="true">*</span>
+          </label>
           <input
             type="text"
             id="id-track-contact"
@@ -45,7 +50,7 @@
           <p class="form-help">Used to verify order ownership.</p>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" style="padding: 0.75rem; margin-top: 1.5rem;">
+        <button type="submit" class="btn btn-primary btn-block mt-4">
           Track Shipment &rarr;
         </button>
       </form>

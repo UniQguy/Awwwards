@@ -1,32 +1,32 @@
 {% extends "base.html" %}
 
-{% block title %}Shipping & Delivery Policy — ELECTROCART{% endblock %}
+{% block title %}Shipping &amp; Delivery Policy — ELECTROCART{% endblock %}
 
 {% block content %}
 <div class="container section">
-  <h1>Shipping & Delivery Policy</h1>
-  <p class="text-muted"><small>Last updated: {% now "F j, Y" %}</small></p>
+  <h1 class="display-l mb-1">Shipping &amp; Delivery Policy</h1>
+  <p class="caption mb-6">Last updated: {% now "F j, Y" %}</p>
 
-  <section>
-    <h2>1. Dispatch Origin & Coverage</h2>
-    <p>All shipments are fulfilled directly from our central warehouse facility located in {{ seller_mode.seller_state }}, India. We service serviceable PIN codes across all 28 states and 8 union territories through vetted courier logistics partners.</p>
+  <section class="mb-6">
+    <h2 class="heading mb-2">1. Dispatch Origin &amp; Coverage</h2>
+    <p class="body">All shipments are fulfilled directly from our central warehouse facility located in {{ seller_mode.seller_state }}, India. We service serviceable PIN codes across all 28 states and 8 union territories through vetted courier logistics partners.</p>
   </section>
 
-  <section>
-    <h2>2. Shipping Rates & Free Delivery</h2>
-    <p>Orders totaling ₹499.00 or above qualify for complimentary standard shipping. For orders below ₹499.00, a nominal shipping fee (typically ₹40.00) is calculated and presented during checkout prior to payment.</p>
+  <section class="mb-6">
+    <h2 class="heading mb-2">2. Shipping Rates &amp; Free Delivery</h2>
+    <p class="body">Orders totaling ₹499.00 or above qualify for complimentary standard delivery. For orders below ₹499.00, a nominal delivery fee (typically ₹40.00) is calculated and presented during checkout prior to payment.</p>
   </section>
 
-  <section>
-    <h2>3. Delivery Timelines</h2>
-    <p>Standard delivery timelines typically range between 2 to 5 business days for major metropolitan hubs and 4 to 8 business days for regional and non-metro destinations.</p>
+  <section class="mb-6">
+    <h2 class="heading mb-2">3. Delivery Timelines</h2>
+    <p class="body">Standard delivery timelines typically range between 2 to 5 business days for major metropolitan hubs and 4 to 8 business days for regional and non-metro destinations.</p>
   </section>
 
-  <section>
-    <h2>4. Logistics Partner SLA Notice</h2>
+  <section class="mb-6">
+    <h2 class="heading mb-2">4. Logistics Partner SLA Notice</h2>
     <div class="alert alert-info" role="note">
-      <p><strong>[PLACEHOLDER - SUBJECT TO OWNER LEGAL REVIEW]</strong></p>
-      <p>Courier Service Level Agreements (SLAs), remote-area surcharges, and transit loss liability clauses are subject to commercial agreement with the logistics provider and legal review by the platform owner.</p>
+      <p class="body-sm"><strong>[PLACEHOLDER - SUBJECT TO OWNER LEGAL REVIEW]</strong></p>
+      <p class="caption mt-1">Courier Service Level Agreements (SLAs), remote-area surcharges, and transit loss liability clauses are subject to commercial agreement with the logistics provider and legal review by the platform owner.</p>
     </div>
   </section>
 </div>

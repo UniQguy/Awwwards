@@ -1,9 +1,9 @@
-<form action="{% url 'compare_add' product.id %}" method="post" class="compare-form">
+<form action="{% url 'compare_add' product.id %}" method="post" class="compare-form" data-fetch-enhance>
   {% csrf_token %}
   <button
     type="submit"
     class="btn btn-secondary btn-sm"
-    aria-label="Add {{ product.display_name }} to comparison"
+    aria-label="Compare {{ product.display_name }}"
   >
     Compare
   </button>

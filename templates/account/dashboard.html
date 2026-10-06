@@ -7,92 +7,96 @@
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <header style="margin-bottom: 2rem;">
-    <h1>My Account</h1>
-    <p class="text-muted">Welcome back, <strong>{{ user.full_name|default:user.email }}</strong>.</p>
+  <header class="mb-6">
+    <h1 class="display-l">My Account</h1>
+    <p class="subhead mt-1">Welcome back, <strong>{{ user.full_name|default:user.email }}</strong>.</p>
   </header>
 
-  <!-- Account Navigation Tabs -->
-  <nav aria-label="Account sections" style="margin-bottom: 2rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">
-    <ul style="list-style: none; padding: 0; margin: 0; display: flex; gap: 1.5rem;">
-      <li><a href="{% url 'account_dashboard' %}" style="font-weight: 700;">Dashboard</a></li>
-      <li><a href="{% url 'account_order_list' %}">Order History</a></li>
-      <li><a href="{% url 'account_address_list' %}">Saved Addresses</a></li>
-      <li><a href="{% url 'account_profile' %}">Profile Settings</a></li>
-    </ul>
-  </nav>
+  <div class="account-layout">
+    <!-- Account Navigation Menu -->
+    <nav aria-label="Account sections">
+      <ul class="account-nav-list">
+        <li><a href="{% url 'account_dashboard' %}" class="account-nav-link" aria-current="page">Dashboard</a></li>
+        <li><a href="{% url 'account_order_list' %}" class="account-nav-link">Order History</a></li>
+        <li><a href="{% url 'account_address_list' %}" class="account-nav-link">Saved Addresses</a></li>
+        <li><a href="{% url 'account_profile' %}" class="account-nav-link">Profile Settings</a></li>
+      </ul>
+    </nav>
 
-  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2.5rem; align-items: start;">
-    <!-- Recent Orders Section -->
-    <section aria-labelledby="recent-orders-heading">
-      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
-        <h2 id="recent-orders-heading" style="font-size: 1.25rem;">Recent Orders</h2>
-        <a href="{% url 'account_order_list' %}" class="btn btn-sm btn-secondary">View All Orders</a>
+    <div>
+      <div class="grid-2 mb-8">
+        <!-- Recent Orders Section -->
+        <section aria-labelledby="recent-orders-heading">
+          <div class="flex justify-between items-baseline mb-4">
+            <h2 id="recent-orders-heading" class="heading">Recent Orders</h2>
+            <a href="{% url 'account_order_list' %}" class="btn btn-sm btn-secondary">View All</a>
+          </div>
+
+          {% if recent_orders %}
+            <div class="table-responsive">
+              <table class="order-history-table">
+                <caption class="sr-only">Recent order history</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Order #</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="numeric">Total</th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in recent_orders %}
+                    <tr>
+                      <td>
+                        <strong><a href="{% url 'account_order_detail' order_number=order.order_number %}">{{ order.order_number }}</a></strong>
+                      </td>
+                      <td>{{ order.created_at|date:"d M Y" }}</td>
+                      <td><span class="badge badge-in-stock">{{ order.get_status_display }}</span></td>
+                      <td class="numeric"><strong>{{ order.total_amount|inr }}</strong></td>
+                      <td>
+                        <a href="{% url 'account_order_detail' order_number=order.order_number %}" class="btn btn-sm btn-secondary">View</a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="alert alert-info">
+              <p>You have not placed any orders yet.</p>
+              <p class="mt-2"><a href="{% url 'category_list' %}" class="btn btn-primary btn-sm">Start Browsing</a></p>
+            </div>
+          {% endif %}
+        </section>
+
+        <!-- Sidebar: Profile & Default Address -->
+        <aside aria-label="Account details">
+          <div class="checkout-card mb-4">
+            <h3 class="label mb-2">Account Information</h3>
+            <p class="body-sm mb-1"><strong>{{ user.full_name|default:"Name not set" }}</strong></p>
+            <p class="caption text-muted">{{ user.email }}</p>
+            <p class="mt-3"><a href="{% url 'account_profile' %}" class="btn btn-sm btn-secondary">Edit Profile</a></p>
+          </div>
+
+          <div class="checkout-card">
+            <h3 class="label mb-2">Primary Delivery Address</h3>
+            {% if default_address %}
+              <p class="body-sm">
+                <strong>{{ default_address.full_name }}</strong><br>
+                {{ default_address.line1 }}<br>
+                {{ default_address.city }}, {{ default_address.state }} &ndash; {{ default_address.pincode }}<br>
+                Mobile: {{ default_address.phone }}
+              </p>
+              <p class="mt-3"><a href="{% url 'account_address_list' %}" class="btn btn-sm btn-secondary">Manage Addresses</a></p>
+            {% else %}
+              <p class="caption text-muted mb-3">No address saved yet.</p>
+              <a href="{% url 'account_address_create' %}" class="btn btn-sm btn-primary">Add Address</a>
+            {% endif %}
+          </div>
+        </aside>
       </div>
-
-      {% if recent_orders %}
-        <div class="table-responsive">
-          <table class="data-table">
-            <caption class="sr-only">Recent order history</caption>
-            <thead>
-              <tr>
-                <th scope="col">Order #</th>
-                <th scope="col">Date</th>
-                <th scope="col">Status</th>
-                <th scope="col" style="text-align: right;">Total</th>
-                <th scope="col"><span class="sr-only">Actions</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for order in recent_orders %}
-                <tr>
-                  <td>
-                    <strong><a href="{% url 'account_order_detail' order_number=order.order_number %}">{{ order.order_number }}</a></strong>
-                  </td>
-                  <td>{{ order.created_at|date:"d M Y" }}</td>
-                  <td><span class="badge badge-in-stock">{{ order.get_status_display }}</span></td>
-                  <td style="text-align: right;"><strong>{{ order.total_amount|inr }}</strong></td>
-                  <td>
-                    <a href="{% url 'account_order_detail' order_number=order.order_number %}" class="btn btn-sm btn-secondary">View</a>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="alert alert-info">
-          <p>You have not placed any orders yet.</p>
-          <p><a href="{% url 'category_list' %}" class="btn btn-primary btn-sm">Start Browsing</a></p>
-        </div>
-      {% endif %}
-    </section>
-
-    <!-- Sidebar: Profile & Default Address -->
-    <aside aria-label="Account details">
-      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem;">
-        <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;">Account Information</h3>
-        <p style="margin: 0 0 0.5rem 0; font-size: 0.95rem;"><strong>{{ user.full_name|default:"Name not set" }}</strong></p>
-        <p style="margin: 0; font-size: 0.9rem;" class="text-muted">{{ user.email }}</p>
-        <p style="margin-top: 1rem;"><a href="{% url 'account_profile' %}" class="btn btn-sm btn-secondary">Edit Profile</a></p>
-      </div>
-
-      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;">
-        <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;">Primary Delivery Address</h3>
-        {% if default_address %}
-          <p style="margin: 0; font-size: 0.9rem;">
-            <strong>{{ default_address.full_name }}</strong><br>
-            {{ default_address.line1 }}<br>
-            {{ default_address.city }}, {{ default_address.state }} &ndash; {{ default_address.pincode }}<br>
-            Mobile: {{ default_address.phone }}
-          </p>
-          <p style="margin-top: 1rem;"><a href="{% url 'account_address_list' %}" class="btn btn-sm btn-secondary">Manage Addresses</a></p>
-        {% else %}
-          <p class="text-muted" style="font-size: 0.9rem;">No address saved yet.</p>
-          <a href="{% url 'account_address_create' %}" class="btn btn-sm btn-primary">Add Address</a>
-        {% endif %}
-      </div>
-    </aside>
+    </div>
   </div>
 </div>
 {% endblock %}
