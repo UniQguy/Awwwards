@@ -60,4 +60,5 @@ Desktop.ini
 .coverage
 htmlcov/
 .pytest_cache/
-
+reports/
+data/

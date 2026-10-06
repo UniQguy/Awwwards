@@ -54,7 +54,6 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.postgres",
 ]
 
 THIRD_PARTY_APPS = [
@@ -64,10 +63,13 @@ THIRD_PARTY_APPS = [
     "csp",
 ]
 
-# Local apps will be registered here as created in Tier 1:
+# Local apps:
 LOCAL_APPS = [
     "apps.core",
     "apps.accounts",
+    "apps.tax",
+    "apps.shipping",
+    "apps.catalog",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -85,6 +87,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "csp.middleware.CSPMiddleware",
+    "apps.core.middleware.SensitivePageHeadersMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
