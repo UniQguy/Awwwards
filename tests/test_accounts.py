@@ -196,3 +196,29 @@ class AddressModelTests(TestCase):
             is_default=False,
         )
         self.assertEqual(Address.objects.filter(user=self.user).count(), 2)
+
+    def test_state_list_size_36(self):
+        """Controlled roster contains exactly 28 states and 8 Union Territories (36 total)."""
+        self.assertEqual(len(IndianState.choices), 36)
+
+
+class AllauthViewsTests(TestCase):
+    """Verify allauth authentication endpoints, inputs, and status codes."""
+
+    def setUp(self):
+        from django.test import Client
+
+        self.client = Client()
+
+    def test_login_view_status_code(self):
+        response = self.client.get("/accounts/login/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_signup_view_renders_email_and_password_inputs(self):
+        response = self.client.get("/accounts/signup/")
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode("utf-8")
+        self.assertIn('name="email"', content)
+        self.assertIn('name="password1"', content)
+        self.assertIn('name="password2"', content)
+
