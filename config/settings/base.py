@@ -67,7 +67,10 @@ THIRD_PARTY_APPS = [
 # Local apps will be registered here as created in Tier 1:
 LOCAL_APPS = [
     "apps.core",
+    "apps.accounts",
 ]
+
+AUTH_USER_MODEL = "accounts.User"
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -139,7 +142,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Modern allauth 65.x configuration
 ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*"]
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_UNIQUE_EMAIL = True
@@ -210,7 +213,7 @@ DEFAULT_FROM_EMAIL = os.environ.get(
 # ==============================================================================
 
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 
@@ -243,6 +246,7 @@ CONTENT_SECURITY_POLICY = {
             "'self'",
             "https://api.razorpay.com",
         ],
+        "frame-ancestors": ["'none'"],
         "connect-src": [
             "'self'",
             "https://lumberjack.razorpay.com",
@@ -263,7 +267,7 @@ CONTENT_SECURITY_POLICY = {
 DJANGO_VITE = {
     "default": {
         "dev_mode": False,
-        "manifest_path": BASE_DIR / "static" / "dist" / "manifest.json",
+        "manifest_path": BASE_DIR / "static" / "dist" / ".vite" / "manifest.json",
     }
 }
 
@@ -294,4 +298,4 @@ RAZORPAY_WEBHOOK_SECRET = os.environ.get("RAZORPAY_WEBHOOK_SECRET", "")
 # In local development, an empty value warns on startup and tax calculations raise errors.
 SELLER_STATE = os.environ.get("SELLER_STATE", "").strip()
 SELLER_GSTIN = os.environ.get("SELLER_GSTIN", "").strip()
-DEFAULT_GST_RATE = Decimal("18.00")
+

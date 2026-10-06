@@ -7,6 +7,9 @@ from .base import *
 
 DEBUG = True
 
+# Allow testserver and localhost for testing
+ALLOWED_HOSTS = list(ALLOWED_HOSTS) + ["testserver"]
+
 # Warn loudly on local startup if SELLER_STATE is missing
 if not SELLER_STATE:
     warnings.warn(
