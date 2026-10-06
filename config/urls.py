@@ -10,5 +10,6 @@ from apps.core.views import health_check
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
+    path("payments/", include("apps.payments.urls")),
     path("health/", health_check, name="health_check"),
 ]
