@@ -4,13 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ invoice.invoice_number }} — {% if invoice.is_bill_of_supply %}Bill of Supply{% else %}Tax Invoice{% endif %}</title>
+  <meta name="robots" content="noindex, nofollow">
   {% vite_hmr_client %}
   {% vite_asset 'frontend/js/main.js' %}
 </head>
 <body>
   <div class="container no-print flex justify-between items-center mt-4">
     <a href="{% url 'order_success' order_number=order.order_number %}" class="btn btn-secondary">&larr; Return to Order Details</a>
-    <button type="button" class="btn btn-primary" id="btn-print-doc">Print Document</button>
+    <div class="flex gap-2">
+      <a href="{% url 'order_invoice_pdf' order_number=order.order_number %}" class="btn btn-secondary" target="_blank" rel="noopener">Download PDF</a>
+      <button type="button" class="btn btn-primary" id="btn-print-doc">Print Document</button>
+    </div>
   </div>
 
   <article class="invoice-container" aria-labelledby="invoice-title">

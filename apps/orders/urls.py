@@ -19,4 +19,6 @@ urlpatterns = [
     path("orders/<str:order_number>/success/", views.order_success, name="order_success"),
     path("orders/<str:order_number>/cancel/", views.order_cancel, name="order_cancel"),
     path("orders/<str:order_number>/invoice/", views.order_invoice, name="order_invoice"),
+    path("orders/<str:order_number>/invoice/pdf/", views.order_invoice_pdf, name="order_invoice_pdf"),
+    path("orders/<str:order_number>/credit-note/pdf/", views.order_credit_note_pdf, name="order_credit_note_pdf"),
 ]

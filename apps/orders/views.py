@@ -18,7 +18,13 @@ from apps.accounts.models import Address, IndianState
 from apps.cart.services.cart_calculator import calculate_cart_summary
 from apps.cart.services.cart_service import get_or_create_cart
 from apps.orders.models import Order
-from apps.orders.services.invoicing import generate_invoice
+from apps.orders.services.email_notifier import (
+    send_cancellation_refund,
+    send_cod_placed,
+    send_order_confirmation,
+)
+from apps.orders.services.invoice_pdf import build_credit_note_pdf, build_invoice_pdf
+from apps.orders.services.invoicing import generate_credit_note, generate_invoice
 from apps.orders.services.order_creator import place_order
 from apps.orders.services.order_status import can_transition, transition_order_status
 from apps.orders.services.tracking import get_tracking_info
@@ -283,8 +289,8 @@ def checkout_place(request: HttpRequest) -> HttpResponse:
     Converts cart to Order, locks stock reservations, and redirects to COD success or Razorpay page.
     """
     if getattr(request, "limited", False):
-        messages.error(request, "Too many checkout requests. Please wait a moment.")
-        return redirect("checkout_review")
+        from apps.core.views import error_429
+        return error_429(request)
 
     cart = _get_cart(request)
     if not cart.items.exists():
@@ -340,6 +346,8 @@ def checkout_place(request: HttpRequest) -> HttpResponse:
     request.session.modified = True
 
     if payment_method == "cod":
+        send_order_confirmation(order, guest_token=token if not user else None)
+        send_cod_placed(order, guest_token=token if not user else None)
         messages.success(request, f"Order #{order.order_number} confirmed! We will dispatch your gear promptly.")
         return redirect(f"/orders/{order.order_number}/success/?token={token}")
     else:
@@ -396,6 +404,17 @@ def order_cancel(request: HttpRequest, order_number: str) -> HttpResponse:
         changed_by=user,
     )
 
+    cn = order.credit_notes.first()
+    refund_amt = order.total_amount if order.is_paid else None
+    token = request.GET.get("token") or request.session.get(f"order_token_{order.order_number}")
+    send_cancellation_refund(
+        order,
+        credit_note=cn,
+        refund_amount=refund_amt,
+        reason="Customer cancelled order via web interface.",
+        guest_token=token if not user else None,
+    )
+
     messages.success(request, f"Order #{order.order_number} has been cancelled successfully. Inventory restored.")
     return redirect("order_success", order_number=order.order_number)
 
@@ -428,14 +447,68 @@ def order_invoice(request: HttpRequest, order_number: str) -> HttpResponse:
     return render(request, "orders/invoice.html", context)
 
 
+@require_GET
+def order_invoice_pdf(request: HttpRequest, order_number: str) -> HttpResponse:
+    """
+    Downloads statutory GST Tax Invoice or Bill of Supply as a PDF.
+    """
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items", "credit_notes"),
+        order_number=order_number,
+    )
+
+    if not _validate_order_access(request, order):
+        raise Http404("Invoice authorization failed.")
+
+    invoice = getattr(order, "invoice", None)
+    if not invoice:
+        invoice = generate_invoice(order)
+
+    pdf_bytes = build_invoice_pdf(order, invoice=invoice)
+
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    filename = f"{invoice.invoice_number}.pdf"
+    response["Content-Disposition"] = f'inline; filename="{filename}"'
+    return response
+
+
+@require_GET
+def order_credit_note_pdf(request: HttpRequest, order_number: str) -> HttpResponse:
+    """
+    Downloads statutory GST Credit Note as a PDF for cancelled/refunded orders.
+    """
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items", "credit_notes"),
+        order_number=order_number,
+    )
+
+    if not _validate_order_access(request, order):
+        raise Http404("Credit note authorization failed.")
+
+    if order.status != Order.STATUS_CANCELLED and not order.credit_notes.exists():
+        messages.error(request, "Credit note is only available for cancelled or refunded orders.")
+        return redirect("order_success", order_number=order.order_number)
+
+    credit_note = order.credit_notes.first()
+    if not credit_note:
+        credit_note = generate_credit_note(order, reason="Order cancellation")
+
+    pdf_bytes = build_credit_note_pdf(order, credit_note=credit_note)
+
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    filename = f"{credit_note.credit_note_number}.pdf"
+    response["Content-Disposition"] = f'inline; filename="{filename}"'
+    return response
+
+
 @ratelimit(key="ip", rate="15/m", block=False)
 def order_track_lookup(request: HttpRequest) -> HttpResponse:
     """
     Public lookup form to track shipment by order number and contact email/phone.
     """
     if getattr(request, "limited", False):
-        messages.error(request, "Too many tracking lookups. Please wait a minute.")
-        return redirect("home")
+        from apps.core.views import error_429
+        return error_429(request)
 
     if request.method == "POST":
         order_num = request.POST.get("order_number", "").strip().upper()

@@ -99,6 +99,7 @@ def place_order(
             total_amount=summary["grand_total"],
             customer_notes=customer_notes,
             is_bill_of_supply=is_bill_of_supply,
+            is_sample_data=any(getattr(it.product, "is_sample_data", False) for it in cart_items),
         )
 
         # Link reservations to order

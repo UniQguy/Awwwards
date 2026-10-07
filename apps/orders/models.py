@@ -89,6 +89,7 @@ class Order(TimeStampedModel):
     tracking_number = models.CharField(_("tracking reference"), max_length=100, blank=True)
     customer_notes = models.TextField(_("customer delivery notes"), blank=True)
     is_bill_of_supply = models.BooleanField(_("is bill of supply"), default=False)
+    is_sample_data = models.BooleanField(_("is sample/demo order"), default=False)
 
     class Meta:
         verbose_name = _("order")
@@ -245,3 +246,28 @@ class CreditNote(models.Model):
 
     def __str__(self):
         return f"{self.credit_note_number} (Invoice {self.invoice.invoice_number}): ₹{self.amount}"
+
+
+class EmailLog(TimeStampedModel):
+    """
+    Audit log and idempotency guard for transactional emails dispatched per order event.
+    """
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="email_logs", verbose_name=_("order"))
+    event = models.CharField(_("event type"), max_length=60)
+    recipient_email = models.CharField(_("masked recipient email"), max_length=255)
+    subject = models.CharField(_("subject"), max_length=255)
+    sent_successfully = models.BooleanField(_("sent successfully"), default=True)
+    error_message = models.TextField(_("error message"), blank=True)
+
+    class Meta:
+        verbose_name = _("email log")
+        verbose_name_plural = _("email logs")
+        constraints = [
+            models.UniqueConstraint(fields=["order", "event"], name="unique_order_event_email"),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.order.order_number} - {self.event} ({'Sent' if self.sent_successfully else 'Failed'})"
+
