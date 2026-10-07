@@ -2,8 +2,9 @@
 Core application views for system health, legal policy pages, error handlers, and request helpers.
 """
 
+from django.conf import settings
 from django.db import DatabaseError, connections
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 
@@ -61,6 +62,27 @@ def legal_shipping(request):
 
 def legal_refunds(request):
     return render(request, "pages/refunds.html")
+
+
+def about(request):
+    return render(request, "pages/about.html")
+
+
+def robots_txt(request):
+    site_url = getattr(settings, "SITE_URL", "http://localhost:8000").rstrip("/")
+    admin_slug = getattr(settings, "ADMIN_URL", "admin/").strip("/")
+    lines = [
+        "User-agent: *",
+        "Disallow: /cart/",
+        "Disallow: /checkout/",
+        "Disallow: /account/",
+        "Disallow: /orders/",
+        f"Disallow: /{admin_slug}/",
+        "Disallow: /search/",
+        "",
+        f"Sitemap: {site_url}/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain; charset=utf-8")
 
 
 # ==============================================================================

@@ -18,10 +18,11 @@ def storefront_context(request):
     Supplies global storefront state across all page templates.
     """
     user = getattr(request, "user", None)
+    session = getattr(request, "session", None)
     guest_token = (
         request.COOKIES.get("electrocart_guest_token")
         or request.COOKIES.get("guest_token")
-        or request.session.get("guest_token", "")
+        or (session.get("guest_token", "") if session else "")
     )
 
     # 1. Cart Count & Total (Single query optimization)
@@ -67,7 +68,7 @@ def storefront_context(request):
     )
 
     # 4. Compare Tray count from session
-    compare_tray = request.session.get("compare_tray", [])
+    compare_tray = session.get("compare_tray", []) if session else []
     compare_count = len(compare_tray)
 
     # 5. Seller & GST Compliance Mode

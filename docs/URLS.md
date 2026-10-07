@@ -42,6 +42,8 @@ Comprehensive map of routes, views, templates, authorization rules, and context 
 | `/orders/<order_number>/success/` | `order_success` | `apps.orders.views.order_success` | `orders/order_success.html` | Token / Owner | `order`, `is_cod`, `token` |
 | `/orders/<order_number>/cancel/` | `order_cancel` | `apps.orders.views.order_cancel` | (Redirect) | Token / Owner (POST) | Flash message |
 | `/orders/<order_number>/invoice/` | `order_invoice` | `apps.orders.views.order_invoice` | `orders/invoice.html` | Token / Owner | `order`, `invoice`, `total_in_words`, `credit_notes` |
+| `/orders/<order_number>/invoice/pdf/` | `order_invoice_pdf` | `apps.orders.views.order_invoice_pdf` | (Binary PDF) | Token / Owner | Direct statutory PDF download |
+| `/orders/<order_number>/credit-note/pdf/` | `order_credit_note_pdf` | `apps.orders.views.order_credit_note_pdf` | (Binary PDF) | Token / Owner | Direct credit note PDF download |
 | `/orders/track/` | `order_track_lookup` | `apps.orders.views.order_track_lookup` | `orders/track_lookup.html` | Public (POST Rate-limited) | `form_data`, error |
 | `/orders/track/<order_number>/verify/` | `order_track_timeline` | `apps.orders.views.order_track_timeline` | `orders/track_timeline.html` | Short-lived Session Grant | `order`, `tracking_info`, `status_history` |
 | `/account/` | `account_dashboard` | `apps.accounts.views.account_dashboard` | `account/dashboard.html` | Login Required | `user`, `recent_orders`, `default_address` |
@@ -57,3 +59,6 @@ Comprehensive map of routes, views, templates, authorization rules, and context 
 | `/legal/privacy/` | `legal_privacy` | `apps.core.views.legal_privacy` | `pages/privacy.html` | Public | None |
 | `/legal/shipping/` | `legal_shipping` | `apps.core.views.legal_shipping` | `pages/shipping.html` | Public | None |
 | `/legal/refunds/` | `legal_refunds` | `apps.core.views.legal_refunds` | `pages/refunds.html` | Public | None |
+| `/about/` | `about` | `apps.core.views.about` | `pages/about.html` | Public | None |
+| `/robots.txt` | `robots_txt` | `apps.core.views.robots_txt` | (Plain Text) | Public | None |
+| `/sitemap.xml` | `sitemap` | `django.contrib.sitemaps.views.sitemap` | (XML Sitemaps) | Public | `sitemaps` |
