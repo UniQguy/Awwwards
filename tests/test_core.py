@@ -122,3 +122,13 @@ class CoreViewsAndMiddlewareTests(TestCase):
         response = self.client.get(reverse("health_check"))
         # Public health check should not have no-store forced by the middleware
         self.assertNotEqual(response.headers.get("Referrer-Policy"), "no-referrer")
+
+    def test_db_backup_command(self):
+        from pathlib import Path
+        import tempfile
+        from django.core.management import call_command
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            call_command("db_backup", output_dir=tmp_dir, retention=2)
+            files = list(Path(tmp_dir).glob("electrocart_backup_*.sqlite3"))
+            self.assertGreaterEqual(len(files), 1)
