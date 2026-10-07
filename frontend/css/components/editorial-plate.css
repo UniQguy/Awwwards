@@ -107,4 +107,43 @@
   .plate-view-link:hover {
     text-decoration: underline;
   }
+
+  /* Specular Glare Layer on Mat */
+  .plate-mat::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle at var(--tilt-glare-x, 50%) var(--tilt-glare-y, 50%),
+      color-mix(in srgb, var(--world-white) 35%, transparent) 0%,
+      transparent 70%
+    );
+    opacity: var(--tilt-glare-opacity, 0);
+    transition: opacity var(--transition-base);
+  }
+
+  /* Technique H: 3D Perspective Tilt */
+  [data-tilt-card] {
+    transform-style: preserve-3d;
+    transform: perspective(1000px) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg));
+    transition: transform 350ms var(--ease-editorial, cubic-bezier(0.22, 1, 0.36, 1)), box-shadow var(--transition-base), border-color var(--transition-base);
+  }
+
+  [data-tilt-card].is-tilting {
+    transition: none;
+  }
+
+  /* Tier 3 and Reduced Motion: disable 3D tilt */
+  html[data-motion-tier="3"] [data-tilt-card] {
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-tilt-card] {
+      transform: none;
+    }
+  }
 }
+

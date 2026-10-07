@@ -65,6 +65,10 @@ def execute_catalog_search(
     order_fields = sort_options.get(sort_by, ["-source_rating_count", "display_name"])
     qs = qs.order_by(*order_fields)
 
+    if collapsed:
+        from apps.catalog.queries.grid_collapse import get_collapsed_catalog_queryset
+        qs = get_collapsed_catalog_queryset(qs)
+
     total_count = qs.count()
 
     # 7. Did you mean suggestion (if query yielded 0 hits)

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% load core_tags %}
+{% load core_tags django_vite %}
 
 {% block title %}ELECTROCART — Curated Electronics Catalogue{% endblock %}
+{% block body_data_layer %} data-layer="editorial"{% endblock %}
+{% block editorial_script %}{% vite_asset 'frontend/js/editorial.js' %}{% endblock %}
 
 {% block content %}
 <div class="container section-sm">
@@ -23,7 +25,8 @@
     </div>
 
     {% if hero_plate_product %}
-      <div>
+      <div class="hero-plate-slot" id="hero-plate-slot" data-hero-img="{{ hero_plate_product.primary_image_url }}">
+        <div class="hero-webgl-canvas-container" id="hero-webgl-canvas-container" aria-hidden="true"></div>
         {% include "includes/collectible_plate.html" with product=hero_plate_product eager=True %}
         {% if hero.is_auto %}
           <p class="hero-marginalia">Selected by number of ratings on Amazon</p>
@@ -70,6 +73,9 @@
   <div>
     {% for chapter in chapters %}
       <section class="spread" data-world="{{ chapter.category.accent_key }}" aria-labelledby="chapter-{{ chapter.category.id }}">
+        {% if not forloop.first %}
+          <div class="chapter-wipe" aria-hidden="true" data-wipe-world="{{ chapter.category.accent_key }}"></div>
+        {% endif %}
         <div class="container chapter-grid">
           <!-- Left Column: Chapter metadata and live stats -->
           <div>
@@ -174,4 +180,7 @@
     <a href="{% url 'category_list' %}" class="btn btn-primary">Browse the complete catalogue &rarr;</a>
   </section>
 </div>
+
+{{ cutout_cycle_data|json_script:"hero-cutouts-data" }}
 {% endblock %}
+

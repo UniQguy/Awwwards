@@ -101,6 +101,39 @@
   }
 
   /* ==========================================================================
+     CSS CUSTOM PROPERTY REGISTRATION (Technique E: Color World Morph)
+     ========================================================================== */
+  @property --world-bg {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #F5F2EB;
+  }
+
+  @property --world-surface {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #EDE8DE;
+  }
+
+  @property --world-accent {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #9E3D24;
+  }
+
+  @property --world-text {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #1C1917;
+  }
+
+  @property --world-muted {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #544E48;
+  }
+
+  /* ==========================================================================
      GLOBAL TOKENS (INDEPENDENT OF CATEGORY WORLD)
      ========================================================================== */
   :root {

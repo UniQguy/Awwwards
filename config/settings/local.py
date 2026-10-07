@@ -10,6 +10,9 @@ DEBUG = True
 # Allow testserver and localhost for testing
 ALLOWED_HOSTS = list(ALLOWED_HOSTS) + ["testserver"]
 
+# Development motion debugging: allows ?motion=1|2|3 to force motion tiers
+MOTION_DEBUG = True
+
 # Warn loudly on local startup if SELLER_STATE is missing
 if not SELLER_STATE:
     warnings.warn(

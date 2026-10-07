@@ -95,6 +95,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "csp.middleware.CSPMiddleware",
     "apps.core.middleware.SensitivePageHeadersMiddleware",
+    "apps.core.middleware.MotionDebugMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -261,12 +262,15 @@ CONTENT_SECURITY_POLICY = {
         "connect-src": [
             "'self'",
             "https://lumberjack.razorpay.com",
+            "https://m.media-amazon.com",
         ],
         "font-src": ["'self'"],
         "object-src": ["'none'"],
         "base-uri": ["'self'"],
     }
 }
+
+MOTION_DEBUG = False
 
 # NOTE: config.settings.local will extend script-src and connect-src to include
 # the Vite development server (http://localhost:5173).

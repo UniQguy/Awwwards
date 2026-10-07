@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% load core_tags %}
+{% load core_tags django_vite %}
 
 {% block data_world %}{{ product.category.accent_key }}{% endblock %}
+{% block body_data_layer %} data-layer="editorial"{% endblock %}
+{% block editorial_script %}{% vite_asset 'frontend/js/editorial.js' %}{% endblock %}
 {% block title %}{{ product.display_name }} — ELECTROCART{% endblock %}
 {% block meta_description %}{{ product.description|default:product.display_name|truncatechars:150 }}{% endblock %}
 

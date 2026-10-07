@@ -8,9 +8,10 @@ import urllib.parse
 
 from django.conf import settings
 from django.contrib import messages
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count, Min, Q
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 
@@ -68,10 +69,28 @@ def home(request: HttpRequest) -> HttpResponse:
     # 6. Brands
     brands = get_editorial_brands(max_brands=35)
 
+    # 7. Cutout cycling data for Technique A progressive enhancement (in-memory, 0 extra queries)
+    cycle_candidates = list(hero_res.products)
+    for ch in chapters:
+        cycle_candidates.extend(ch.picks)
+    seen_ids = set()
+    cutout_cycle_data = []
+    for p in cycle_candidates:
+        if p.id not in seen_ids and p.primary_image_url:
+            seen_ids.add(p.id)
+            cutout_cycle_data.append({
+                "id": p.id,
+                "name": p.display_name,
+                "image_url": p.primary_image_url,
+            })
+            if len(cutout_cycle_data) >= 10:
+                break
+
     context = {
         "hero": hero_res,
         "hero_plate_product": hero_plate_product,
         "cutouts": cutouts,
+        "cutout_cycle_data": cutout_cycle_data,
         "total_listings": total_listings,
         "total_categories": total_categories,
         "min_price": min_price,
@@ -193,6 +212,74 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
         ],
     }
     return render(request, "catalog/category_detail.html", context)
+
+
+@require_GET
+def category_price_count(request: HttpRequest, slug: str) -> HttpResponse:
+    """
+    Lightweight, rate-limited JSON endpoint returning product count for given filter parameters.
+    Used by dual-thumb slider for progressive enhancement count hints.
+    """
+    category = get_object_or_404(Category, slug=slug, is_active=True)
+
+    # Rate limiting: max 120 calls per minute per client IP
+    client_ip = (
+        request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", "127.0.0.1"))
+        .split(",")[0]
+        .strip()
+    )
+    cache_key = f"rl_price_count_{client_ip}"
+    req_count = cache.get(cache_key, 0)
+    if req_count >= 120:
+        return JsonResponse({"error": "Rate limit exceeded"}, status=429)
+    cache.set(cache_key, req_count + 1, timeout=60)
+
+    brand = request.GET.get("brand", "").strip() or None
+    collapsed = request.GET.get("collapsed", "0") in ("1", "true", "True")
+
+    min_price_val = None
+    max_price_val = None
+
+    bracket_idx = request.GET.get("bracket")
+    if bracket_idx is not None and bracket_idx != "":
+        try:
+            b_idx = int(bracket_idx)
+            if 0 <= b_idx < len(PRICE_BRACKETS):
+                bracket = PRICE_BRACKETS[b_idx]
+                min_price_val = bracket["min"]
+                max_price_val = bracket["max"]
+        except (ValueError, TypeError):
+            pass
+
+    if min_price_val is None and request.GET.get("min_price"):
+        try:
+            min_price_val = Decimal(request.GET.get("min_price").strip())
+        except Exception:
+            pass
+
+    if max_price_val is None and request.GET.get("max_price"):
+        try:
+            max_price_val = Decimal(request.GET.get("max_price").strip())
+        except Exception:
+            pass
+
+    search_result = execute_catalog_search(
+        query="",
+        category_slug=category.slug,
+        brand=brand,
+        min_price=min_price_val,
+        max_price=max_price_val,
+        collapsed=collapsed,
+    )
+
+    return JsonResponse({
+        "count": search_result["total_count"],
+        "category": category.slug,
+        "brand": brand,
+        "min_price": str(min_price_val) if min_price_val is not None else None,
+        "max_price": str(max_price_val) if max_price_val is not None else None,
+        "collapsed": collapsed,
+    })
 
 
 @require_GET

@@ -25,4 +25,6 @@
 @import "./components/editorial-cutout.css";
 @import "./components/editorial-hero.css";
 @import "./components/editorial-spread.css";
+@import "./components/chapter-wipe.css";
+@import "./components/price-histogram.css";
 @import "./print.css";

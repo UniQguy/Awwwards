@@ -13,8 +13,11 @@ import { initHeaderScroll } from "./modules/header-scroll.js";
 import { initMessagesDismiss } from "./modules/messages-dismiss.js";
 import { initFetchForms } from "./modules/fetch-forms.js";
 import { initStickyPurchaseBar } from "./modules/sticky-purchase-bar.js";
+import { initMotionTier, initMotionToggleButton } from "./modules/capability.js";
 
 function bootstrap() {
+  initMotionTier();
+  initMotionToggleButton();
   initMenuPanel();
   initSearchSheet();
   initFilterSheet();

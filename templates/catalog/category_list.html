@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% load core_tags %}
+{% load core_tags django_vite %}
 
 {% block title %}Category Monograph Index — ELECTROCART{% endblock %}
+{% block body_data_layer %} data-layer="editorial"{% endblock %}
+{% block editorial_script %}{% vite_asset 'frontend/js/editorial.js' %}{% endblock %}
 
 {% block content %}
 <div class="container section-sm">

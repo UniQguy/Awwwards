@@ -1,0 +1,80 @@
+/**
+ * ELECTROCART Signature Transition: Diagonal Clip-Path Wipe (WP3).
+ *
+ * Rules:
+ * - Content of incoming chapter is 100% visible and readable at rest.
+ * - The wipe layer is aria-hidden and pointer-events: none.
+ * - Tier 1: Scrubbed GSAP ScrollTrigger polygon animation.
+ * - Tier 2: CSS keyframe clip-path transition triggered by IntersectionObserver.
+ * - Tier 3 / Reduced Motion: 150ms opacity crossfade, or instant.
+ */
+
+@layer components {
+  .spread {
+    position: relative;
+  }
+
+  .chapter-wipe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    pointer-events: none;
+    z-index: var(--z-badge, 1);
+    background-color: var(--world-surface);
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+    opacity: 0;
+  }
+
+  /* Tier 1 active state (controlled via GSAP) */
+  html[data-motion-tier="1"] .chapter-wipe {
+    opacity: 1;
+  }
+
+  /* Tier 2 CSS Keyframe Sweep */
+  html[data-motion-tier="2"] .chapter-wipe--active {
+    opacity: 1;
+    animation: diagonalWipeSweep 450ms var(--ease-editorial, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
+  }
+
+  @keyframes diagonalWipeSweep {
+    0% {
+      clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+      opacity: 0.8;
+    }
+    50% {
+      clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%);
+      opacity: 0.9;
+    }
+    100% {
+      clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+      opacity: 0;
+    }
+  }
+
+  /* Tier 3 & Reduced Motion: Calm 150ms crossfade only */
+  html[data-motion-tier="3"] .chapter-wipe {
+    clip-path: none;
+    animation: none;
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
+
+  html[data-motion-tier="3"] .chapter-wipe--active {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chapter-wipe {
+      clip-path: none;
+      animation: none;
+      opacity: 0;
+      transition: opacity 150ms ease-out;
+    }
+
+    .chapter-wipe--active {
+      opacity: 0;
+    }
+  }
+}

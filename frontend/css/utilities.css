@@ -184,5 +184,63 @@
     width: 32px;
     height: 32px;
   }
+
+  /* Small Motions (WP8): Hairline Draw, Heading Reveal, Bag Count Nudge */
+  .hairline-draw {
+    transform-origin: left center;
+    animation: hairlineDraw 450ms var(--ease-editorial, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
+  }
+
+  @keyframes hairlineDraw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .heading-reveal {
+    animation: headingReveal 420ms var(--ease-editorial, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
+  }
+
+  @keyframes headingReveal {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .bag-count-nudge {
+    animation: bagNudge 200ms cubic-bezier(0.2, 0, 0.38, 0.9) 1;
+  }
+
+  @keyframes bagNudge {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+    100% { transform: translateY(0); }
+  }
+
+  html[data-motion-tier="3"] .hairline-draw,
+  html[data-motion-tier="3"] .heading-reveal,
+  html[data-motion-tier="3"] .bag-count-nudge {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hairline-draw,
+    .heading-reveal,
+    .bag-count-nudge {
+      animation: none;
+      transform: none;
+      opacity: 1;
+    }
+  }
 }
 

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% load core_tags %}
+{% load core_tags django_vite %}
 
 {% block data_world %}{{ category.accent_key }}{% endblock %}
+{% block body_data_layer %}{% if show_marquee %} data-layer="editorial"{% endif %}{% endblock %}
+{% block editorial_script %}{% vite_asset 'frontend/js/editorial.js' %}{% endblock %}
 {% block title %}{{ category.name }} — ELECTROCART{% endblock %}
 {% block meta_description %}{{ category.description|default:"Curated electronics collection." }}{% endblock %}
 
@@ -127,6 +129,9 @@
             </select>
           </div>
 
+          <!-- Dual-thumb Range Mount (Progressively enhanced over server-rendered inputs) -->
+          <div id="price-slider-mount" class="price-slider-mount" data-category="{{ category.slug }}"></div>
+
           <!-- Price Range Min/Max -->
           <div class="form-group">
             <label for="filter-min-price" class="form-label">
@@ -225,4 +230,7 @@
     </section>
   </div>
 </div>
+
+{{ price_bars|json_script:"price-brackets-data" }}
 {% endblock %}
+

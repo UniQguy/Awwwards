@@ -32,3 +32,28 @@ class SensitivePageHeadersMiddleware:
             response["Pragma"] = "no-cache"
 
         return response
+
+
+class MotionDebugMiddleware:
+    """
+    Development-only motion override guard per Phase 6 standing orders.
+    When settings.MOTION_DEBUG is False (production), strips ?motion= query parameter
+    via redirect. When MOTION_DEBUG is True, allows ?motion=1|2|3 for tier testing.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        from django.conf import settings
+        from django.http import HttpResponseRedirect
+
+        if not getattr(settings, "MOTION_DEBUG", False) and "motion" in request.GET:
+            query = request.GET.copy()
+            query.pop("motion", None)
+            clean_url = request.path_info
+            if query:
+                clean_url += f"?{query.urlencode()}"
+            return HttpResponseRedirect(clean_url)
+
+        return self.get_response(request)

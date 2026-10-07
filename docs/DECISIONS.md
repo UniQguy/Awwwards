@@ -130,5 +130,35 @@
 - **Reason**: Guarantees that built Vite assets in `static/dist/` are resolved with correct URLs during production and test runs, and eliminates horizontal overflow on narrow mobile screens (down to 360px).
 - **Alternative Rejected**: Manually copying files from `dist/` into `static/` root.
 
+### DEC-023: Exact Pinned Dependency Versions for Motion & 3D (Phase 6)
+- **Date**: 2026-10-07
+- **Decision**: Pinned exact dependency versions in `package.json`: `gsap@3.15.0`, `lenis@1.3.26`, `three@0.186.1`, `vitest@2.1.8`, `jsdom@29.1.1`.
+- **Reason**: Vitest 5.x requires Vite 6.x+, so `vitest@2.1.8` was installed for 100% native compatibility with existing Vite 5.4. Exact pinned versions prevent breaking API drifts across build pipelines.
+- **Alternative Rejected**: Using unpinned caret versions (`^`) or attempting to force Vitest 5.x with broken Vite peer-dependencies.
 
+### DEC-024: Dynamic Code Splitting for WebGL Chunk
+- **Date**: 2026-10-07
+- **Decision**: Split JavaScript into three distinct bundles:
+  1. `main.js`: Utility bundle (4.67 kB, 1.70 kB gzip) loaded on all pages.
+  2. `editorial.js`: Editorial motion bundle (151 kB, 56.5 kB gzip) loaded strictly on editorial-layer pages.
+  3. `hero_webgl.js`: Three.js 3D scene (621 kB, 157 kB gzip) loaded strictly via dynamic `import()` on Tier 1 when `#hero-webgl-canvas-container` enters the viewport.
+- **Reason**: Ensures utility commerce pages (`/cart/`, `/checkout/`, `/account/`) remain ultra-lightweight and completely free of animation libraries. Guarantees that Tier 2, Tier 3, and reduced-motion users never download Three.js over the network.
+- **Alternative Rejected**: Bundling Three.js and GSAP into a monolithic `main.js`.
 
+### DEC-025: Lenis Smooth Scroll Activation Constraints
+- **Date**: 2026-10-07
+- **Decision**: Restricted Lenis scroller activation strictly to: Tier 1, fine pointer (`(pointer: fine)`), desktop widths ($\ge 1024\text{px}$), and `body[data-layer="editorial"]`.
+- **Reason**: Prevents scroll hijacking on mobile touch devices, prevents smooth-scroll lag during transactional utility tasks (cart and checkout), and allows native keyboard navigation (PageUp/Down, Space, Arrows) to operate without interference.
+- **Alternative Rejected**: Running Lenis sitewide or on touch devices.
+
+### DEC-026: Three.js Custom Multiply Shader for Background Matching
+- **Date**: 2026-10-07
+- **Decision**: Rendered the hero product photo plane using a custom Three.js `ShaderMaterial` that multiplies the texture RGB by the active world background RGB (`multiplied = texColor.rgb * uWorldBg`).
+- **Reason**: Seamlessly blends marketplace product photography (which standardly has pure white studio backgrounds) into the warm paper background color of each category chapter without harsh white rectangular bounding boxes.
+- **Alternative Rejected**: Rendering a harsh opaque white photo plane or relying solely on CSS `mix-blend-mode` on the canvas element.
+
+### DEC-027: Dual-Thumb Stepped Log Scale Price Range Slider (Technique J)
+- **Date**: 2026-10-07
+- **Decision**: Implemented an ARIA slider pattern (`role="slider"`) over server-rendered bracket data with stepped log-scale boundary mapping, SVG histogram rendering, and debounced fetch to `/c/<slug>/count/`.
+- **Reason**: Provides immediate feedback during price range adjustments while honoring the 100% no-JS principle (falls back to native `<input type="number">` form submission).
+- **Alternative Rejected**: Continuous linear dollar/rupee scale that bunches up high-end prices or client-side recalculation of entire product sets.

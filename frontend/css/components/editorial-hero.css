@@ -61,4 +61,50 @@
     color: var(--world-muted);
     font-style: italic;
   }
+
+  /* Hero Plate Slot & WebGL Layer */
+  .hero-plate-slot {
+    position: relative;
+  }
+
+  .hero-webgl-canvas-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+    border-radius: var(--radius-2);
+  }
+
+  /* When WebGL is active on Tier 1, hide the underlying static img */
+  html[data-motion-tier="1"] .hero-plate-slot.has-webgl .plate-mat-img {
+    opacity: 0;
+  }
+
+  /* Tier 2: CSS-only Float */
+  html[data-motion-tier="2"] .hero-plate-slot .plate-collectible {
+    animation: heroPlateFloat 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes heroPlateFloat {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-4px);
+    }
+  }
+
+  /* Tier 3: Static Plate & Reduced Motion */
+  html[data-motion-tier="3"] .hero-plate-slot .plate-collectible {
+    animation: none;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-plate-slot .plate-collectible {
+      animation: none;
+      transform: none;
+    }
+  }
 }

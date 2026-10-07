@@ -10,6 +10,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "frontend/js/main.js"),
+        editorial: resolve(__dirname, "frontend/js/editorial.js"),
         styles: resolve(__dirname, "frontend/css/main.css"),
       },
       output: {

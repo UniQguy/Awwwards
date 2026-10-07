@@ -1,5 +1,5 @@
 {% load static django_vite %}<!DOCTYPE html>
-<html lang="en-IN">
+<html lang="en-IN"{% if motion_debug %} data-motion-debug="true"{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,9 +10,10 @@
   <link rel="preconnect" href="https://m.media-amazon.com">
   {% vite_hmr_client %}
   {% vite_asset 'frontend/js/main.js' %}
+  {% block editorial_script %}{% endblock %}
   {% block extra_head %}{% endblock %}
 </head>
-<body data-world="{% block data_world %}{{ active_world|default:'earphones-headphones' }}{% endblock %}">
+<body data-world="{% block data_world %}{{ active_world|default:'earphones-headphones' }}{% endblock %}"{% block body_data_layer %}{% endblock %}>
   <a href="#main-content" class="skip-link">Skip to main content</a>
   <div id="header-sentinel" aria-hidden="true"></div>
 

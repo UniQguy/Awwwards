@@ -151,4 +151,24 @@
   - `ASSETS.md`: Complete geometric and production specifications for photography, cutouts, calibration posters, and video plinths.
   - `scripts/generate_placeholders.py`: Pillow-based generator for 9 WebP calibration posters (`static/media/placeholders/`).
 
-
+### Phase 6: Motion, Micro-Interactions, and WebGL Layer
+- **New HTTP Endpoint**:
+  - `GET /c/<slug>/count/` (`apps.catalog.views.category_count`): Returns JSON `{"count": <int>}` with collapsed variant matching, filters (`min_price`, `max_price`, `brand`), and a 120 req/minute rate limit.
+- **Middleware & Settings**:
+  - `apps.core.middleware.MotionDebugMiddleware`: Strips `?motion=` query param in production (`settings.MOTION_DEBUG = False`); permits tier forcing in dev/test (`settings.MOTION_DEBUG = True`).
+  - `apps.core.context_processors.motion_debug`: Injects `motion_debug: bool` to template context to annotate `html[data-motion-debug="true"]`.
+  - Added `"https://m.media-amazon.com"` to `connect-src` in Content Security Policy (CSP).
+- **Frontend Code Split**:
+  - `frontend/js/main.js`: Utility bundle (4.67 kB, 1.70 kB gzip) loaded on all pages. Handles footer motion toggle and base UI.
+  - `frontend/js/editorial.js`: Editorial motion bundle (151 kB, 56.5 kB gzip) loaded strictly on editorial pages (`body[data-layer="editorial"]` and `#price-slider-mount`).
+  - `frontend/js/modules/hero_webgl.js`: Three.js dynamic chunk (621 kB, 157 kB gzip) lazy-loaded via dynamic `import()` strictly on Tier 1 when `#hero-webgl-canvas-container` enters viewport.
+- **Motion Modules**:
+  - `capability.js`: Pure capability probe evaluating `prefers-reduced-motion`, `saveData`, connection speed, device memory, hardware concurrency, pointer type, viewport, throwaway WebGL canvas probe, and 400ms frame delta probe.
+  - `scroller.js`: Lenis smooth scroller driving GSAP ticker, restricted strictly to Tier 1 fine pointer desktop on editorial pages.
+  - `chapter_transitions.js`: Diagonal clip-path polygon wipes and CSS `@property` color morphing.
+  - `collectible_cards.js`: Technique H 3D perspective tilt (max 6deg) with dynamic specular sheen.
+  - `headline_cutouts.js`: Technique A 7.5s circular buffer cutout cycling with float-crossfade.
+  - `price_histogram.js`: Technique J ARIA dual-thumb stepped log scale slider with SVG histogram bars.
+  - `small_motions.js`: Hairline draws, heading reveals, and `announceBagUpdate` live announcements.
+- **Automated Verification Harnesses**:
+  - `scripts/motion_e2e_check.py`: Playwright Chromium verification testing all three motion tiers, reduced motion emulation, WebGL chunk isolation, utility page scroller absence, and performance timing.
