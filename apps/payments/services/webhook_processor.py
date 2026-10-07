@@ -16,6 +16,10 @@ from apps.inventory.exceptions import (
 )
 from apps.inventory.services.reservation_service import convert_reservation
 from apps.orders.models import Order
+from apps.orders.services.email_notifier import (
+    send_order_confirmation,
+    send_payment_confirmation,
+)
 from apps.orders.services.invoicing import generate_invoice
 from apps.payments.models import PaymentTransaction, WebhookEvent
 from apps.payments.providers import RazorpayProvider
@@ -69,6 +73,8 @@ def verify_and_capture_checkout_payment(
 
             # Generate sequential invoice
             generate_invoice(order)
+            send_payment_confirmation(order, payment_id=razorpay_payment_id)
+            send_order_confirmation(order)
             return True
 
         except (ReservationExpiredError, InsufficientStockError):
@@ -163,6 +169,8 @@ def process_webhook_payload(
                         raw_response=payload,
                     )
                     generate_invoice(order)
+                    send_payment_confirmation(order, payment_id=gateway_payment_id)
+                    send_order_confirmation(order)
 
                 except (ReservationExpiredError, InsufficientStockError):
                     order.status = Order.STATUS_REFUND_REQUIRED
