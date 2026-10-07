@@ -39,6 +39,9 @@ urlpatterns = [
     path("legal/shipping/", legal_shipping, name="legal_shipping"),
     path("legal/refunds/", legal_refunds, name="legal_refunds"),
 
+    # QA and Test Endpoints
+    path("404-test-page/", error_404, name="error_404_test"),
+
     # Catalog & Editorial Storefront
     path("", include("apps.catalog.urls")),
 ]

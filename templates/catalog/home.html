@@ -1,59 +1,177 @@
 {% extends "base.html" %}
 {% load core_tags %}
 
-{% block title %}ELECTROCART — Premium Electronics India{% endblock %}
+{% block title %}ELECTROCART — Curated Electronics Catalogue{% endblock %}
 
 {% block content %}
-<div class="container section">
-  <header class="text-center mb-8">
-    <h1 class="display-l">Curated Electronics &amp; Accessories</h1>
-    <p class="subhead max-w-md mx-auto mt-2">
-      An editorial catalog of precision personal audio, tactile mechanical gear, monitors, and photography instruments.
-    </p>
-    <p class="caption mt-2">
-      Exploring {{ total_products_count }} curated products across {{ categories_count }} dedicated worlds.
-    </p>
-  </header>
+<div class="container section-sm">
+  <!-- 1. HERO SECTION -->
+  <section class="hero-composition" aria-labelledby="hero-heading">
+    <div>
+      <h1 class="hero-headline" id="hero-heading">
+        Instruments for listening{% if cutouts.0 %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutouts.0.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}, tools for thought{% if cutouts.1 %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutouts.1.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}, and objects of pure utility{% if cutouts.2 %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutouts.2.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}.
+      </h1>
 
-  {% if featured_collections %}
-    {% for collection in featured_collections %}
-      <section class="section-sm" aria-labelledby="coll-title-{{ collection.id }}">
-        <div class="hairline-bottom mb-5 pb-2">
-          <h2 class="heading" id="coll-title-{{ collection.id }}">{{ collection.title }}</h2>
-          {% if collection.intro %}
-            <p class="body-sm text-muted">{{ collection.intro }}</p>
-          {% endif %}
-        </div>
+      <p class="hero-live-stat">
+        {{ total_listings }} listings across {{ total_categories }} categories, priced from {{ min_price|inr }}.
+      </p>
 
-        <div class="grid-catalog">
-          {% for item in collection.featured_items.all %}
-            {% with product=item.product %}
-              {% include "includes/product_card.html" %}
-            {% endwith %}
-          {% endfor %}
+      <div class="hero-actions">
+        <a href="{% url 'category_list' %}" class="btn btn-primary">Browse Categories &rarr;</a>
+        <a href="{% url 'search_results' %}" class="btn btn-secondary">Search the Catalogue</a>
+      </div>
+    </div>
+
+    {% if hero_plate_product %}
+      <div>
+        {% include "includes/collectible_plate.html" with product=hero_plate_product eager=True %}
+        {% if hero.is_auto %}
+          <p class="hero-marginalia">Selected by number of ratings on Amazon</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- 2. TYPOGRAPHIC CATEGORY INDEX -->
+  <section class="section" aria-labelledby="index-heading">
+    <div class="flex justify-between items-baseline mb-4">
+      <h2 id="index-heading" class="label">Category Directory</h2>
+      <span class="caption">{{ total_categories }} dedicated hardware monograph worlds</span>
+    </div>
+
+    <ul class="typographic-index-list">
+      {% for row in index_rows %}
+        <li data-world="{{ row.category.accent_key }}">
+          <a href="{% url 'category_detail' slug=row.category.slug %}" class="typographic-index-row">
+            <div class="index-row-title-group">
+              <span class="index-row-dot" aria-hidden="true"></span>
+              <span class="index-row-name">{{ row.category.name }}</span>
+            </div>
+
+            {% if row.pick and row.pick.primary_image_url %}
+              <div class="index-row-cutout" aria-hidden="true">
+                <img src="{{ row.pick.primary_image_url }}" alt="" width="56" height="56" loading="lazy">
+              </div>
+            {% endif %}
+
+            <div class="index-row-meta">
+              <span>{{ row.count }} item{{ row.count|pluralize }}</span>
+              <span class="index-row-price">from {{ row.price_from|inr }}</span>
+            </div>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+
+<!-- 3. CHAPTERS (Full-bleed monograph worlds) -->
+{% if chapters %}
+  <div>
+    {% for chapter in chapters %}
+      <section class="spread" data-world="{{ chapter.category.accent_key }}" aria-labelledby="chapter-{{ chapter.category.id }}">
+        <div class="container chapter-grid">
+          <!-- Left Column: Chapter metadata and live stats -->
+          <div>
+            <div class="chapter-label">
+              <span class="chapter-numeral">{{ forloop.counter|stringformat:"02d" }}</span>
+              <span class="chapter-hairline"></span>
+              <span>Chapter</span>
+            </div>
+
+            <h2 class="display-l mb-3" id="chapter-{{ chapter.category.id }}">{{ chapter.category.name }}</h2>
+
+            <p class="pull">{{ chapter.editorial_line }}</p>
+
+            <div class="marginalia">
+              <div class="marginalia-stat">
+                <span class="marginalia-label">Curated listings</span>
+                <span class="marginalia-value">{{ chapter.product_count }}</span>
+              </div>
+              <div class="marginalia-stat">
+                <span class="marginalia-label">Catalogue range</span>
+                <span class="marginalia-value">{{ chapter.price_min|inr }} &ndash; {{ chapter.price_max|inr }}</span>
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <a href="{% url 'category_detail' slug=chapter.category.slug %}" class="btn btn-secondary">
+                Enter the Chapter &rarr;
+              </a>
+            </div>
+
+            {% if chapter.is_auto %}
+              <p class="caption mt-2 text-muted">Selected by number of ratings on Amazon</p>
+            {% endif %}
+          </div>
+
+          <!-- Right Area: Collectible plates mosaic / mobile snap -->
+          <div>
+            <div class="chapter-plates-mosaic">
+              {% for pick in chapter.picks %}
+                {% include "includes/collectible_plate.html" with product=pick %}
+              {% endfor %}
+            </div>
+          </div>
         </div>
       </section>
     {% endfor %}
+  </div>
+{% endif %}
+
+<div class="container section">
+  <!-- 4. HOW BUYING WORKS HERE -->
+  <section aria-labelledby="buying-heading">
+    <h2 id="buying-heading" class="label mb-4">How Purchasing Works</h2>
+
+    <div class="how-buying-works">
+      <div class="how-buying-passage">
+        <span class="how-buying-lead">Prices and Tax</span>
+        <p class="how-buying-text">
+          {% if is_bill_of_supply %}
+            All displayed prices are net under Bill of Supply mode with zero added charges.
+          {% else %}
+            All catalog prices are inclusive of applicable GST under Indian tax regulations. No surprise additions at checkout.
+          {% endif %}
+        </p>
+      </div>
+
+      <div class="how-buying-passage">
+        <span class="how-buying-lead">Delivery by PIN Code</span>
+        <p class="how-buying-text">
+          Orders above {{ free_shipping_threshold|inr }} qualify for free standard delivery across serviceable Indian PIN codes. Orders below include a standard shipping fee calculated before payment.
+        </p>
+      </div>
+
+      <div class="how-buying-passage">
+        <span class="how-buying-lead">Payment Authorization</span>
+        <p class="how-buying-text">
+          Cash on Delivery is supported for serviceable destinations within statutory limits.
+          {% if razorpay_enabled %}
+            Online card, UPI, and net-banking transactions are authenticated through our verified payment gateway.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. ALLOW-LISTED BRANDS FLOW -->
+  {% if brands %}
+    <section class="section-sm" aria-labelledby="brands-heading">
+      <h2 id="brands-heading" class="label mb-2">Manufacturers &amp; Brands</h2>
+      <p class="brands-flow-paragraph">
+        Explore hardware manufactured by
+        {% for b in brands %}
+          <a href="{% url 'search_results' %}?brand={{ b.name|urlencode }}" class="brand-flow-link">{{ b.name }}</a><span class="brand-flow-count">{{ b.product_count }}</span>{% if not forloop.last %} &middot; {% endif %}
+        {% endfor %}.
+      </p>
+    </section>
   {% endif %}
 
-  <section class="section-sm" aria-labelledby="sec-all-categories">
-    <div class="hairline-bottom mb-5 pb-2">
-      <h2 class="heading" id="sec-all-categories">Browse by Category</h2>
-    </div>
-
-    <div class="grid-3">
-      {% for cat in categories %}
-        <article class="product-card text-center p-6">
-          <h3 class="heading"><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></h3>
-          {% if cat.description %}
-            <p class="caption mt-2">{{ cat.description|truncatewords:20 }}</p>
-          {% endif %}
-          <div class="card-actions-row justify-center mt-4">
-            <a href="{% url 'category_detail' slug=cat.slug %}" class="btn btn-secondary btn-sm">Explore Collection &rarr;</a>
-          </div>
-        </article>
-      {% endfor %}
-    </div>
+  <!-- 6. CLOSING LINE -->
+  <section class="section text-center">
+    <p class="display-m mb-4">A catalogue of precision electronics and honest craft.</p>
+    <a href="{% url 'category_list' %}" class="btn btn-primary">Browse the complete catalogue &rarr;</a>
   </section>
 </div>
 {% endblock %}

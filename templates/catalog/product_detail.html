@@ -6,7 +6,15 @@
 {% block meta_description %}{{ product.description|default:product.display_name|truncatechars:150 }}{% endblock %}
 
 {% block extra_head %}
-<!-- JSON-LD Structured Data (Schema.org/Product) -->
+<!-- Open Graph Metadata -->
+<meta property="og:title" content="{{ product.display_name }} — ELECTROCART">
+<meta property="og:description" content="{{ product.description|default:product.display_name|truncatechars:150 }}">
+<meta property="og:type" content="product">
+{% if product.primary_image_url %}
+  <meta property="og:image" content="{{ product.primary_image_url }}">
+{% endif %}
+
+<!-- JSON-LD Structured Data (Product-Only, Verified Data) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -17,8 +25,8 @@
     "@type": "Brand",
     "name": "{{ product.parsed_brand|escapejs }}"
   },
-  {% if product.media.first and product.media.first.url %}
-  "image": "{{ product.media.first.url }}",
+  {% if product.primary_image_url %}
+  "image": "{{ product.primary_image_url }}",
   {% endif %}
   "description": "{{ product.description|default:product.display_name|striptags|escapejs }}",
   "offers": {
@@ -26,79 +34,99 @@
     "priceCurrency": "INR",
     "price": "{{ product.selling_price|default:'0.00' }}",
     "itemCondition": "https://schema.org/NewCondition",
-    "availability": "{% if product.is_purchasable %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
-    "seller": {
-      "@type": "Organization",
-      "name": "{{ seller_mode.seller_legal_name|escapejs }}"
-    }
+    "availability": "{% if product.is_purchasable %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
   }
 }
 </script>
 {% endblock %}
 
 {% block content %}
-<div class="container section">
+<div class="container section-sm">
   {% include "includes/breadcrumbs.html" %}
 
-  <div class="product-hero-layout">
-    <!-- Media / Image Column -->
-    <div>
-      <div class="product-plate-hero">
-        {% include "includes/product_image.html" with eager=True %}
+  <div class="product-sheet-layout mt-4">
+    <!-- Left Sticky Column: Large Exhibition Frame -->
+    <div class="product-sheet-sticky-frame">
+      <div class="product-frame-plate">
+        <div class="product-frame-mat">
+          {% with media_item=product.media.first %}
+            {% if media_item and media_item.url %}
+              <img
+                class="product-frame-img"
+                src="{{ media_item.url }}"
+                alt="{{ media_item.alt_text|default:product.display_name }}"
+                width="480"
+                height="480"
+                loading="eager"
+                fetchpriority="high"
+              >
+            {% else %}
+              <div class="image-fallback-plate" role="img" aria-label="{{ product.display_name }}">
+                <span class="image-fallback-initial">{{ product.display_name|slice:":1" }}</span>
+                <span class="image-fallback-text">{{ product.category.name }}</span>
+              </div>
+            {% endif %}
+          {% endwith %}
+        </div>
+
+        <div class="product-frame-caption">
+          <span>{{ product.category.name }}</span>
+          {% if product.highlight_spec_summary %}
+            <span>{{ product.highlight_spec_summary }}</span>
+          {% endif %}
+        </div>
       </div>
 
-      {% if media_items|length > 1 %}
-        <div class="product-thumbnails">
-          {% for m in media_items %}
-            <div class="product-thumbnail-item">
-              <img src="{{ m.url }}" alt="{{ m.alt_text|default:product.display_name }}" width="64" height="64">
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
+      <!-- Secondary Media Slot: quiet slot only when video/model placeholder row exists -->
+      {% for m in media_items %}
+        {% if m.media_type == "video" or m.media_type == "model" %}
+          <div class="product-frame-plate mt-4 text-center p-4">
+            <span class="caption text-muted">Exhibition Model: {{ m.get_media_type_display }} Slot</span>
+          </div>
+        {% endif %}
+      {% endfor %}
     </div>
 
-    <!-- Product Summary & Commerce Actions -->
+    <!-- Right Column: Editorial Details & Commerce Panel -->
     <div>
-      <div class="flex items-center gap-2 mb-2">
-        <span class="badge badge-in-stock">{{ product.category.name }}</span>
-        <span class="caption">Brand: <strong class="text-accent">{{ product.parsed_brand }}</strong></span>
-      </div>
+      <a href="{% url 'category_detail' slug=product.category.slug %}" class="chapter-link-band">
+        &larr; {{ product.category.name }} Chapter
+      </a>
 
-      <h1 class="display-m mb-3">{{ product.display_name }}</h1>
-
-      {% if product.raw_name != product.display_name %}
-        <p class="caption mb-4">
-          Marketplace Title: <em>{{ product.raw_name }}</em>
-        </p>
+      {% if product.parsed_brand and product.parsed_brand != "Unknown" %}
+        <div class="label text-accent mb-1">{{ product.parsed_brand }}</div>
       {% endif %}
 
-      {% include "includes/price_block.html" %}
+      <h1 class="display-l mb-2">{{ product.display_name }}</h1>
 
-      <div class="mt-4 mb-4">
-        {% include "includes/stock_badge.html" %}
-      </div>
+      <p class="caption text-muted mb-4">
+        Listed as: {{ product.raw_name }}
+      </p>
 
-      <!-- Marketplace Rating Provenance -->
-      {% if product.source_rating %}
-        <div class="product-provenance-box">
-          <p class="body-sm">
-            <strong>Marketplace Rating:</strong> {{ product.source_rating }} / 5.0
-            {% if product.source_rating_count %}
-              <span class="text-muted">({{ product.source_rating_count }} customer ratings recorded)</span>
-            {% endif %}
-          </p>
-          <p class="caption mt-1">
-            Imported from verified public marketplace data. ELECTROCART does not generate artificial reviews.
-          </p>
+      <!-- Price Panel -->
+      <div class="product-purchase-box mb-5">
+        <div class="price-row mb-1">
+          <span class="price-current display-m">{{ product.selling_price|inr }}</span>
+          {% if product.mrp and product.mrp > product.selling_price %}
+            <span class="price-mrp-wrapper"><span class="price-mrp-struck">{{ product.mrp|inr }}</span></span>
+            {% with savings=product.mrp|subtract:product.selling_price %}
+              <span class="badge badge-success">Save {{ savings|inr }}</span>
+            {% endwith %}
+          {% endif %}
         </div>
-      {% endif %}
 
-      <!-- Commerce Purchase Form -->
-      <div class="product-purchase-box">
-        <form action="{% url 'cart_add' product.id %}" method="post" data-fetch-enhance>
+        <p class="caption text-muted mb-4">
+          Prices are inclusive of applicable GST under Indian tax regulations.
+        </p>
+
+        <div class="mb-4">
+          {% include "includes/stock_badge.html" %}
+        </div>
+
+        <!-- Purchase Actions -->
+        <form action="{% url 'cart_add' product.id %}" method="post" data-fetch-enhance class="mb-4">
           {% csrf_token %}
-          <div class="flex gap-4 items-baseline mb-4">
+          <div class="flex gap-4 items-baseline mb-3">
             <div class="w-qty">
               <label for="id-quantity" class="form-label">
                 <span>Quantity</span>
@@ -129,8 +157,24 @@
         </div>
       </div>
 
+      <!-- Other Listings of This Item (Finish Swatch Chips) -->
+      {% if other_variants %}
+        <section class="mb-6" aria-labelledby="variants-heading">
+          <h2 id="variants-heading" class="label mb-2">Other Listings of This Item</h2>
+          <div class="finish-swatch-list">
+            {% for variant in other_variants %}
+              <a href="{% url 'product_detail' slug=variant.slug %}" class="finish-swatch-item">
+                <span class="finish-swatch-circle" style="background-color: {{ variant.display_name|colour_hex }};"></span>
+                <span>{{ variant.display_name|truncatewords:4 }}</span>
+                <span class="caption text-muted">{{ variant.selling_price|inr }}</span>
+              </a>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
       <!-- PIN Code Delivery Estimator -->
-      <section class="pincode-estimator-box" aria-labelledby="shipping-estimator-heading">
+      <section class="pincode-estimator-box mb-6" aria-labelledby="shipping-estimator-heading">
         <h2 id="shipping-estimator-heading" class="label mb-2">Estimated Delivery &amp; Serviceability</h2>
         <form action="{% url 'shipping_check' %}" method="post" class="flex gap-2 max-w-md" data-fetch-enhance>
           {% csrf_token %}
@@ -172,39 +216,56 @@
           </div>
         {% endif %}
       </section>
+
+      <!-- Technical Specifications Table -->
+      {% if specifications %}
+        <section class="mb-8" aria-labelledby="specs-heading">
+          <h2 id="specs-heading" class="label mb-3">Technical Specifications</h2>
+          <div class="spec-table-wrapper">
+            <table class="spec-table">
+              <caption class="sr-only">Product technical attributes</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Attribute</th>
+                  <th scope="col">Specification</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for spec in specifications %}
+                  <tr>
+                    <th scope="row" class="spec-key">{{ spec.key }}</th>
+                    <td class="spec-val">{{ spec.value }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      {% endif %}
+
+      <!-- Marketplace Rating Provenance -->
+      {% if product.source_rating %}
+        <div class="product-provenance-box mb-8">
+          <p class="body-sm">
+            <strong>Marketplace Rating:</strong> {{ product.source_rating }} / 5.0
+            {% if product.source_rating_count %}
+              <span class="text-muted">({{ product.source_rating_count }} customer ratings recorded on Amazon)</span>
+            {% endif %}
+          </p>
+          <p class="caption mt-1">
+            Imported from verified public marketplace data. ELECTROCART does not generate artificial reviews.
+          </p>
+        </div>
+      {% endif %}
     </div>
   </div>
 
-  <!-- Technical Specifications Table -->
-  {% if specifications %}
-    <section class="mb-8" aria-labelledby="specs-heading">
-      <h2 id="specs-heading" class="heading mb-4">Technical Specifications</h2>
-      <div class="spec-table-wrapper">
-        <table class="spec-table">
-          <caption class="sr-only">Product technical attributes</caption>
-          <thead>
-            <tr>
-              <th scope="col">Attribute</th>
-              <th scope="col">Specification</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for spec in specifications %}
-              <tr>
-                <th scope="row" class="spec-key">{{ spec.key }}</th>
-                <td class="spec-val">{{ spec.value }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  {% endif %}
-
   <!-- Related Products in Category -->
   {% if related_products %}
-    <section aria-labelledby="related-heading">
-      <h2 id="related-heading" class="heading mb-4">Related in {{ product.category.name }}</h2>
+    <section class="section" aria-labelledby="related-heading">
+      <div class="hairline-bottom pb-2 mb-5">
+        <h2 id="related-heading" class="label">Related in {{ product.category.name }}</h2>
+      </div>
       <div class="grid-catalog">
         {% for rel in related_products %}
           {% with product=rel %}
@@ -214,5 +275,19 @@
       </div>
     </section>
   {% endif %}
+</div>
+
+<!-- Mobile Sticky Bottom Purchase Bar -->
+<div class="sticky-purchase-bar" data-sticky-bar>
+  <div class="price-row">
+    <span class="price-current">{{ product.selling_price|inr }}</span>
+  </div>
+  <form action="{% url 'cart_add' product.id %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="quantity" value="1">
+    <button type="submit" class="btn btn-primary btn-sm" {% if not product.is_purchasable %}disabled{% endif %}>
+      Add to Bag
+    </button>
+  </form>
 </div>
 {% endblock %}

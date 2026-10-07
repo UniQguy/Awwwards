@@ -1,0 +1,194 @@
+@layer components {
+  /* Typographic Category Index */
+  .typographic-index-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--world-rule);
+  }
+
+  .typographic-index-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--world-rule);
+    text-decoration: none;
+    color: var(--world-text);
+    transition: padding var(--transition-fast), color var(--transition-fast);
+    position: relative;
+  }
+
+  .typographic-index-row:hover,
+  .typographic-index-row:focus-visible {
+    color: var(--world-accent);
+    padding-left: var(--space-3);
+  }
+
+  .index-row-title-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .index-row-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background-color: var(--world-accent);
+    display: inline-block;
+  }
+
+  .index-row-name {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    line-height: 1.2;
+    font-weight: 500;
+  }
+
+  .index-row-meta {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--step-0);
+    color: var(--world-muted);
+  }
+
+  .index-row-price {
+    font-weight: 500;
+    color: var(--world-text);
+  }
+
+  /* Hover slide-in cutout on desktop */
+  .index-row-cutout {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .index-row-cutout {
+      display: block;
+      position: absolute;
+      right: 240px;
+      width: 56px;
+      height: 56px;
+      opacity: 0;
+      transform: translateX(-12px);
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+      pointer-events: none;
+    }
+
+    .index-row-cutout img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      mix-blend-mode: multiply;
+    }
+
+    .typographic-index-row:hover .index-row-cutout,
+    .typographic-index-row:focus-visible .index-row-cutout {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* How buying works here: asymmetric typographic block */
+  .how-buying-works {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    padding: var(--space-12) 0;
+    border-top: 1px solid var(--world-rule);
+    border-bottom: 1px solid var(--world-rule);
+  }
+
+  @media (min-width: 860px) {
+    .how-buying-works {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-8);
+    }
+  }
+
+  .how-buying-passage {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .how-buying-lead {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-1);
+    color: var(--world-accent);
+  }
+
+  .how-buying-text {
+    font-size: var(--step--1);
+    line-height: 1.5;
+    color: var(--world-muted);
+  }
+
+  /* Brand flow paragraph */
+  .brands-flow-paragraph {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-1);
+    line-height: 1.8;
+    color: var(--world-text);
+    margin-top: var(--space-6);
+  }
+
+  .brand-flow-link {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid var(--world-rule);
+    padding-bottom: 1px;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  .brand-flow-link:hover {
+    color: var(--world-accent);
+    border-color: var(--world-accent);
+  }
+
+  .brand-flow-count {
+    font-style: normal;
+    font-family: var(--font-body);
+    font-size: var(--step--2);
+    color: var(--world-muted);
+    font-variant-numeric: tabular-nums;
+    margin-left: 2px;
+    margin-right: var(--space-2);
+  }
+
+  /* Category Marquee (Page 1 top section on /c/<slug>/) */
+  .category-marquee {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--world-rule);
+    margin-bottom: var(--space-10);
+  }
+
+  .category-marquee-headline {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    line-height: 1.1;
+    color: var(--world-text);
+    margin-bottom: var(--space-3);
+  }
+
+  @media (min-width: 768px) {
+    .category-marquee-headline {
+      font-size: var(--step-5);
+    }
+  }
+
+  .category-editorial-line {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-1);
+    color: var(--world-accent);
+    max-width: 60ch;
+    margin-bottom: var(--space-6);
+  }
+}

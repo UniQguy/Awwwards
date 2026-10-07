@@ -1,34 +1,86 @@
 {% extends "base.html" %}
+{% load core_tags %}
 
-{% block title %}All Categories — ELECTROCART{% endblock %}
+{% block title %}Category Monograph Index — ELECTROCART{% endblock %}
 
 {% block content %}
-<div class="container section">
-  <nav class="breadcrumbs" aria-label="Breadcrumb">
+<div class="container section-sm">
+  <nav class="breadcrumbs mb-6" aria-label="Breadcrumb">
     <ol>
       <li><a href="{% url 'home' %}">Home</a></li>
       <li aria-current="page">Categories</li>
     </ol>
   </nav>
 
-  <header class="mb-6">
-    <h1 class="display-l">Product Categories</h1>
-    <p class="subhead mt-2">Browse curated consumer electronics by specialized monograph category worlds.</p>
+  <header class="mb-10">
+    <h1 class="display-l">Category Monograph Index</h1>
+    <p class="subhead max-w-md mt-2">
+      An architectural directory of specialized hardware worlds, calibrated materials, and acoustic instruments.
+    </p>
   </header>
+</div>
 
-  <div class="grid-3">
-    {% for cat in categories %}
-      <article class="product-card p-6">
-        <h2 class="heading"><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></h2>
-        <span class="card-brand mt-1">{{ cat.product_count }} active products</span>
-        {% if cat.description %}
-          <p class="body-sm text-muted mt-2">{{ cat.description }}</p>
-        {% endif %}
-        <div class="card-actions-row mt-auto">
-          <a href="{% url 'category_detail' slug=cat.slug %}" class="btn btn-secondary btn-sm">Browse {{ cat.name }} &rarr;</a>
+<!-- Monograph Spreads: One tall spread per category alternating offsets -->
+<div class="monograph-category-index">
+  {% for spread in category_spreads %}
+    <section class="spread" data-world="{{ spread.category.accent_key }}" aria-labelledby="cat-title-{{ spread.category.id }}">
+      <div class="container chapter-grid {% cycle '' 'reverse-chapter-grid' %}">
+        <!-- Text & Marginalia Column -->
+        <div class="flex flex-col justify-center">
+          <div class="chapter-label">
+            <span class="chapter-numeral">{{ forloop.counter|stringformat:"02d" }}</span>
+            <span class="chapter-hairline"></span>
+            <span>Monograph</span>
+          </div>
+
+          <h2 class="display-l mb-3" id="cat-title-{{ spread.category.id }}">
+            <a href="{% url 'category_detail' slug=spread.category.slug %}" class="text-decoration-none color-inherit">
+              {{ spread.category.name }}
+            </a>
+          </h2>
+
+          <p class="pull">{{ spread.editorial_line }}</p>
+
+          <div class="marginalia">
+            <div class="marginalia-stat">
+              <span class="marginalia-label">Curated listings</span>
+              <span class="marginalia-value">{{ spread.stats.listing_count }}</span>
+            </div>
+            <div class="marginalia-stat">
+              <span class="marginalia-label">Distinct models</span>
+              <span class="marginalia-value">{{ spread.stats.distinct_raw_name_count }}</span>
+            </div>
+            <div class="marginalia-stat">
+              <span class="marginalia-label">Allow-listed brands</span>
+              <span class="marginalia-value">{{ spread.stats.brand_count }}</span>
+            </div>
+            <div class="marginalia-stat">
+              <span class="marginalia-label">Price range</span>
+              <span class="marginalia-value">{{ spread.stats.price_min|inr }} &ndash; {{ spread.stats.price_max|inr }}</span>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <a href="{% url 'category_detail' slug=spread.category.slug %}" class="btn btn-secondary">
+              Enter {{ spread.category.name }} &rarr;
+            </a>
+          </div>
+
+          {% if spread.is_auto %}
+            <p class="caption mt-2 text-muted">Selected by number of ratings on Amazon</p>
+          {% endif %}
         </div>
-      </article>
-    {% endfor %}
-  </div>
+
+        <!-- Plate Column: One pick on collectible plate -->
+        <div class="flex justify-center items-center">
+          {% if spread.picks.0 %}
+            <div class="w-full max-w-sm">
+              {% include "includes/collectible_plate.html" with product=spread.picks.0 %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  {% endfor %}
 </div>
 {% endblock %}

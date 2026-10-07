@@ -1,0 +1,110 @@
+@layer components {
+  /* Collectible Plate (Technique H): 1px rule frame, inner mat in --world-surface, multiply blend */
+  .plate-collectible {
+    position: relative;
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-2);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-4);
+    box-shadow: var(--lift-1);
+    transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+  }
+
+  .plate-collectible:hover,
+  .plate-collectible:focus-within {
+    border-color: var(--world-accent);
+    box-shadow: var(--lift-2);
+  }
+
+  .plate-mat {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: var(--world-bg);
+    border-radius: var(--radius-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    overflow: hidden;
+  }
+
+  .plate-mat-img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+    transition: transform var(--transition-slow);
+  }
+
+  .plate-collectible:hover .plate-mat-img {
+    transform: scale(1.03);
+  }
+
+  .plate-body {
+    padding-top: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .plate-meta-line {
+    font-size: var(--step--2);
+    color: var(--world-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-1);
+  }
+
+  .plate-title {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    line-height: 1.3;
+    font-weight: 600;
+    color: var(--world-text);
+    margin-bottom: var(--space-2);
+  }
+
+  .plate-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .plate-title a:hover {
+    color: var(--world-accent);
+  }
+
+  .plate-caption {
+    font-size: var(--step--1);
+    color: var(--world-muted);
+    line-height: 1.4;
+    margin-bottom: var(--space-3);
+  }
+
+  .plate-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--world-rule);
+  }
+
+  .plate-view-link {
+    font-size: var(--step--1);
+    font-weight: 600;
+    color: var(--world-accent);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .plate-view-link:hover {
+    text-decoration: underline;
+  }
+}

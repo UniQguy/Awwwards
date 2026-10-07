@@ -1,0 +1,37 @@
+@layer components {
+  /* Inline Headline Cutout (Technique A) */
+  .cutout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    height: 0.85em;
+    width: auto;
+    aspect-ratio: 1 / 1;
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-1);
+    padding: 2px;
+    margin: 0 0.15em;
+    transform: skewX(-6deg);
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+  }
+
+  .cutout-img {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+    display: block;
+  }
+
+  /* Support fallback to crisp plinth when multiply is unavailable */
+  @supports not (mix-blend-mode: multiply) {
+    .cutout {
+      background-color: var(--color-paper);
+    }
+  }
+}

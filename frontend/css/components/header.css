@@ -21,11 +21,7 @@
     gap: var(--space-4);
   }
 
-  @media (max-width: 640px) {
-    .header-inner {
-      height: 56px;
-    }
-  }
+
 
   /* Wordmark & Brand Mark */
   .site-brand {
@@ -87,6 +83,10 @@
     background-color: var(--world-surface);
   }
 
+  .shop-menu-details:not([open]) .shop-dropdown-panel {
+    display: none;
+  }
+
   .shop-dropdown-panel {
     position: absolute;
     top: 100%;
@@ -99,6 +99,13 @@
     border-radius: var(--radius-2);
     box-shadow: var(--lift-2);
     margin-top: var(--space-1);
+  }
+
+  @media (max-width: 640px) {
+    .shop-dropdown-panel {
+      min-width: 200px;
+      max-width: calc(100vw - 32px);
+    }
   }
 
   .shop-dropdown-panel ul {
@@ -211,5 +218,52 @@
     height: 100%;
     background-color: var(--world-accent);
     transition: width var(--dur-editorial) var(--ease-editorial);
+  }
+
+  /* Responsive Header for Handheld / Narrow Viewports */
+  @media (max-width: 640px) {
+    .header-inner {
+      height: 56px;
+      gap: var(--space-2);
+    }
+
+    .brand-name {
+      font-size: var(--step--1);
+      letter-spacing: -0.03em;
+    }
+
+    .brand-logo-mark {
+      width: 20px;
+      height: 20px;
+    }
+
+    .shop-menu-summary {
+      padding: var(--space-1) var(--space-2);
+      font-size: var(--step--2);
+    }
+
+    .header-nav {
+      gap: 2px;
+    }
+
+    .header-nav-link {
+      padding: var(--space-1);
+      min-width: 32px;
+      min-height: 32px;
+    }
+
+    .header-nav-link span:not(.sr-only):not(.bag-badge) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .brand-name {
+      font-size: var(--step--2);
+    }
+
+    .shop-menu-summary span {
+      font-size: var(--step--2);
+    }
   }
 }

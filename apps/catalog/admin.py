@@ -50,15 +50,17 @@ class ProductAdmin(admin.ModelAdmin):
 class FeaturedProductInline(admin.TabularInline):
     model = FeaturedProduct
     extra = 1
-    raw_id_fields = ["product"]
+    autocomplete_fields = ["product"]
+    fields = ["product", "is_hero", "callout", "display_order"]
 
 
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
-    list_display = ["title", "slug", "is_active", "is_sample_data", "display_order"]
-    list_filter = ["is_active", "is_sample_data"]
-    search_fields = ["title", "slug"]
+    list_display = ["title", "slug", "placement", "category", "is_active", "is_sample_data", "display_order"]
+    list_filter = ["placement", "category", "is_active", "is_sample_data"]
+    search_fields = ["title", "slug", "intro"]
     prepopulated_fields = {"slug": ("title",)}
+    autocomplete_fields = ["category"]
     inlines = [FeaturedProductInline]
     ordering = ["display_order", "title"]
 

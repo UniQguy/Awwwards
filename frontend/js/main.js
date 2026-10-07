@@ -12,6 +12,7 @@ import { initImageFallback } from "./modules/image-fallback.js";
 import { initHeaderScroll } from "./modules/header-scroll.js";
 import { initMessagesDismiss } from "./modules/messages-dismiss.js";
 import { initFetchForms } from "./modules/fetch-forms.js";
+import { initStickyPurchaseBar } from "./modules/sticky-purchase-bar.js";
 
 function bootstrap() {
   initMenuPanel();
@@ -23,6 +24,7 @@ function bootstrap() {
   initHeaderScroll();
   initMessagesDismiss();
   initFetchForms();
+  initStickyPurchaseBar();
 }
 
 if (document.readyState === "loading") {

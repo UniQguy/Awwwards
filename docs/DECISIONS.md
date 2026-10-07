@@ -106,6 +106,29 @@
 - **Date**: 2026-10-06
 - **Decision**: Formulated `aria-label` attributes on visible action buttons to start with the verbatim visible button text (e.g. `aria-label="Compare {{ product.display_name }}"`).
 - **Reason**: Strictly conforms to WCAG 2.5.3 (Label in Name), ensuring speech-input users can activate buttons by speaking their visible label without speech engine failure.
-- **Alternative Rejected**: Dissimilar descriptive labels like `aria-label="Add {{ product.display_name }} to comparison"`.
+### DEC-019: Collection Placement Hierarchy & Honest Attribution Contract
+- **Date**: 2026-10-06
+- **Decision**: Enhanced `Collection` model with `placement` (`none`, `home_hero`, `home_chapter`, `category_spread`) and optional `category` FK. Built pure services in `editorial.py` with curation-first precedence and verified Amazon rating count + price fallback. When auto-selected, the template renders the honest disclosure: *"Selected by number of ratings on Amazon"*.
+- **Reason**: Guarantees zero hardcoded hero products while providing a seamless transition between human editorial curation and automated catalog fallback.
+- **Alternative Rejected**: Hardcoding product IDs or generating fake "staff picks" labels.
+
+### DEC-020: Exhibition Frame vs Thumbnails on Product Detail (Gallery Monograph)
+- **Date**: 2026-10-06
+- **Decision**: Restructured `product_detail.html` into a two-column gallery monograph with a left sticky exhibition frame (`.product-sheet-sticky-frame`, `.product-frame-plate`) and removed the multi-thumbnail carousel for single-image marketplace items. Added a quiet secondary slot strictly when genuine video or 3D model assets exist.
+- **Reason**: Reflects the "Kinetic Monograph" design concept where beautiful physical hardware is treated like a museum exhibition piece, avoiding fake thumbnails or empty plinths.
+- **Alternative Rejected**: Rendering artificial empty carousel thumbnails or mock 3D canvases for items that lack 3D assets.
+
+### DEC-021: Screen-Reader Transparency for Inline Cutouts (Technique A)
+- **Date**: 2026-10-06
+- **Decision**: Embedded product cutout badges (`.cutout`) inside display headlines with `aria-hidden="true"` and empty `alt=""`.
+- **Reason**: Inline decorative product silhouettes embedded within headlines must not disrupt the reading flow of screen readers or text-to-speech tools.
+- **Alternative Rejected**: Adding descriptive alt text inside the headline, which creates jarring speech syntax (e.g. "Instruments for boAt Bassheads listening").
+
+### DEC-022: Django Vite Static URL Prefix and CSS Layer Architecture
+- **Date**: 2026-10-07
+- **Decision**: Configured `"static_url_prefix": "dist/"` in `DJANGO_VITE` settings and refined mobile breakpoints with `minmax(0, 1fr)` tracks in `@layer layout`.
+- **Reason**: Guarantees that built Vite assets in `static/dist/` are resolved with correct URLs during production and test runs, and eliminates horizontal overflow on narrow mobile screens (down to 360px).
+- **Alternative Rejected**: Manually copying files from `dist/` into `static/` root.
+
 
 

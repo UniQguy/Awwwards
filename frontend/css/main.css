@@ -2,6 +2,7 @@
 @import "./reset.css";
 @import "./base.css";
 @import "./layout.css";
+@import "./layout-editorial.css";
 @import "./utilities.css";
 @import "./components/header.css";
 @import "./components/footer.css";
@@ -20,4 +21,8 @@
 @import "./components/messages.css";
 @import "./components/empty-states.css";
 @import "./components/compare.css";
+@import "./components/editorial-plate.css";
+@import "./components/editorial-cutout.css";
+@import "./components/editorial-hero.css";
+@import "./components/editorial-spread.css";
 @import "./print.css";

@@ -96,6 +96,7 @@ class CatalogViewsTests(TestCase):
             title="Studio Acoustic Reference",
             slug="studio-acoustic-reference",
             intro="Critically engineered transducers for audio mastering.",
+            placement=Collection.PLACEMENT_HOME_CHAPTER,
         )
         FeaturedProduct.objects.create(
             collection=self.collection,

@@ -66,6 +66,14 @@
     list-style: none;
   }
 
+  code,
+  kbd,
+  samp,
+  pre {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
   [hidden] {
     display: none;
   }

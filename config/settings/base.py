@@ -279,6 +279,7 @@ DJANGO_VITE = {
     "default": {
         "dev_mode": False,
         "manifest_path": BASE_DIR / "static" / "dist" / ".vite" / "manifest.json",
+        "static_url_prefix": "dist/",
     }
 }
 

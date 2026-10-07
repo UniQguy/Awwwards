@@ -118,3 +118,31 @@ Spacing adheres strictly to the 4px base increment:
 - **Tax Notice**: Every price display is accompanied by the statutory notice: *"Inclusive of all taxes"* or *"Prices inclusive of applicable GST"*.
 - **Postal Code**: Consistently referenced as *"PIN code"* rather than "Zip code".
 - **Currency**: Formatted with the official Indian Rupee symbol `₹` via the custom `|inr` filter.
+
+---
+
+## 9. Editorial Layer: "The Kinetic Monograph" Patterns
+
+Phase 5 introduced the cinematic editorial layer built on top of the Phase 4 utility system:
+
+### 9.1 Technique H: The Collectible Plate (`.plate-collectible`)
+- **Structure**: Outer card container (`.plate-collectible`), inner recessed mat (`.plate-mat`), isolated product image (`.plate-mat-img`), meta line (`.plate-meta-line`), editorial title (`.plate-title`), and footer (`.plate-footer`).
+- **Surface Treatment**: The inner mat uses `var(--world-bg)` within a `var(--world-surface)` plate, producing a physical bevel effect. Images use `mix-blend-mode: multiply` on pure white Amazon marketplace assets, rendering them seamlessly into the tinted world paper.
+- **Physical Feedback**: Subtle lift on hover (`transform: translateY(-2px)` and `box-shadow: var(--lift-2)`). On desktop devices with pointer precision, dynamic tilt response via `data-tilt-card`.
+
+### 9.2 Technique A: Inline Headline Cutouts (`.cutout`)
+- **Structure**: Inline badge container (`.cutout`) with child image (`.cutout-img`) embedded directly inside display typography headlines.
+- **Styling**: `height: 0.85em; aspect-ratio: 1 / 1; border-radius: var(--radius-1); transform: skew(-6deg);` with `mix-blend-mode: multiply`.
+- **Accessibility Contract**: Always marked with `aria-hidden="true"` and `alt=""` so assistive screen readers read the headline text naturally without decorative image interruptions.
+
+### 9.3 6-Column Asymmetric Grid & Spreads
+- **Grid Architecture** (`.grid-editorial-6`): Asymmetric desktop proportions (`1.6fr 1fr 1.2fr 1fr 1.4fr 1fr`) inspired by biennial print catalogues.
+- **Chapter Spread** (`.spread`): Full-bleed section with contextual `data-world` tint, hairline top transition seam, and 2-column asymmetric split (`.chapter-grid`).
+- **Marginalia Column** (`.marginalia`): Vertical data strip displaying real computed stats (listing count, model count, allow-listed brand count, and live price range) with hairline separators.
+- **Chapter Label** (`.chapter-label`): Two-digit romanized numeral (`01`), hairline stroke, and tracking label.
+
+### 9.4 Gallery-Monograph Product Sheet
+- **Exhibition Frame** (`.product-sheet-sticky-frame`): Left sticky column housing the primary product plate (`.product-frame-plate`), generous inner mat, and caption strip with technical summary.
+- **Finish Swatches** (`.finish-swatch-list`): Circular color-coded hardware chips (`.finish-swatch-circle`) mapped to real electronics finishes (e.g. Space Black, Midnight, Chalk, Sage) via `colour_map.py` and `|colour_hex`.
+- **Secondary Media Slot**: Cleanly omitted unless genuine video or 3D plinth models are attached to the product record. Zero fake 3D canvases or empty frames.
+

@@ -97,6 +97,15 @@ def savings(mrp: Any, selling_price: Any) -> str:
     return ""
 
 
+@register.filter(name="subtract")
+def subtract(value: Any, arg: Any) -> Any:
+    """Subtract arg from value, returning Decimal or 0."""
+    try:
+        return Decimal(str(value)) - Decimal(str(arg))
+    except Exception:
+        return 0
+
+
 @register.filter(name="colour_hex")
 def colour_hex(name: Any) -> str:
     """

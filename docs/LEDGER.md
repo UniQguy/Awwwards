@@ -134,3 +134,21 @@
 - **Hardware Finish Swatches**: `apps/catalog/data/colour_map.py` and template filter `colour_hex` for authentic product swatch rendering.
 - **Accessibility & Contrast**: 100% WCAG 2.1 AA compliance (0 violations) across all 70 color pairings, status alerts, focus rings, and axe-core Playwright checks.
 
+### 6. Editorial Architecture & Curation Ledger (Phase 5)
+- **Model Enhancements**:
+  - `apps.catalog.models.Collection.placement`: CharField with choices `none`, `home_hero`, `home_chapter`, `category_spread`.
+  - `apps.catalog.models.Collection.category`: Optional ForeignKey to `catalog.Category` for tying chapter/spread collections to specific monograph worlds.
+- **Editorial Services** (`apps/catalog/services/editorial.py`):
+  - `hero_products(n=3) -> HeroResult`: Curation-first hero lookup with automatic fallback by verified Amazon rating count + price. Returns `HeroResult(products, is_auto)`.
+  - `home_chapters(max_chapters=6) -> list[HomeChapter]`: Generates full-bleed monograph chapters with live database statistics and plate mosaics.
+  - `category_spread(category) -> CategorySpreadResult`: Generates category monograph marquee with live price brackets, model counts, and curated/auto picks.
+  - `index_rows() -> list[IndexRow]`: Generates data for `/categories/` typographic index with price minimums and model counts.
+  - `brand_list() -> list[BrandItem]`: Generates allow-listed brand catalog directory with product count.
+  - `eligible_cutout_products(limit=10) -> list[Product]`: Selects high-rated products across distinct categories for Technique A headline cutouts.
+- **Honest Attribution Guarantee**:
+  - When collections are auto-selected (rather than human-curated), templates unconditionally display: *"Selected by number of ratings on Amazon"*.
+- **Asset Contracts & Posters**:
+  - `ASSETS.md`: Complete geometric and production specifications for photography, cutouts, calibration posters, and video plinths.
+  - `scripts/generate_placeholders.py`: Pillow-based generator for 9 WebP calibration posters (`static/media/placeholders/`).
+
+

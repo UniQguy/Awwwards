@@ -1,0 +1,51 @@
+{% load core_tags %}
+<article class="plate-collectible" data-tilt-card data-product-id="{{ product.id }}">
+  <div class="plate-mat">
+    {% with media_item=product.media.first %}
+      {% if media_item and media_item.url %}
+        <img
+          class="plate-mat-img"
+          src="{{ media_item.url }}"
+          alt="{{ media_item.alt_text|default:product.display_name }}"
+          width="300"
+          height="300"
+          {% if eager %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+        >
+      {% else %}
+        <div class="image-fallback-plate" role="img" aria-label="{{ product.display_name }}">
+          <span class="image-fallback-initial">{{ product.display_name|slice:":1" }}</span>
+          <span class="image-fallback-text">{{ product.category.name }}</span>
+        </div>
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <div class="plate-body">
+    <div class="plate-meta-line">
+      <span>{{ product.category.name }}</span>
+      {% if product.parsed_brand and product.parsed_brand != "Unknown" %}
+        &middot; <span>{{ product.parsed_brand }}</span>
+      {% endif %}
+    </div>
+
+    <h3 class="plate-title">
+      <a href="{% url 'product_detail' slug=product.slug %}">{{ product.display_name }}</a>
+    </h3>
+
+    {% if product.highlight_spec_summary %}
+      <p class="plate-caption">{{ product.highlight_spec_summary }}</p>
+    {% endif %}
+
+    <div class="plate-footer">
+      <div class="price-row">
+        <span class="price-current">{{ product.selling_price|inr }}</span>
+        {% if product.mrp and product.mrp > product.selling_price %}
+          <span class="price-mrp-wrapper"><span class="price-mrp-struck">{{ product.mrp|inr }}</span></span>
+        {% endif %}
+      </div>
+      <a href="{% url 'product_detail' slug=product.slug %}" class="plate-view-link">
+        View &rarr;
+      </a>
+    </div>
+  </div>
+</article>

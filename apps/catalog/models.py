@@ -161,6 +161,28 @@ class Product(TimeStampedModel):
     def is_purchasable(self) -> bool:
         return self.selling_price is not None and self.selling_price > Decimal("0.00") and self.is_available
 
+    @property
+    def primary_image_url(self) -> str:
+        """
+        Returns the primary image URL (local or external CDN) from preloaded media items.
+        """
+        for m in self.media.all():
+            if m.media_type == "image" and m.url:
+                return m.url
+        return ""
+
+    @property
+    def highlight_spec_summary(self) -> str:
+        """
+        Returns up to three highlight specifications joined with middle dots (e.g. '6 GB · 128 GB · 5G').
+        Prefetches safe: reads from preloaded specifications if available.
+        """
+        specs = list(self.specifications.all())
+        highlights = [s.value for s in specs if s.is_highlight][:3]
+        if not highlights:
+            highlights = [s.value for s in specs[:3]]
+        return " · ".join(highlights)
+
     def save(self, *args, **kwargs):
         # Automatically update denormalized search_text
         brand = self.parsed_brand or ""
@@ -247,8 +269,36 @@ class Collection(TimeStampedModel):
     Curated editorial groupings of real products for themed homepage spreads.
     """
 
+    PLACEMENT_NONE = "none"
+    PLACEMENT_HOME_HERO = "home_hero"
+    PLACEMENT_HOME_CHAPTER = "home_chapter"
+    PLACEMENT_CATEGORY_SPREAD = "category_spread"
+
+    PLACEMENT_CHOICES = [
+        (PLACEMENT_NONE, _("None / Standalone")),
+        (PLACEMENT_HOME_HERO, _("Home Hero")),
+        (PLACEMENT_HOME_CHAPTER, _("Home Chapter")),
+        (PLACEMENT_CATEGORY_SPREAD, _("Category Spread")),
+    ]
+
     title = models.CharField(_("collection title"), max_length=150)
     slug = models.SlugField(_("slug"), max_length=150, unique=True)
+    placement = models.CharField(
+        _("placement"),
+        max_length=30,
+        choices=PLACEMENT_CHOICES,
+        default=PLACEMENT_NONE,
+        help_text=_("These collections drive the homepage and category spreads. If none are curated the site auto-selects, and says so."),
+    )
+    category = models.ForeignKey(
+        "catalog.Category",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="collections",
+        verbose_name=_("category"),
+        help_text=_("Associated category for category spreads and home chapters."),
+    )
     intro = models.TextField(_("editorial introduction"), blank=True)
     is_active = models.BooleanField(_("is active"), default=True)
     display_order = models.PositiveIntegerField(_("display order"), default=0)
@@ -258,6 +308,9 @@ class Collection(TimeStampedModel):
         verbose_name = _("editorial collection")
         verbose_name_plural = _("editorial collections")
         ordering = ["display_order", "title"]
+        indexes = [
+            models.Index(fields=["placement", "is_active"], name="idx_collection_placement"),
+        ]
 
     def __str__(self):
         sample = " [SAMPLE]" if self.is_sample_data else ""

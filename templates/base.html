@@ -7,6 +7,7 @@
   <meta name="description" content="{% block meta_description %}India's curated consumer electronics destination. Curated headphones, audio, mechanical keyboards, and precision tech.{% endblock %}">
   <link rel="preload" href="{% static 'fonts/fraunces-latin-full-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{% static 'fonts/plus-jakarta-sans-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://m.media-amazon.com">
   {% vite_hmr_client %}
   {% vite_asset 'frontend/js/main.js' %}
   {% block extra_head %}{% endblock %}

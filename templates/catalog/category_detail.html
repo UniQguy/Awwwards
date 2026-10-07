@@ -6,15 +6,71 @@
 {% block meta_description %}{{ category.description|default:"Curated electronics collection." }}{% endblock %}
 
 {% block content %}
-<div class="container section">
+<div class="container section-sm">
   {% include "includes/breadcrumbs.html" %}
 
-  <header class="mb-6">
-    <h1 class="display-l">{{ category.name }}</h1>
-    {% if category.description %}
-      <p class="subhead mt-2">{{ category.description }}</p>
-    {% endif %}
-  </header>
+  {% if show_marquee and spread %}
+    <!-- Editorial Marquee (Page 1 without active filters) -->
+    <section class="category-marquee" aria-labelledby="marquee-heading">
+      <div class="chapter-label">
+        <span class="chapter-numeral">{{ category.display_order|stringformat:"02d" }}</span>
+        <span class="chapter-hairline"></span>
+        <span>Monograph Marquee</span>
+      </div>
+
+      <div class="chapter-grid mb-8">
+        <div>
+          <h1 class="category-marquee-headline" id="marquee-heading">{{ category.name }}</h1>
+          <p class="category-editorial-line">{{ spread.editorial_line }}</p>
+
+          <div class="marginalia">
+            <div class="marginalia-stat">
+              <span class="marginalia-label">Curated listings</span>
+              <span class="marginalia-value">{{ spread.stats.listing_count }}</span>
+            </div>
+            <div class="marginalia-stat">
+              <span class="marginalia-label">Distinct models</span>
+              <span class="marginalia-value">{{ spread.stats.distinct_raw_name_count }}</span>
+            </div>
+            <div class="marginalia-stat">
+              <span class="marginalia-label">Allow-listed brands</span>
+              <span class="marginalia-value">{{ spread.stats.brand_count }}</span>
+            </div>
+            <div class="marginalia-stat">
+              <span class="marginalia-label">Catalogue range</span>
+              <span class="marginalia-value">{{ spread.stats.price_min|inr }} &ndash; {{ spread.stats.price_max|inr }}</span>
+            </div>
+          </div>
+
+          {% if spread.is_auto %}
+            <p class="caption mt-2 text-muted">Selected by number of ratings on Amazon</p>
+          {% endif %}
+        </div>
+
+        <div>
+          {% if spread.picks %}
+            <h2 class="sr-only">Curated Selections</h2>
+            <div class="chapter-plates-mosaic">
+              {% for pick in spread.picks %}
+                {% include "includes/collectible_plate.html" with product=pick %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="hairline-bottom mb-8 pb-2 flex justify-between items-baseline">
+        <h2 class="label">All {{ page_obj.paginator.count }} Listings</h2>
+        <span class="caption">Explore the full category index</span>
+      </div>
+    </section>
+  {% else %}
+    <!-- Compact Header (When filtering or paginating) -->
+    <header class="mb-6">
+      <h1 class="display-l">{{ category.name }}</h1>
+      <p class="caption mt-1">{{ page_obj.paginator.count }} listing{{ page_obj.paginator.count|pluralize }} found</p>
+    </header>
+  {% endif %}
 
   <div class="catalog-layout">
     <!-- Facet Filter Sidebar -->
@@ -71,7 +127,7 @@
             </select>
           </div>
 
-          <!-- Custom Price Inputs -->
+          <!-- Price Range Min/Max -->
           <div class="form-group">
             <label for="filter-min-price" class="form-label">
               <span>Min Price (₹)</span>
@@ -86,14 +142,22 @@
             <input type="number" step="1" name="max_price" id="filter-max-price" class="form-control" value="{{ selected_filters.max_price|default:'' }}">
           </div>
 
-          <div class="btn-group mt-2">
+          <!-- Variant Grid Collapse Toggle -->
+          <div class="form-checkbox-group mt-2">
+            <input type="checkbox" name="collapsed" value="1" id="filter-collapsed" class="form-checkbox" {% if collapsed %}checked{% endif %}>
+            <label for="filter-collapsed" class="form-checkbox-label">
+              <span>Collapse duplicate models</span>
+            </label>
+          </div>
+
+          <div class="btn-group mt-3">
             <button type="submit" class="btn btn-primary btn-block">Apply</button>
             <a href="{% url 'category_detail' slug=category.slug %}" class="btn btn-secondary">Reset</a>
           </div>
         </fieldset>
       </form>
 
-      <!-- Price Distribution Histogram -->
+      <!-- Price Distribution Histogram (Technique J) -->
       {% if price_bars %}
         <div class="histogram-chart">
           <h2 class="label mb-2">Price Distribution</h2>
@@ -118,6 +182,26 @@
 
     <!-- Product Grid Column -->
     <section aria-labelledby="products-heading">
+      <!-- Active Filter Chips -->
+      {% if selected_filters.brand or selected_filters.bracket or selected_filters.min_price or selected_filters.max_price %}
+        <div class="active-filter-chips mb-4 flex items-center gap-2 flex-wrap">
+          <span class="caption">Active Filters:</span>
+          {% if selected_filters.brand %}
+            <span class="badge badge-secondary">Brand: {{ selected_filters.brand }}</span>
+          {% endif %}
+          {% if selected_filters.bracket %}
+            <span class="badge badge-secondary">Bracket #{{ selected_filters.bracket }}</span>
+          {% endif %}
+          {% if selected_filters.min_price %}
+            <span class="badge badge-secondary">Min: ₹{{ selected_filters.min_price }}</span>
+          {% endif %}
+          {% if selected_filters.max_price %}
+            <span class="badge badge-secondary">Max: ₹{{ selected_filters.max_price }}</span>
+          {% endif %}
+          <a href="{% url 'category_detail' slug=category.slug %}" class="badge badge-quiet text-decoration-none">&times; Clear all</a>
+        </div>
+      {% endif %}
+
       <div class="flex justify-between items-baseline hairline-bottom pb-2 mb-5">
         <h2 id="products-heading" class="heading">
           {{ page_obj.paginator.count }} Product{{ page_obj.paginator.count|pluralize }}

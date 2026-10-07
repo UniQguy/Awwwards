@@ -9,44 +9,78 @@ import urllib.parse
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count, Min, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.catalog.models import Category, Collection, Product
+from apps.catalog.services.editorial import (
+    brand_list as get_editorial_brands,
+    category_spread,
+    eligible_cutout_products,
+    hero_products,
+    home_chapters,
+    index_rows,
+)
 from apps.catalog.services.price_distribution import PRICE_BRACKETS
 from apps.search.services.search_service import execute_catalog_search
+from apps.shipping.models import ShippingConfig
 from apps.shipping.services.estimator import estimate_delivery
 
 
 @require_GET
 def home(request: HttpRequest) -> HttpResponse:
     """
-    Storefront editorial homepage displaying catalog statistics, collections, and categories.
+    Storefront editorial homepage displaying the Kinetic Monograph:
+    - Hero with headline cutouts and single collectible plate
+    - Typographic category index
+    - Chapters per active category with real stats and plates
+    - How buying works here (live config: GST, shipping threshold, payments)
+    - Allow-listed brand flowing paragraph
+    - Closing line
     """
-    total_products_count = Product.objects.filter(is_available=True, selling_price__gt=0).count()
-    categories_count = Category.objects.filter(is_active=True).count()
+    # 1. Hero
+    hero_res = hero_products(n=3)
+    hero_plate_product = hero_res.products[0] if hero_res.products else None
+    cutout_candidates = hero_res.products[1:] if len(hero_res.products) > 1 else hero_res.products
+    cutouts = eligible_cutout_products(cutout_candidates, max_cutouts=3)
 
-    featured_collections = (
-        Collection.objects.filter(is_active=True)
-        .prefetch_related(
-            "featured_items__product__media",
-            "featured_items__product__category",
-        )
-        .order_by("display_order", "title")[:4]
-    )
+    # 2. Stats for live hero sentence
+    total_listings = Product.objects.filter(is_available=True, selling_price__gt=0).count()
+    total_categories = Category.objects.filter(is_active=True).count()
+    min_price_agg = Product.objects.filter(is_available=True, selling_price__gt=0).aggregate(Min("selling_price"))
+    min_price = min_price_agg["selling_price__min"] or Decimal("0.00")
 
-    categories = list(
-        Category.objects.filter(is_active=True)
-        .order_by("display_order", "name")
-    )
+    # 3. Typographic Index Rows
+    index_list = index_rows()
+
+    # 4. Chapters
+    chapters = home_chapters(max_chapters=6)
+
+    # 5. How Buying Works data
+    shipping_config = ShippingConfig.get_solo()
+    free_shipping_threshold = shipping_config.free_shipping_threshold
+    seller_gstin = getattr(settings, "SELLER_GSTIN", "")
+    is_bill_of_supply = not bool(seller_gstin)
+    razorpay_enabled = bool(getattr(settings, "RAZORPAY_KEY_ID", ""))
+
+    # 6. Brands
+    brands = get_editorial_brands(max_brands=35)
 
     context = {
-        "total_products_count": total_products_count,
-        "categories_count": categories_count,
-        "featured_collections": featured_collections,
-        "categories": categories,
+        "hero": hero_res,
+        "hero_plate_product": hero_plate_product,
+        "cutouts": cutouts,
+        "total_listings": total_listings,
+        "total_categories": total_categories,
+        "min_price": min_price,
+        "index_rows": index_list,
+        "chapters": chapters,
+        "free_shipping_threshold": free_shipping_threshold,
+        "is_bill_of_supply": is_bill_of_supply,
+        "razorpay_enabled": razorpay_enabled,
+        "brands": brands,
     }
     return render(request, "catalog/home.html", context)
 
@@ -54,25 +88,19 @@ def home(request: HttpRequest) -> HttpResponse:
 @require_GET
 def category_list(request: HttpRequest) -> HttpResponse:
     """
-    Index of all active merchandise categories with real-time product counts.
+    Monograph category index: one tall spread per active category alternating left and right offsets,
+    each with category name in display-l, live stats in marginalia, one pick on a plate, and an Enter link.
     """
-    categories = (
-        Category.objects.filter(is_active=True)
-        .annotate(
-            product_count=Count(
-                "products",
-                filter=Q(products__is_available=True, products__selling_price__gt=0),
-            )
-        )
-        .order_by("display_order", "name")
-    )
-    return render(request, "catalog/category_list.html", {"categories": categories})
+    categories = list(Category.objects.filter(is_active=True).order_by("display_order", "name"))
+    category_spreads = [category_spread(cat) for cat in categories]
+    return render(request, "catalog/category_list.html", {"category_spreads": category_spreads})
 
 
 @require_GET
 def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     """
     Faceted category catalog page with price brackets, brand filtering, and pagination.
+    Top editorial marquee displays only on page 1 with no active filters.
     """
     category = get_object_or_404(Category, slug=slug, is_active=True)
 
@@ -107,6 +135,21 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
         except Exception:
             pass
 
+    # Check whether editorial marquee should show (page 1, zero search/filter/sort parameters)
+    page_param = request.GET.get("page", "1")
+    is_page_1 = str(page_param) in ("1", "", "None")
+    has_active_filters = bool(
+        brand
+        or bracket_idx
+        or request.GET.get("min_price")
+        or request.GET.get("max_price")
+        or (sort_by and sort_by != "popularity")
+        or collapsed
+    )
+    show_marquee = is_page_1 and not has_active_filters
+
+    spread = category_spread(category) if show_marquee else None
+
     search_result = execute_catalog_search(
         query="",
         category_slug=category.slug,
@@ -120,8 +163,7 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     products_qs = search_result["products"].prefetch_related("media")
 
     paginator = Paginator(products_qs, 24)
-    page_number = request.GET.get("page", 1)
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator.get_page(page_param)
 
     # Build querystring preserving parameters without page
     params = request.GET.copy()
@@ -143,6 +185,8 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
         "collapsed": collapsed,
         "price_bars": search_result["facets"]["price_histogram"],
         "querystring": querystring,
+        "show_marquee": show_marquee,
+        "spread": spread,
         "breadcrumbs": [
             {"title": "Categories", "url": "/categories/"},
             {"title": category.name, "url": f"/c/{category.slug}/"},
@@ -173,17 +217,25 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
         .prefetch_related("media")[:4]
     )
 
-    # Variant options by same brand in category
-    other_variants = (
-        Product.objects.filter(
-            category=product.category,
-            parsed_brand=product.parsed_brand,
-            is_available=True,
-            selling_price__gt=0,
-        )
+    # Variant options: check for same raw_name first, then same brand in category
+    same_raw_name = list(
+        Product.objects.filter(raw_name=product.raw_name, is_available=True, selling_price__gt=0)
         .exclude(id=product.id)
-        .prefetch_related("media")[:5]
+        .prefetch_related("media")[:6]
     )
+    if same_raw_name:
+        other_variants = same_raw_name
+    else:
+        other_variants = list(
+            Product.objects.filter(
+                category=product.category,
+                parsed_brand=product.parsed_brand,
+                is_available=True,
+                selling_price__gt=0,
+            )
+            .exclude(id=product.id)
+            .prefetch_related("media")[:5]
+        )
 
     # Delivery estimate lookup from session
     remembered_pincode = request.session.get("pincode", "")
@@ -195,7 +247,7 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
         "product": product,
         "specifications": specifications,
         "media_items": media_items,
-        "option_count": other_variants.count(),
+        "option_count": len(other_variants),
         "other_variants": other_variants,
         "related_products": related_products,
         "delivery_estimate": delivery_estimate,
