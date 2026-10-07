@@ -185,4 +185,20 @@
     border-color: var(--color-danger);
     box-shadow: 0 0 0 2px var(--color-danger);
   }
+
+  .form-checkbox-group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+  }
+
+  .form-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    cursor: pointer;
+    font-size: var(--step--1);
+    color: var(--world-text);
+  }
 }

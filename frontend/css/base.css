@@ -98,4 +98,52 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /* High Contrast / Forced Colors Mode */
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline: 2px solid Highlight;
+      outline-offset: 2px;
+    }
+
+    .btn,
+    button,
+    [role="button"] {
+      border: 1px solid ButtonBorder;
+    }
+
+    .btn:hover,
+    button:hover,
+    [role="button"]:hover {
+      outline: 2px solid Highlight;
+    }
+
+    .card,
+    .product-card,
+    .checkout-card,
+    .editorial-plate,
+    .spec-table,
+    table {
+      border: 1px solid CanvasText;
+    }
+
+    input,
+    select,
+    textarea {
+      border: 1px solid FieldText;
+    }
+
+    hr,
+    .divider,
+    .hairline {
+      border-color: CanvasText;
+    }
+
+    .badge,
+    .tag,
+    .pill {
+      border: 1px solid CanvasText;
+    }
+  }
 }
+

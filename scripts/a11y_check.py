@@ -78,51 +78,58 @@ def run_a11y_audit() -> bool:
     critical_or_serious_count = 0
     all_violations_by_page = {}
 
+    VIEWPORTS = [
+        {"name": "desktop-1280", "width": 1280, "height": 800},
+        {"name": "mobile-390", "width": 390, "height": 844},
+    ]
+
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
-            page = browser.new_page(viewport={"width": 1280, "height": 800})
 
-            for p_info in PAGES_TO_AUDIT:
-                url = f"{server_url}{p_info['path']}"
-                try:
-                    page.goto(url, wait_until="networkidle", timeout=10000)
-                except Exception:
-                    page.goto(url, wait_until="domcontentloaded", timeout=10000)
+            for vp in VIEWPORTS:
+                print(f"\n--- Testing Viewport: {vp['name']} ({vp['width']}x{vp['height']}) ---")
+                page = browser.new_page(viewport={"width": vp["width"], "height": vp["height"]})
 
-                # Inject axe-core
-                page.evaluate(axe_script)
+                for p_info in PAGES_TO_AUDIT:
+                    url = f"{server_url}{p_info['path']}"
+                    try:
+                        page.goto(url, wait_until="networkidle", timeout=10000)
+                    except Exception:
+                        page.goto(url, wait_until="domcontentloaded", timeout=10000)
 
-                # Execute axe.run()
-                results = page.evaluate("""
-                    async () => {
-                        const r = await axe.run(document, {
-                            runOnly: {
-                                type: 'tag',
-                                values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
-                            }
-                        });
-                        return r.violations;
-                    }
-                """)
+                    # Inject axe-core
+                    page.evaluate(axe_script)
 
-                severe_page_violations = [
-                    v for v in results if v.get("impact") in ("critical", "serious")
-                ]
-                minor_page_violations = [
-                    v for v in results if v.get("impact") not in ("critical", "serious")
-                ]
+                    # Execute axe.run()
+                    results = page.evaluate("""
+                        async () => {
+                            const r = await axe.run(document, {
+                                runOnly: {
+                                    type: 'tag',
+                                    values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
+                                }
+                            });
+                            return r.violations;
+                        }
+                    """)
 
-                critical_or_serious_count += len(severe_page_violations)
-                all_violations_by_page[p_info["slug"]] = results
+                    severe_page_violations = [
+                        v for v in results if v.get("impact") in ("critical", "serious")
+                    ]
+                    minor_page_violations = [
+                        v for v in results if v.get("impact") not in ("critical", "serious")
+                    ]
 
-                status_tag = "[PASS]" if not severe_page_violations else "[FAIL]"
-                print(f"{status_tag} {p_info['slug']:<18} ({p_info['path']}) -> {len(severe_page_violations)} serious/critical, {len(minor_page_violations)} moderate/minor")
-                for sv in severe_page_violations:
-                    print(f"      - [{sv.get('impact').upper()}] {sv.get('id')}: {sv.get('help')} (Nodes: {len(sv.get('nodes', []))})")
-                    for node in sv.get('nodes', [])[:5]:
-                        print(f"         Node: {node.get('html')[:120]}")
-                        print(f"         Summary: {node.get('failureSummary', '').replace('\n', ' ')}")
+                    critical_or_serious_count += len(severe_page_violations)
+                    all_violations_by_page[f"{p_info['slug']}-{vp['name']}"] = results
+
+                    status_tag = "[PASS]" if not severe_page_violations else "[FAIL]"
+                    print(f"{status_tag} [{vp['name']:<12}] {p_info['slug']:<18} ({p_info['path']}) -> {len(severe_page_violations)} serious/critical, {len(minor_page_violations)} moderate/minor")
+                    for sv in severe_page_violations:
+                        print(f"      - [{sv.get('impact').upper()}] {sv.get('id')}: {sv.get('help')} (Nodes: {len(sv.get('nodes', []))})")
+
+                page.close()
 
             browser.close()
 

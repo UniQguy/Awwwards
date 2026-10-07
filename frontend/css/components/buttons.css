@@ -104,6 +104,17 @@
     font-size: var(--step--2);
   }
 
+  @media (max-width: 860px), (pointer: coarse) {
+    .btn-sm {
+      min-height: 44px;
+      padding-block: var(--space-2);
+    }
+  }
+
+  .motion-toggle-btn {
+    min-height: 44px;
+  }
+
   .btn-lg {
     min-height: 52px;
     padding: var(--space-3) var(--space-6);
