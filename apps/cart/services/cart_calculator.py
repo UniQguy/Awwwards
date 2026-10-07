@@ -23,7 +23,11 @@ def calculate_cart_summary(
     """
     Computes complete financial breakdown of a shopping cart.
     """
-    items = list(cart.items.select_related("product", "product__category").all())
+    items = list(
+        cart.items.select_related("product", "product__category", "product__inventory")
+        .prefetch_related("product__media")
+        .all()
+    )
 
     subtotal = Decimal("0.00")
     mrp_total = Decimal("0.00")

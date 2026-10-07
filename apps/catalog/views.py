@@ -179,7 +179,7 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
         collapsed=collapsed,
     )
 
-    products_qs = search_result["products"].prefetch_related("media")
+    products_qs = search_result["products"].select_related("inventory").prefetch_related("media")
 
     paginator = Paginator(products_qs, 24)
     page_obj = paginator.get_page(page_param)
@@ -301,6 +301,7 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
     related_products = (
         Product.objects.filter(category=product.category, is_available=True, selling_price__gt=0)
         .exclude(id=product.id)
+        .select_related("category", "inventory")
         .prefetch_related("media")[:4]
     )
 
@@ -308,6 +309,7 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
     same_raw_name = list(
         Product.objects.filter(raw_name=product.raw_name, is_available=True, selling_price__gt=0)
         .exclude(id=product.id)
+        .select_related("category", "inventory")
         .prefetch_related("media")[:6]
     )
     if same_raw_name:
@@ -321,6 +323,7 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
                 selling_price__gt=0,
             )
             .exclude(id=product.id)
+            .select_related("category", "inventory")
             .prefetch_related("media")[:5]
         )
 

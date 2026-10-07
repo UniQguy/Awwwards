@@ -54,6 +54,7 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",
 ]
 
 THIRD_PARTY_APPS = [
@@ -95,6 +96,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "csp.middleware.CSPMiddleware",
     "apps.core.middleware.SensitivePageHeadersMiddleware",
+    "apps.core.middleware.SecurityHeadersMiddleware",
     "apps.core.middleware.MotionDebugMiddleware",
 ]
 
@@ -200,6 +202,17 @@ STORAGES = {
 # NOTE: config.settings.test will override STORAGES['staticfiles'] with plain
 # django.contrib.staticfiles.storage.StaticFilesStorage to prevent test execution
 # failures when manifest static assets have not been compiled.
+
+def whitenoise_immutable_file_test(path, url):
+    """
+    Identifies versioned assets that can be cached forever:
+    Vite bundles under /dist/ and Django CompressedManifestStaticFilesStorage hashed files.
+    """
+    import re
+    return "/dist/" in url or bool(re.search(r"([.-][0-9a-fA-F]{8,32}\.)", url))
+
+WHITENOISE_IMMUTABLE_FILE_TEST = whitenoise_immutable_file_test
+WHITENOISE_MAX_AGE = 31536000  # 1 year for immutable hashed assets
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -319,4 +332,46 @@ SELLER_ADDRESS = os.environ.get("SELLER_ADDRESS", "").strip()
 
 CSRF_FAILURE_VIEW = "apps.core.views.csrf_failure"
 CART_MAX_QTY_PER_LINE = 10
+
+# ==============================================================================
+# LOGGING INFRASTRUCTURE & SECURITY REDACTION
+# ==============================================================================
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "sensitive_redaction": {
+            "()": "apps.core.logging_filters.SensitiveDataFilter",
+        },
+    },
+    "formatters": {
+        "standard": {
+            "format": "[%(asctime)s] %(levelname)s %(name)s: %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "filters": ["sensitive_redaction"],
+            "formatter": "standard",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "apps": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
 

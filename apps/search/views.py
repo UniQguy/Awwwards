@@ -8,6 +8,8 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET
 
+from django_ratelimit.decorators import ratelimit
+
 from apps.catalog.models import Category, Product
 from apps.catalog.services.brands import get_known_brands
 from apps.catalog.services.price_distribution import PRICE_BRACKETS
@@ -59,7 +61,7 @@ def search_view(request: HttpRequest) -> HttpResponse:
         sort_by=sort_by,
     )
 
-    products_qs = search_result["products"].prefetch_related("media")
+    products_qs = search_result["products"].select_related("inventory").prefetch_related("media")
 
     paginator = Paginator(products_qs, 24)
     page_number = request.GET.get("page", 1)
@@ -90,11 +92,15 @@ def search_view(request: HttpRequest) -> HttpResponse:
     return render(request, "search/search_results.html", context)
 
 
+@ratelimit(key="ip", rate="60/m", block=False)
 @require_GET
 def search_suggest(request: HttpRequest) -> JsonResponse:
     """
     Fast JSON suggestion endpoint returning matching products, categories, and brands (max 8).
     """
+    if getattr(request, "limited", False):
+        return JsonResponse({"error": "Rate limit exceeded."}, status=429)
+
     query = request.GET.get("q", "").strip().lower()
     if len(query) < 2:
         return JsonResponse({"products": [], "categories": [], "brands": []})

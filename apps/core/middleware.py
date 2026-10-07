@@ -10,6 +10,7 @@ SENSITIVE_PREFIXES = (
     "/payments/",
     "/account/",
     "/accounts/",
+    "/cart/",
 )
 
 
@@ -57,3 +58,30 @@ class MotionDebugMiddleware:
             return HttpResponseRedirect(clean_url)
 
         return self.get_response(request)
+
+
+class SecurityHeadersMiddleware:
+    """
+    Applies strict baseline security headers to all HTTP responses:
+    - Permissions-Policy: restricts browser APIs (camera, microphone, geolocation)
+    - Cross-Origin-Opener-Policy: isolates browsing context
+    - Referrer-Policy: default strict-origin-when-cross-origin
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        response = self.get_response(request)
+
+        if "Permissions-Policy" not in response:
+            response["Permissions-Policy"] = (
+                "camera=(), microphone=(), geolocation=(), "
+                'payment=(self "https://checkout.razorpay.com")'
+            )
+        if "Cross-Origin-Opener-Policy" not in response:
+            response["Cross-Origin-Opener-Policy"] = "same-origin"
+        if "Referrer-Policy" not in response:
+            response["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+        return response
