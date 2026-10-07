@@ -52,6 +52,28 @@
     border-bottom: 1px solid var(--world-rule);
   }
 
+  @media (max-width: 639px) {
+    .cart-line-item {
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      align-items: flex-start;
+    }
+    .cart-item-thumbnail {
+      width: 64px;
+      height: 64px;
+    }
+    .cart-item-details {
+      flex: 1 1 calc(100% - 80px);
+      min-width: 0;
+    }
+    .cart-line-item > .text-right {
+      width: 100%;
+      text-align: right;
+      padding-top: var(--space-2);
+      border-top: 1px dashed var(--world-rule);
+    }
+  }
+
   .cart-item-thumbnail {
     width: 96px;
     height: 96px;

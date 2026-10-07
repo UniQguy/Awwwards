@@ -98,6 +98,20 @@
     padding: var(--space-8);
   }
 
+  @media (max-width: 639px) {
+    .invoice-container {
+      margin: var(--space-4) auto;
+      padding: var(--space-4);
+    }
+    .invoice-header {
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    .invoice-header .text-right {
+      text-align: left;
+    }
+  }
+
   .invoice-header {
     display: flex;
     justify-content: space-between;

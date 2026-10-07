@@ -9,9 +9,9 @@
 <div class="container section">
   <div class="max-w-md mx-auto">
     <div class="alert alert-success text-center p-6 mb-6">
-      <h1 class="display-m mb-2">Order Placed Successfully!</h1>
+      <h1 class="display-m mb-2">Order Confirmed</h1>
       <p class="body mb-2">
-        Thank you for choosing ELECTROCART. Your order reference is <strong>#{{ order.order_number }}</strong>.
+        Order Placed Successfully. Thank you for choosing ELECTROCART. Your order reference is <strong>#{{ order.order_number }}</strong>.
       </p>
       <p class="caption">
         A confirmation receipt has been sent to <strong>{{ order.recipient_email }}</strong>.
@@ -50,30 +50,32 @@
       </div>
 
       <h3 class="label mb-3">Merchandise Items</h3>
-      <table class="spec-table mb-5">
-        <caption class="sr-only">Items included in order</caption>
-        <thead>
-          <tr>
-            <th scope="col">Product</th>
-            <th scope="col" class="text-right">Unit Price</th>
-            <th scope="col" class="text-center">Qty</th>
-            <th scope="col" class="text-right">Line Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in order.items.all %}
+      <div class="table-container mb-5" style="overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%;">
+        <table class="spec-table">
+          <caption class="sr-only">Items included in order</caption>
+          <thead>
             <tr>
-              <td>
-                <strong class="body-sm">{{ item.product_title }}</strong>
-                <div class="caption">SKU: {{ item.product_sku }} &bull; HSN: {{ item.hsn_code }} ({{ item.gst_rate }}% GST)</div>
-              </td>
-              <td class="text-right body-sm">{{ item.unit_price|inr }}</td>
-              <td class="text-center body-sm">{{ item.quantity }}</td>
-              <td class="text-right body-sm"><strong>{{ item.line_total|inr }}</strong></td>
+              <th scope="col">Product</th>
+              <th scope="col" class="text-right">Unit Price</th>
+              <th scope="col" class="text-center">Qty</th>
+              <th scope="col" class="text-right">Line Total</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for item in order.items.all %}
+              <tr>
+                <td>
+                  <strong class="body-sm">{{ item.product_title }}</strong>
+                  <div class="caption">SKU: {{ item.product_sku }} &bull; HSN: {{ item.hsn_code }} ({{ item.gst_rate }}% GST)</div>
+                </td>
+                <td class="text-right body-sm">{{ item.unit_price|inr }}</td>
+                <td class="text-center body-sm">{{ item.quantity }}</td>
+                <td class="text-right body-sm"><strong>{{ item.line_total|inr }}</strong></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
       <dl class="summary-totals-dl mb-4">
         <dt>Subtotal</dt>

@@ -40,6 +40,10 @@ class Cart(TimeStampedModel):
     def total_quantity(self) -> int:
         return sum(item.quantity for item in self.items.all())
 
+    @property
+    def total_items(self) -> int:
+        return self.total_quantity
+
 
 class CartItem(TimeStampedModel):
     """

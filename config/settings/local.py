@@ -9,6 +9,10 @@ DEBUG = True
 
 # Allow testserver and localhost for testing
 ALLOWED_HOSTS = list(ALLOWED_HOSTS) + ["testserver"]
+CSRF_TRUSTED_ORIGINS = list(CSRF_TRUSTED_ORIGINS) + [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 
 # Development motion debugging: allows ?motion=1|2|3 to force motion tiers
 MOTION_DEBUG = True

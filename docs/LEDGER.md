@@ -172,3 +172,33 @@
   - `small_motions.js`: Hairline draws, heading reveals, and `announceBagUpdate` live announcements.
 - **Automated Verification Harnesses**:
   - `scripts/motion_e2e_check.py`: Playwright Chromium verification testing all three motion tiers, reduced motion emulation, WebGL chunk isolation, utility page scroller absence, and performance timing.
+
+### 7. Phase 7: Finish, Harden, and Prepare to Ship Layer
+- **New Models**:
+  - `apps.orders.models.EmailLog`: `uuid`, `order` (FK Order), `event` (CharField), `recipient` (masked email), `sent_at`, `status` (success/failed). Unique constraint on `['order', 'event']` guaranteeing transactional email idempotency.
+- **New Services**:
+  - `apps.orders.services.email_notifier.py`: Restrained multipart (HTML + plain text) transactional email engine with preheaders, inline CSS layout (600px warm paper background, charcoal ink), Fraunces fallback to Georgia, Plus Jakarta fallback to Arial. Sends on `transaction.on_commit`, logs silently on failure without breaking checkout, masks email addresses (`a***a***@example.com`), and guarantees idempotency.
+  - `apps.orders.services.invoice_pdf.py`: Pure Python ReportLab GST Tax Invoice & Credit Note generator. Registers bundled DejaVuSans TrueType font for native Indian Rupee symbol (₹) support across Windows and Linux. Generates statutory line item table, HSN codes, tax breakups, place of supply, and amount in words in-memory via `io.BytesIO`.
+  - `apps.catalog.validators.validate_image_file`: Upload validation verifying file size (max 5 MB) and inspecting file magic bytes via Pillow to prevent malicious file uploads.
+- **New HTTP Endpoints**:
+  - `GET /orders/<order_number>/invoice/pdf/` -> `order_invoice_pdf_view`: Secure statutory GST PDF download with guest token verification and `attachment; filename=...` headers.
+  - `GET /about/` -> `about_view`: Honest brand monograph explaining provenance, live catalog stats, sample data notice, and trade policies.
+  - `GET /sitemap.xml` -> Django sitemap index serving 6,724 canonical URLs (Static, Categories, Brands, Products).
+  - `GET /robots.txt` -> Dynamic crawl instructions with `Disallow: /checkout/`, `/account/`, `/admin/`, and dynamic `Sitemap:` reference.
+- **Security Hardening**:
+  - `apps.core.logging.SensitiveDataRedactionFilter`: Intercepts log records to scrub guest tokens, Razorpay keys/signatures, passwords, and full email addresses (`a***@domain`).
+  - Rate limiting: Added Decorators / rate-limiting guards to `/search/suggest/`, `/cart/coupon/apply/`, `/cart/add/`, and `/orders/track/` returning HTTP 429 Too Many Requests.
+  - `manage.py check --deploy --settings=config.settings.production`: Clean exit 0 with zero warnings.
+  - WhiteNoise immutable caching headers for static assets (`Cache-Control: max-age=31536000, immutable`).
+- **Management Commands**:
+  - `manage.py preview_emails`: Generates HTML visual previews for all transactional email templates into `reports/emails/`.
+  - `manage.py db_backup`: Performs online `sqlite3.Connection.backup()` to `backups/` directory with automatic retention cleanup.
+- **Testing, Verification & Audits**:
+  - `tests/test_emails.py`: 7 tests verifying multipart generation, token masking, idempotency, non-blocking failure path, and email content integrity.
+  - `tests/test_invoice_pdf.py`: 4 tests verifying ReportLab PDF structure, statutory fields, credit notes, and byte header output.
+  - Full Python suite: 230 passing unit and integration tests.
+  - Full JS suite: 49 passing Vitest unit tests.
+  - `scripts/customer_walkthrough.py`: End-to-end user shopping journey capturing 26 full-page screenshots at 1280px and 390px with zero horizontal scroll overflow.
+  - `scripts/audit_copy_honesty.py`: 100% compliance with honesty guidelines (zero fake reviews, zero lorem/TODO, zero banned hype words, zero customer-facing exclamation marks).
+  - `scripts/clean_clone_check.ps1`: 100% reproducible clean clone test in fresh environment completing in 32s.
+  - `scripts/launch_audit.py`: Automated 9-gate pre-flight deployment audit passing all checks.

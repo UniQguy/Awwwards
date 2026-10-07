@@ -162,3 +162,28 @@
 - **Decision**: Implemented an ARIA slider pattern (`role="slider"`) over server-rendered bracket data with stepped log-scale boundary mapping, SVG histogram rendering, and debounced fetch to `/c/<slug>/count/`.
 - **Reason**: Provides immediate feedback during price range adjustments while honoring the 100% no-JS principle (falls back to native `<input type="number">` form submission).
 - **Alternative Rejected**: Continuous linear dollar/rupee scale that bunches up high-end prices or client-side recalculation of entire product sets.
+
+### DEC-028: ReportLab as Pure Python PDF Generation Engine
+- **Date**: 2026-10-07
+- **Decision**: Used ReportLab (`reportlab>=4.2.0`) in base `requirements.txt` for pure Python, Windows-safe PDF invoice generation. Added optional `requirements-pdf.txt` for WeasyPrint reference if desired.
+- **Reason**: WeasyPrint requires complex external C system libraries (Pango, Cairo, GObject) that fail or require complex installers on Windows host environments and minimal container runtimes. ReportLab is 100% self-contained pure Python with zero native dependencies.
+- **Alternative Rejected**: Adding WeasyPrint to `requirements.txt` which breaks clean Windows installs.
+
+### DEC-029: Bundled TrueType Font for Indian Rupee Symbol in Statutory PDFs
+- **Date**: 2026-10-07
+- **Decision**: Registered bundled `DejaVuSans.ttf` font in ReportLab for statutory GST invoices.
+- **Reason**: ReportLab's standard Helvetica and Times-Roman core 14 PostScript fonts lack the Unicode Indian Rupee sign (`₹`, U+20B9) and crash or render question marks. Embedding DejaVuSans guarantees crisp, standard ₹ glyph rendering across all operating systems.
+- **Alternative Rejected**: Writing "INR" or "Rs." in statutory invoice totals.
+
+### DEC-030: Sensitive Data Redaction in Server Logging
+- **Date**: 2026-10-07
+- **Decision**: Implemented `SensitiveDataRedactionFilter` in Django logging pipeline targeting guest tokens, Razorpay keys/signatures, passwords, and full email addresses.
+- **Reason**: Compliance with privacy and security requirements; prevents accidental credential or PII leaks to stdout or third-party log aggregation systems.
+- **Alternative Rejected**: Relying solely on manual developer discipline across every logger call.
+
+### DEC-031: Native Container Overflow & Responsive Scoping for Narrow Mobile Screens
+- **Date**: 2026-10-07
+- **Decision**: Scoped histogram slider margins to `calc(100% - 24px)` with `overflow-x: clip`, added `@media (max-width: 639px)` line item wrapping to shopping cart, and wrapped statutory 9-column invoice tables in `.table-responsive` (`overflow-x: auto`).
+- **Reason**: Eliminates horizontal scroll overflow entirely on 390px mobile screens without breaking table layout or causing horizontal page jitter.
+- **Alternative Rejected**: Forcing `overflow-x: hidden` globally on `<body>` which masks layout bugs and disables sticky positioning.
+

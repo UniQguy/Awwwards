@@ -219,10 +219,16 @@ def checkout_address(request: HttpRequest) -> HttpResponse:
         return redirect("checkout_review")
 
     initial_pincode = request.session.get("pincode", "")
+    guest_info = request.session.get("checkout_guest", {})
+    initial_form_data = {
+        "pincode": initial_pincode,
+        "full_name": guest_info.get("full_name", ""),
+        "phone": guest_info.get("phone", ""),
+    }
     context = {
         "saved_addresses": saved_addresses,
         "states": states,
-        "form_data": {"pincode": initial_pincode},
+        "form_data": initial_form_data,
         "breadcrumbs": [
             {"title": "Checkout", "url": "/checkout/"},
             {"title": "Delivery Address", "url": "/checkout/address/"},

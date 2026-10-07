@@ -93,10 +93,11 @@ def csrf_failure(request, reason=""):
     """
     Renders custom 403 page when CSRF token verification fails.
     """
+    print(f"CSRF FAILURE REASON: {reason} for path {request.path}")
     return render(
         request,
         "403.html",
-        {"reason": "Security verification failed (CSRF check). Please reload the page and try again."},
+        {"reason": f"Security verification failed: {reason}"},
         status=403,
     )
 

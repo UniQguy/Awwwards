@@ -126,7 +126,8 @@ def cart_add(request: HttpRequest, product_id: int) -> HttpResponse:
         success = False
 
     if is_json_request(request):
-        return JsonResponse({"success": success, "message": msg, "cart_count": cart.total_items})
+        json_resp = JsonResponse({"success": success, "message": msg, "cart_count": cart.total_items})
+        return _ensure_guest_cookie(json_resp, request)
 
     referrer = request.POST.get("next") or request.META.get("HTTP_REFERER") or "/cart/"
     response = redirect(referrer)

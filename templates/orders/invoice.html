@@ -83,50 +83,52 @@
     </div>
 
     <!-- Itemized Tax Schedule -->
-    <table class="invoice-table">
-      <caption class="sr-only">Itemized product taxes schedule</caption>
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Item Description</th>
-          <th scope="col">HSN</th>
-          <th scope="col" class="text-center">Qty</th>
-          <th scope="col" class="numeric">Unit Price</th>
-          <th scope="col" class="numeric">Taxable Val</th>
-          {% if not invoice.is_bill_of_supply %}
-            <th scope="col" class="numeric">GST Rate</th>
-            <th scope="col" class="numeric">Tax Amt</th>
-          {% endif %}
-          <th scope="col" class="numeric">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in order.items.all %}
+    <div class="table-responsive mb-4" style="overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%;">
+      <table class="invoice-table">
+        <caption class="sr-only">Itemized product taxes schedule</caption>
+        <thead>
           <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-              <strong>{{ item.product_title }}</strong><br>
-              <span class="caption">SKU: {{ item.product_sku }}</span>
-            </td>
-            <td>{{ item.hsn_code|default:"—" }}</td>
-            <td class="text-center">{{ item.quantity }}</td>
-            <td class="numeric">{{ item.unit_price|inr }}</td>
-            <td class="numeric">{{ item.taxable_value|inr }}</td>
+            <th scope="col">#</th>
+            <th scope="col">Item Description</th>
+            <th scope="col">HSN</th>
+            <th scope="col" class="text-center">Qty</th>
+            <th scope="col" class="numeric">Unit Price</th>
+            <th scope="col" class="numeric">Taxable Val</th>
             {% if not invoice.is_bill_of_supply %}
-              <td class="numeric">{{ item.gst_rate }}%</td>
-              <td class="numeric">
-                {% if item.igst_amount > 0 %}
-                  {{ item.igst_amount|inr }} (IGST)
-                {% else %}
-                  {{ item.cgst_amount|add:item.sgst_amount|inr }}
-                {% endif %}
-              </td>
+              <th scope="col" class="numeric">GST Rate</th>
+              <th scope="col" class="numeric">Tax Amt</th>
             {% endif %}
-            <td class="numeric"><strong>{{ item.line_total|inr }}</strong></td>
+            <th scope="col" class="numeric">Total</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for item in order.items.all %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>
+                <strong>{{ item.product_title }}</strong><br>
+                <span class="caption">SKU: {{ item.product_sku }}</span>
+              </td>
+              <td>{{ item.hsn_code|default:"—" }}</td>
+              <td class="text-center">{{ item.quantity }}</td>
+              <td class="numeric">{{ item.unit_price|inr }}</td>
+              <td class="numeric">{{ item.taxable_value|inr }}</td>
+              {% if not invoice.is_bill_of_supply %}
+                <td class="numeric">{{ item.gst_rate }}%</td>
+                <td class="numeric">
+                  {% if item.igst_amount > 0 %}
+                    {{ item.igst_amount|inr }} (IGST)
+                  {% else %}
+                    {{ item.cgst_amount|add:item.sgst_amount|inr }}
+                  {% endif %}
+                </td>
+              {% endif %}
+              <td class="numeric"><strong>{{ item.line_total|inr }}</strong></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
     <!-- Totals Table -->
     <div class="flex justify-end mb-4">

@@ -18,7 +18,7 @@
     <div class="free-delivery-meter">
       <div class="meter-label-row">
         {% if summary.free_shipping_progress >= 100 %}
-          <strong class="text-success">&check; You have qualified for FREE delivery!</strong>
+          <strong class="text-success">&check; You have qualified for free delivery.</strong>
         {% else %}
           <span>Add <strong>{{ summary.free_shipping_remaining|inr }}</strong> more to qualify for <strong>FREE delivery</strong></span>
         {% endif %}
