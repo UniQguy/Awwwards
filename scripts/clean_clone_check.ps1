@@ -71,7 +71,7 @@ try {
         if ($LASTEXITCODE -ne 0) { throw "Database migration failed" }
 
         if (Test-Path "$tempBase\data\electronics_product.csv") {
-            & $venvPy manage.py import_catalog data/electronics_product.csv
+            & $venvPy manage.py import_products --csv "$tempBase\data\electronics_product.csv"
             if ($LASTEXITCODE -ne 0) { throw "Catalog import failed" }
         }
 

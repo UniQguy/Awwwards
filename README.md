@@ -52,7 +52,7 @@ python manage.py migrate
 ### Step 8: Ensure the Catalog CSV Exists and Import Catalog
 Place `electronics_product.csv` at `data/electronics_product.csv` and run:
 ```powershell
-python manage.py import_catalog data/electronics_product.csv
+python manage.py import_products --csv data/electronics_product.csv
 ```
 
 ### Step 9: Seed Demo Store Data
