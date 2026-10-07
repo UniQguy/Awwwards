@@ -1,0 +1,12 @@
+{% extends "emails/base_email.txt" %}
+
+{% block content %}
+Confirm Your Email — ELECTROCART
+==================================================
+
+Welcome to ELECTROCART. Please confirm your email address to activate your account:
+
+{{ activate_url }}
+
+If you did not sign up for an account on ELECTROCART, please ignore this email.
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "emails/base_email.txt" %}
+
+{% block content %}
+Order Status Update: #{{ order.order_number }}
+==================================================
+
+Your order #{{ order.order_number }} has progressed to {{ status_display }}.
+
+Status: {{ status_display }}
+{% if carrier %}Courier: {{ carrier }}{% endif %}
+{% if tracking_number %}Tracking: {{ tracking_number }}{% endif %}
+{% if estimated_delivery %}Estimated Delivery: {{ estimated_delivery }}{% endif %}
+
+Track your order:
+{{ order_url }}
+{% endblock %}

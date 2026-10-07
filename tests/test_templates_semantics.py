@@ -218,6 +218,9 @@ class SemanticHTMLComplianceTests(TestCase):
 
         violations = []
         for template_file in templates_dir.rglob("*.html"):
+            # Email templates require inline styles for email client compatibility
+            if "emails" in template_file.parts or ("account" in template_file.parts and "email" in template_file.parts):
+                continue
             content = template_file.read_text(encoding="utf-8")
             for match in style_pattern.finditer(content):
                 style_value = match.group(1)

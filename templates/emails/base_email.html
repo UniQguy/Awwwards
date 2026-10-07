@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ELECTROCART{% endblock %}</title>
+  <style>
+    /* Client-specific resets */
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; background-color: #F5F2EB; font-family: 'Plus Jakarta Sans', Arial, -apple-system, sans-serif; color: #1A1918; }
+  </style>
+</head>
+<body style="margin: 0; padding: 24px 12px; background-color: #F5F2EB; font-family: Arial, sans-serif; color: #1A1918; -webkit-font-smoothing: antialiased;">
+  <!-- Preheader text hidden from visual view -->
+  <div style="display: none; font-size: 1px; color: #F5F2EB; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+    {% block preheader %}{% endblock %}
+  </div>
+
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center">
+        <!-- Main Email Container (600px max) -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #FFFFFF; border: 1px solid #E5E0D8; border-radius: 4px; overflow: hidden; text-align: left;">
+          <!-- Header Bar -->
+          <tr>
+            <td style="padding: 28px 32px 20px 32px; border-bottom: 1px solid #F0ECE4;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td>
+                    <span style="font-family: Georgia, serif; font-size: 20px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #1A1918; text-decoration: none;">ELECTROCART</span>
+                  </td>
+                  <td align="right">
+                    <span style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #76726B;">Curated Electronics</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Email Content Body -->
+          <tr>
+            <td style="padding: 32px 32px 36px 32px;">
+              {% block content %}{% endblock %}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 32px; background-color: #FAF8F5; border-top: 1px solid #F0ECE4; font-size: 12px; line-height: 1.6; color: #76726B;">
+              <p style="margin: 0 0 8px 0;">
+                ELECTROCART &bull; Curated Consumer Electronics &bull; India
+              </p>
+              <p style="margin: 0 0 8px 0;">
+                All listed prices include applicable GST. This is an automated transactional message.
+              </p>
+              <p style="margin: 0;">
+                Questions? Visit <a href="{{ site_url }}/legal/contact/" style="color: #C85A32; text-decoration: underline;">Contact & Support</a> or view our <a href="{{ site_url }}/legal/terms/" style="color: #76726B; text-decoration: underline;">Terms</a>.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

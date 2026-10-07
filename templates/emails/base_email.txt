@@ -1,0 +1,10 @@
+ELECTROCART — Curated Electronics
+==================================================
+
+{% block content %}{% endblock %}
+
+==================================================
+ELECTROCART • Curated Consumer Electronics • India
+All catalog prices include applicable GST.
+Support: {{ site_url }}/legal/contact/
+Terms: {{ site_url }}/legal/terms/

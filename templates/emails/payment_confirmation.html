@@ -1,0 +1,47 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Payment Captured: #{{ order.order_number }}{% endblock %}
+
+{% block preheader %}Payment of ₹{{ order.total_amount }} for order #{{ order.order_number }} was successfully captured.{% endblock %}
+
+{% block content %}
+<h1 style="font-family: Georgia, serif; font-size: 22px; font-weight: normal; margin: 0 0 12px 0; color: #1A1918;">Payment Successful</h1>
+
+<p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #4A4640;">
+  Your online payment via Razorpay has been verified and captured. Your order is confirmed and moving to fulfillment.
+</p>
+
+<!-- Payment Details Box -->
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #FAF8F5; border: 1px solid #EAE5DE; border-radius: 4px; margin-bottom: 24px;">
+  <tr>
+    <td style="padding: 16px 20px;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="font-size: 13px; color: #76726B; padding-bottom: 4px;">Order Number</td>
+          <td align="right" style="font-size: 13px; font-weight: bold; color: #1A1918; padding-bottom: 4px;">#{{ order.order_number }}</td>
+        </tr>
+        <tr>
+          <td style="font-size: 13px; color: #76726B; padding-bottom: 4px;">Payment Reference</td>
+          <td align="right" style="font-size: 13px; font-family: monospace; color: #1A1918; padding-bottom: 4px;">{{ payment_id }}</td>
+        </tr>
+        <tr>
+          <td style="font-size: 13px; color: #76726B; padding-bottom: 4px;">Amount Paid</td>
+          <td align="right" style="font-size: 14px; font-weight: bold; color: #1A1918; padding-bottom: 4px;">₹{{ order.total_amount }}</td>
+        </tr>
+        <tr>
+          <td style="font-size: 13px; color: #76726B;">Payment Status</td>
+          <td align="right" style="font-size: 13px; color: #2E6930; font-weight: bold;">Captured (Success)</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="center">
+      <a href="{{ order_url }}" style="display: inline-block; background-color: #1A1918; color: #FFFFFF; font-size: 14px; font-weight: 600; text-decoration: none; padding: 14px 28px; border-radius: 3px; min-height: 20px; line-height: 20px; text-align: center;">View Order Details &rarr;</a>
+    </td>
+  </tr>
+</table>
+{% endblock %}

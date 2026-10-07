@@ -1,0 +1,106 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Order Confirmed: #{{ order.order_number }}{% endblock %}
+
+{% block preheader %}Your order #{{ order.order_number }} has been confirmed. Total: ₹{{ order.total_amount }}.{% endblock %}
+
+{% block content %}
+<h1 style="font-family: Georgia, serif; font-size: 22px; font-weight: normal; margin: 0 0 12px 0; color: #1A1918;">Order Confirmed</h1>
+
+<p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #4A4640;">
+  Thank you for your order. We have received your purchase and are preparing it for shipment.
+</p>
+
+<!-- Order Metadata Strip -->
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #FAF8F5; border: 1px solid #EAE5DE; border-radius: 4px; margin-bottom: 24px;">
+  <tr>
+    <td style="padding: 16px 20px;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="font-size: 13px; color: #76726B; padding-bottom: 4px;">Order Reference</td>
+          <td align="right" style="font-size: 13px; font-weight: bold; color: #1A1918; padding-bottom: 4px;">#{{ order.order_number }}</td>
+        </tr>
+        <tr>
+          <td style="font-size: 13px; color: #76726B; padding-bottom: 4px;">Order Date</td>
+          <td align="right" style="font-size: 13px; color: #1A1918; padding-bottom: 4px;">{{ order.created_at|date:"d M Y, H:i" }} IST</td>
+        </tr>
+        <tr>
+          <td style="font-size: 13px; color: #76726B;">Payment Method</td>
+          <td align="right" style="font-size: 13px; color: #1A1918;">{{ order.get_payment_method_display }}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- Purchased Items -->
+<h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: #76726B; margin: 0 0 12px 0; border-bottom: 1px solid #F0ECE4; padding-bottom: 8px;">Items Ordered</h2>
+
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px; border-collapse: collapse;">
+  {% for item in order.items.all %}
+  <tr>
+    <td style="padding: 12px 0; border-bottom: 1px solid #F0ECE4; vertical-align: top;">
+      <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: #1A1918;">{{ item.product_title }}</p>
+      <p style="margin: 0; font-size: 12px; color: #76726B;">Qty: {{ item.quantity }} &bull; SKU: {{ item.product_sku }}</p>
+    </td>
+    <td align="right" style="padding: 12px 0; border-bottom: 1px solid #F0ECE4; vertical-align: top; font-size: 14px; font-weight: 600; color: #1A1918;">
+      ₹{{ item.line_total }}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+<!-- Financial Totals -->
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 28px;">
+  <tr>
+    <td style="font-size: 14px; color: #76726B; padding: 4px 0;">Subtotal</td>
+    <td align="right" style="font-size: 14px; color: #1A1918; padding: 4px 0;">₹{{ order.subtotal }}</td>
+  </tr>
+  {% if order.discount_amount > 0 %}
+  <tr>
+    <td style="font-size: 14px; color: #2E6930; padding: 4px 0;">Coupon Discount</td>
+    <td align="right" style="font-size: 14px; color: #2E6930; padding: 4px 0;">-₹{{ order.discount_amount }}</td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td style="font-size: 14px; color: #76726B; padding: 4px 0;">Shipping Fee</td>
+    <td align="right" style="font-size: 14px; color: #1A1918; padding: 4px 0;">
+      {% if order.shipping_fee > 0 %}₹{{ order.shipping_fee }}{% else %}Free{% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td style="font-size: 12px; color: #76726B; padding: 4px 0;">
+      {% if order.is_bill_of_supply %}
+        Composition Levy (No tax collected)
+      {% else %}
+        Applicable GST Included
+      {% endif %}
+    </td>
+    <td align="right" style="font-size: 12px; color: #76726B; padding: 4px 0;">
+      {% if not order.is_bill_of_supply %}₹{{ order.tax_amount }}{% else %}&mdash;{% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td style="font-size: 16px; font-weight: bold; color: #1A1918; padding: 12px 0 0 0; border-top: 1px solid #EAE5DE;">Total</td>
+    <td align="right" style="font-size: 18px; font-weight: bold; color: #1A1918; padding: 12px 0 0 0; border-top: 1px solid #EAE5DE;">₹{{ order.total_amount }}</td>
+  </tr>
+</table>
+
+<!-- Delivery Address -->
+<h2 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: #76726B; margin: 0 0 8px 0;">Shipping Address</h2>
+<p style="font-size: 14px; line-height: 1.5; color: #4A4640; margin: 0 0 28px 0; background-color: #FAF8F5; padding: 14px 18px; border-radius: 4px; border: 1px solid #EAE5DE;">
+  <strong>{{ order.shipping_address_snapshot.full_name }}</strong><br>
+  {{ order.shipping_address_snapshot.line1 }}{% if order.shipping_address_snapshot.line2 %}, {{ order.shipping_address_snapshot.line2 }}{% endif %}<br>
+  {{ order.shipping_address_snapshot.city }}, {{ order.shipping_address_snapshot.state }} &ndash; {{ order.shipping_address_snapshot.pincode }}<br>
+  Phone: {{ order.shipping_address_snapshot.phone }}
+</p>
+
+<!-- CTA Button -->
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="center">
+      <a href="{{ order_url }}" style="display: inline-block; background-color: #1A1918; color: #FFFFFF; font-size: 14px; font-weight: 600; text-decoration: none; padding: 14px 28px; border-radius: 3px; min-height: 20px; line-height: 20px; text-align: center;">View Order &amp; Invoice &rarr;</a>
+    </td>
+  </tr>
+</table>
+{% endblock %}

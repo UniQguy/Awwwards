@@ -1,0 +1,32 @@
+{% extends "emails/base_email.txt" %}
+
+{% block content %}
+Order Confirmed: #{{ order.order_number }}
+==================================================
+
+Thank you for your order. We have received your purchase and are preparing it for shipment.
+
+Order Date: {{ order.created_at|date:"d M Y, H:i" }} IST
+Payment Method: {{ order.get_payment_method_display }}
+
+ITEMS ORDERED:
+{% for item in order.items.all %}
+- {{ item.product_title }} (Qty: {{ item.quantity }}, SKU: {{ item.product_sku }}): INR {{ item.line_total }}
+{% endfor %}
+
+TOTALS:
+Subtotal: INR {{ order.subtotal }}
+{% if order.discount_amount > 0 %}Coupon Discount: -INR {{ order.discount_amount }}{% endif %}
+Shipping Fee: {% if order.shipping_fee > 0 %}INR {{ order.shipping_fee }}{% else %}Free{% endif %}
+{% if order.is_bill_of_supply %}Composition Levy: No tax collected{% else %}Applicable GST: INR {{ order.tax_amount }}{% endif %}
+Grand Total: INR {{ order.total_amount }}
+
+SHIPPING ADDRESS:
+{{ order.shipping_address_snapshot.full_name }}
+{{ order.shipping_address_snapshot.line1 }}{% if order.shipping_address_snapshot.line2 %}, {{ order.shipping_address_snapshot.line2 }}{% endif %}
+{{ order.shipping_address_snapshot.city }}, {{ order.shipping_address_snapshot.state }} - {{ order.shipping_address_snapshot.pincode }}
+Phone: {{ order.shipping_address_snapshot.phone }}
+
+View your order and invoice:
+{{ order_url }}
+{% endblock %}

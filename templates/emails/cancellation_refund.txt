@@ -1,0 +1,15 @@
+{% extends "emails/base_email.txt" %}
+
+{% block content %}
+Order Cancelled: #{{ order.order_number }}
+==================================================
+
+Your order #{{ order.order_number }} has been cancelled.
+{% if reason %}Reason: {{ reason }}{% endif %}
+
+{% if credit_note %}GST Credit Note: {{ credit_note.credit_note_number }}{% endif %}
+{% if refund_amount %}Refund Amount: INR {{ refund_amount }} (5-7 bank business days to original method){% endif %}
+
+View your order record:
+{{ order_url }}
+{% endblock %}

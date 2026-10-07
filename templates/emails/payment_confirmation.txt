@@ -1,0 +1,16 @@
+{% extends "emails/base_email.txt" %}
+
+{% block content %}
+Payment Successful: #{{ order.order_number }}
+==================================================
+
+Your online payment via Razorpay has been verified and captured.
+
+Order Number: #{{ order.order_number }}
+Payment Reference: {{ payment_id }}
+Amount Paid: INR {{ order.total_amount }}
+Status: Captured (Success)
+
+View your order:
+{{ order_url }}
+{% endblock %}

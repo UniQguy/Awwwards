@@ -1,0 +1,17 @@
+{% extends "emails/base_email.txt" %}
+
+{% block content %}
+Cash on Delivery Scheduled: #{{ order.order_number }}
+==================================================
+
+Your order #{{ order.order_number }} has been placed with Cash on Delivery (COD) payment.
+
+Order Number: #{{ order.order_number }}
+Amount Due at Doorstep: INR {{ order.total_amount }}
+Payment Mode: Cash or UPI upon delivery agent verification
+
+Please keep the exact cash amount ready upon delivery.
+
+View your order:
+{{ order_url }}
+{% endblock %}

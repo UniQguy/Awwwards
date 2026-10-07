@@ -1,0 +1,25 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Confirm email change — ELECTROCART{% endblock %}
+
+{% block preheader %}Confirm your new email address for ELECTROCART.{% endblock %}
+
+{% block content %}
+<h1 style="font-family: Georgia, serif; font-size: 22px; font-weight: normal; margin: 0 0 12px 0; color: #1A1918;">Confirm Email Address</h1>
+
+<p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #4A4640;">
+  You have requested to verify this email address for your ELECTROCART account. Click the button below to confirm.
+</p>
+
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0;">
+  <tr>
+    <td align="center">
+      <a href="{{ activate_url }}" style="display: inline-block; background-color: #1A1918; color: #FFFFFF; font-size: 14px; font-weight: 600; text-decoration: none; padding: 14px 28px; border-radius: 3px; min-height: 20px; line-height: 20px; text-align: center;">Confirm Email &rarr;</a>
+    </td>
+  </tr>
+</table>
+
+<p style="font-size: 13px; line-height: 1.5; color: #76726B; margin: 24px 0 0 0;">
+  If you did not request this verification, please contact our support team immediately.
+</p>
+{% endblock %}

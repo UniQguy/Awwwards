@@ -1,0 +1,53 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Order Update: #{{ order.order_number }} is {{ status_display }}{% endblock %}
+
+{% block preheader %}Status update for order #{{ order.order_number }}: {{ status_display }}.{% endblock %}
+
+{% block content %}
+<h1 style="font-family: Georgia, serif; font-size: 22px; font-weight: normal; margin: 0 0 12px 0; color: #1A1918;">Order Status Update</h1>
+
+<p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #4A4640;">
+  Your order <strong>#{{ order.order_number }}</strong> has progressed to <strong>{{ status_display }}</strong>.
+</p>
+
+<!-- Status Box -->
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #FAF8F5; border: 1px solid #EAE5DE; border-radius: 4px; margin-bottom: 24px;">
+  <tr>
+    <td style="padding: 16px 20px;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="font-size: 13px; color: #76726B; padding-bottom: 4px;">Current Status</td>
+          <td align="right" style="font-size: 14px; font-weight: bold; color: #1A1918; padding-bottom: 4px;">{{ status_display }}</td>
+        </tr>
+        {% if carrier %}
+        <tr>
+          <td style="font-size: 13px; color: #76726B; padding-bottom: 4px;">Courier / Carrier</td>
+          <td align="right" style="font-size: 13px; color: #1A1918; padding-bottom: 4px;">{{ carrier }}</td>
+        </tr>
+        {% endif %}
+        {% if tracking_number %}
+        <tr>
+          <td style="font-size: 13px; color: #76726B;">Tracking Reference</td>
+          <td align="right" style="font-size: 13px; font-family: monospace; color: #1A1918;">{{ tracking_number }}</td>
+        </tr>
+        {% endif %}
+      </table>
+    </td>
+  </tr>
+</table>
+
+{% if estimated_delivery %}
+<p style="font-size: 14px; line-height: 1.5; color: #76726B; margin: 0 0 24px 0;">
+  Estimated delivery: <strong>{{ estimated_delivery }}</strong> (computed from verified serviceability).
+</p>
+{% endif %}
+
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="center">
+      <a href="{{ order_url }}" style="display: inline-block; background-color: #1A1918; color: #FFFFFF; font-size: 14px; font-weight: 600; text-decoration: none; padding: 14px 28px; border-radius: 3px; min-height: 20px; line-height: 20px; text-align: center;">Track Your Order &rarr;</a>
+    </td>
+  </tr>
+</table>
+{% endblock %}
