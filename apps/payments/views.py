@@ -152,12 +152,19 @@ def razorpay_verify_view(request: HttpRequest) -> HttpResponse:
         return redirect("payments:payment_failed", order_number=order.order_number)
 
 
+from django_ratelimit.decorators import ratelimit
+
+
 @csrf_exempt
+@ratelimit(key="ip", rate="120/m", block=False)
 @require_POST
 def razorpay_webhook_view(request: HttpRequest) -> JsonResponse:
     """
     POST endpoint for asynchronous inbound Razorpay webhooks.
     """
+    if getattr(request, "limited", False):
+        return JsonResponse({"error": "Rate limit exceeded."}, status=429)
+
     raw_body = request.body
     signature = request.headers.get("X-Razorpay-Signature", "")
 

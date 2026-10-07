@@ -1,0 +1,6 @@
+-r requirements.txt
+
+# Development, Testing & Verification
+pypdf>=6.0,<7.0
+playwright>=1.40,<2.0
+pip-audit>=2.10.0,<3.0

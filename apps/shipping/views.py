@@ -22,8 +22,8 @@ def shipping_check(request: HttpRequest) -> HttpResponse:
     if getattr(request, "limited", False):
         if is_json_request(request):
             return JsonResponse({"serviceable": False, "error": "Rate limit exceeded."}, status=429)
-        messages.error(request, "Too many PIN code queries. Please wait a moment.")
-        return redirect(request.META.get("HTTP_REFERER", "/"))
+        from apps.core.views import error_429
+        return error_429(request)
 
     pincode = (request.POST.get("pincode") or request.GET.get("pincode") or "").strip()
     if not pincode:

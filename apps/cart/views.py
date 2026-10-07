@@ -197,8 +197,8 @@ def coupon_apply(request: HttpRequest) -> HttpResponse:
     Rate-limited to prevent brute-force code enumeration.
     """
     if getattr(request, "limited", False):
-        messages.error(request, "Too many coupon attempts. Please try again in a minute.")
-        return redirect("cart_detail")
+        from apps.core.views import error_429
+        return error_429(request)
 
     code = request.POST.get("code", "").strip()
     if not code:

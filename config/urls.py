@@ -2,10 +2,14 @@
 Root URL configuration for ELECTROCART.
 """
 
+import os
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 
+from apps.core.sitemaps import sitemaps
 from apps.core.views import (
+    about,
     error_400,
     error_403,
     error_404,
@@ -15,10 +19,17 @@ from apps.core.views import (
     legal_refunds,
     legal_shipping,
     legal_terms,
+    robots_txt,
 )
 
+ADMIN_URL = os.environ.get("ADMIN_URL", "admin/").strip("/")
+admin_path = f"{ADMIN_URL}/" if ADMIN_URL else "admin/"
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path(admin_path, admin.site.urls),
+    path("robots.txt", robots_txt, name="robots_txt"),
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
+    path("about/", about, name="about"),
     path("health/", health_check, name="health_check"),
 
     # Customer Authentication & Accounts
@@ -50,3 +61,5 @@ handler400 = "apps.core.views.error_400"
 handler403 = "apps.core.views.error_403"
 handler404 = "apps.core.views.error_404"
 handler500 = "apps.core.views.error_500"
+handler429 = "apps.core.views.error_429"
+

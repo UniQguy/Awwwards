@@ -40,6 +40,19 @@ class OrderAdmin(admin.ModelAdmin):
     def customer_display(self, obj):
         return obj.user.email if obj.user else f"Guest ({obj.guest_email})"
 
+    def save_model(self, request, obj, form, change):
+        if change and "status" in form.changed_data:
+            from_status = form.initial.get("status")
+            to_status = obj.status
+            OrderStatusHistory.objects.create(
+                order=obj,
+                from_status=from_status,
+                to_status=to_status,
+                notes=f"Staff admin update by {getattr(request.user, 'email', str(request.user))}",
+                changed_by=request.user,
+            )
+        super().save_model(request, obj, form, change)
+
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):

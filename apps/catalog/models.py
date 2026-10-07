@@ -220,6 +220,55 @@ class ProductSpecification(TimeStampedModel):
         return f"{self.key}: {self.value}"
 
 
+def validate_product_image_upload(value):
+    """
+    Validates uploaded product image:
+    1. Size cap: 5MB
+    2. Format verification via Pillow inspection (JPEG, PNG, WEBP, AVIF)
+    3. Prevents corrupted or malicious file payloads
+    """
+    if not value:
+        return
+
+    MAX_FILE_SIZE = 5 * 1024 * 1024
+    if value.size > MAX_FILE_SIZE:
+        raise ValidationError(f"File size exceeds 5MB limit ({value.size / (1024*1024):.1f}MB uploaded).")
+
+    try:
+        from PIL import Image
+
+        if hasattr(value, "seek"):
+            value.seek(0)
+        with Image.open(value) as img:
+            img.verify()
+            allowed_formats = {"JPEG", "PNG", "WEBP", "AVIF"}
+            if img.format not in allowed_formats:
+                raise ValidationError(
+                    f"Unsupported image format: {img.format}. Allowed: {', '.join(sorted(allowed_formats))}"
+                )
+    except ValidationError:
+        raise
+    except Exception as exc:
+        raise ValidationError("Uploaded file is not a valid readable image.") from exc
+    finally:
+        if hasattr(value, "seek"):
+            value.seek(0)
+
+
+def product_image_upload_to(instance, filename):
+    import os
+    import uuid
+    from django.utils.text import get_valid_filename
+
+    clean_name = get_valid_filename(filename)
+    _, ext = os.path.splitext(clean_name)
+    ext = ext.lower()
+    if ext not in (".jpg", ".jpeg", ".png", ".webp", ".avif"):
+        ext = ".webp"
+    safe_name = f"{uuid.uuid4().hex[:12]}{ext}"
+    return f"products/{safe_name}"
+
+
 class ProductMedia(TimeStampedModel):
     """
     Visual assets for a product: marketplace photos, local webp cutouts, video/3D placeholders.
@@ -239,7 +288,12 @@ class ProductMedia(TimeStampedModel):
     )
     media_type = models.CharField(_("media type"), max_length=20, choices=MEDIA_TYPES, default="image")
     external_image_url = models.URLField(_("external CDN / marketplace URL"), max_length=500, blank=True)
-    local_image = models.ImageField(_("local asset file"), upload_to="products/%Y/%m/", blank=True)
+    local_image = models.ImageField(
+        _("local asset file"),
+        upload_to=product_image_upload_to,
+        validators=[validate_product_image_upload],
+        blank=True,
+    )
     alt_text = models.CharField(_("alt text description"), max_length=255, blank=True)
     display_order = models.PositiveIntegerField(_("display order"), default=0)
     width = models.PositiveIntegerField(_("width (px)"), null=True, blank=True)
