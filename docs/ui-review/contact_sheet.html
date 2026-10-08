@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ELECTROCART — Phase 8c Final Visual & Motion Contact Sheet</title>
+  <style>
+    :root {
+      --bg: #F9F8F6;
+      --surface: #FFFFFF;
+      --card-bg: #F4F2EE;
+      --text: #1F2421;
+      --muted: #5C645F;
+      --rule: #E5E2DC;
+      --accent: #2C4A3E;
+      --accent-tint: rgba(44, 74, 62, 0.08);
+      --font-display: "Fraunces", Georgia, serif;
+      --font-body: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.5;
+      padding: 2.5rem 1.5rem;
+    }
+    .sheet-container {
+      max-width: 1540px;
+      margin: 0 auto;
+    }
+    header.sheet-header {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .colophon {
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .summary-p {
+      color: var(--muted);
+      max-width: 80ch;
+      font-size: 1rem;
+    }
+    .metrics-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 1rem 1.5rem;
+    }
+    .metric-card {
+      display: flex;
+      flex-direction: column;
+    }
+    .metric-val {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .metric-lbl {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    section.sheet-section {
+      margin-bottom: 3.5rem;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 2rem;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    .sec-desc {
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    /* Gallery styles */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .card-shot {
+      background: var(--card-bg);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .shot-img-wrap {
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+      background: #e9e6df;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      position: relative;
+    }
+    .shot-img-wrap img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      transition: transform 200ms ease;
+    }
+    .shot-img-wrap:hover img {
+      transform: scale(1.03);
+    }
+    .shot-meta {
+      padding: 0.85rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border-top: 1px solid var(--rule);
+    }
+    .shot-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .shot-tag {
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      background: var(--accent-tint);
+      color: var(--accent);
+      border-radius: 2px;
+      font-weight: 600;
+    }
+
+    /* Frame sequences */
+    .frame-strip {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+      scrollbar-width: thin;
+    }
+    .frame-item {
+      flex: 0 0 200px;
+      background: var(--card-bg);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .frame-item img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+    }
+    .frame-lbl {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.75rem;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 600;
+      background: var(--surface);
+    }
+
+    /* Interactive state inspector */
+    .state-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .picker-btn {
+      padding: 0.4rem 0.85rem;
+      font-size: 0.8rem;
+      border: 1px solid var(--rule);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 120ms;
+    }
+    .picker-btn:hover {
+      background: var(--card-bg);
+      border-color: var(--accent);
+    }
+    .picker-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .vp-columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+    .vp-col {
+      background: var(--card-bg);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .vp-header {
+      background: var(--surface);
+      padding: 0.6rem 0.85rem;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .vp-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .vp-img-wrap {
+      width: 100%;
+      height: 380px;
+      overflow-y: auto;
+      background: #e9e6df;
+    }
+    .vp-img-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    a.img-link {
+      text-decoration: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet-container">
+    <header class="sheet-header">
+      <div class="colophon">ELECTROCART Architectural Proof &middot; Phase 8c</div>
+      <h1>Visual &amp; Motion Contact Sheet</h1>
+      <p class="summary-p">
+        Complete multi-viewport, multi-mode visual evidence archive from Playwright Chromium audits.
+        Verifies 26 storefront states, zero horizontal scroll, pure keyboard checkout walkthrough,
+        smooth editorial choreographies, and tier-calibrated transitions.
+      </p>
+
+      <div class="metrics-bar">
+        <div class="metric-card">
+          <span class="metric-val">468</span>
+          <span class="metric-lbl">Browser Evaluations</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-val">0</span>
+          <span class="metric-lbl">Layout / Overflow Defects</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-val">100%</span>
+          <span class="metric-lbl">Keyboard Traversable</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-val">3</span>
+          <span class="metric-lbl">Motion Tiers Calibrated</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-val">6</span>
+          <span class="metric-lbl">Tested Viewports (360 - 1920px)</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECTION 1: KEYBOARD-ONLY PURCHASE WALKTHROUGH -->
+    <section class="sheet-section">
+      <h2>1. Pure Keyboard Checkout Sequence (20 Keystrokes, 0 Pointer)</h2>
+      <p class="sec-desc">
+        Complete end-to-end purchase executed strictly via Tab, Space, Enter and typing.
+        Demonstrates skip links, focus states, interactive mini-bag drawer, and COD order completion.
+      </p>
+      <div class="gallery-grid">
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/01_home_start.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/01_home_start.png" alt="01 Home Start" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">01. 01 Home Start</span>
+            <span class="shot-tag">Key 01</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/02_category_entered.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/02_category_entered.png" alt="02 Category Entered" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">02. 02 Category Entered</span>
+            <span class="shot-tag">Key 02</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/03_product_card_focused.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/03_product_card_focused.png" alt="03 Product Card Focused" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">03. 03 Product Card Focused</span>
+            <span class="shot-tag">Key 03</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/04_pdp_landed.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/04_pdp_landed.png" alt="04 Pdp Landed" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">04. 04 Pdp Landed</span>
+            <span class="shot-tag">Key 04</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/05_add_to_bag_focused.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/05_add_to_bag_focused.png" alt="05 Add To Bag Focused" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">05. 05 Add To Bag Focused</span>
+            <span class="shot-tag">Key 05</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/06_mini_bag_drawer_opened.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/06_mini_bag_drawer_opened.png" alt="06 Mini Bag Drawer Opened" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">06. 06 Mini Bag Drawer Opened</span>
+            <span class="shot-tag">Key 06</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/07_cart_page.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/07_cart_page.png" alt="07 Cart Page" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">07. 07 Cart Page</span>
+            <span class="shot-tag">Key 07</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/08_checkout_guest_landed.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/08_checkout_guest_landed.png" alt="08 Checkout Guest Landed" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">08. 08 Checkout Guest Landed</span>
+            <span class="shot-tag">Key 08</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/09_checkout_address.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/09_checkout_address.png" alt="09 Checkout Address" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">09. 09 Checkout Address</span>
+            <span class="shot-tag">Key 09</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/10_checkout_review_payment.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/10_checkout_review_payment.png" alt="10 Checkout Review Payment" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">10. 10 Checkout Review Payment</span>
+            <span class="shot-tag">Key 10</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/11_place_order_focused.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/11_place_order_focused.png" alt="11 Place Order Focused" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">11. 11 Place Order Focused</span>
+            <span class="shot-tag">Key 11</span>
+          </div>
+        </div>
+
+        <div class="card-shot">
+          <a class="img-link" href="../../reports/full_qa/keyboard_walkthrough/12_order_success_page.png" target="_blank" title="Click to view full size">
+            <div class="shot-img-wrap">
+              <img src="../../reports/full_qa/keyboard_walkthrough/12_order_success_page.png" alt="12 Order Success Page" loading="lazy">
+            </div>
+          </a>
+          <div class="shot-meta">
+            <span class="shot-title">12. 12 Order Success Page</span>
+            <span class="shot-tag">Key 12</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 2: MOTION CHOREOGRAPHY FRAME SEQUENCES -->
+    <section class="sheet-section">
+      <h2>2. Motion Choreography Frame Sequences (100 ms Increments)</h2>
+      <p class="sec-desc">
+        High-cadence frame captures validating hero entrance sequence (masked line stagger, specular sweep, plate rise)
+        and diagonal chapter seam transitions without layout shift.
+      </p>
+
+      <h3 style="font-family: var(--font-display); font-size: 1.15rem; margin: 1.5rem 0 0.75rem 0; color: var(--accent);">Hero</h3>
+      <div class="frame-strip">
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_00_0ms.png" target="_blank">
+            <img src="frames/hero/frame_00_0ms.png" alt="00 0ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">00 0ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_01_100ms.png" target="_blank">
+            <img src="frames/hero/frame_01_100ms.png" alt="01 100ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">01 100ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_02_200ms.png" target="_blank">
+            <img src="frames/hero/frame_02_200ms.png" alt="02 200ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">02 200ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_03_300ms.png" target="_blank">
+            <img src="frames/hero/frame_03_300ms.png" alt="03 300ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">03 300ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_04_400ms.png" target="_blank">
+            <img src="frames/hero/frame_04_400ms.png" alt="04 400ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">04 400ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_05_500ms.png" target="_blank">
+            <img src="frames/hero/frame_05_500ms.png" alt="05 500ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">05 500ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_06_600ms.png" target="_blank">
+            <img src="frames/hero/frame_06_600ms.png" alt="06 600ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">06 600ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_07_700ms.png" target="_blank">
+            <img src="frames/hero/frame_07_700ms.png" alt="07 700ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">07 700ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_08_800ms.png" target="_blank">
+            <img src="frames/hero/frame_08_800ms.png" alt="08 800ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">08 800ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_09_900ms.png" target="_blank">
+            <img src="frames/hero/frame_09_900ms.png" alt="09 900ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">09 900ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_10_1000ms.png" target="_blank">
+            <img src="frames/hero/frame_10_1000ms.png" alt="10 1000ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">10 1000ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_11_1100ms.png" target="_blank">
+            <img src="frames/hero/frame_11_1100ms.png" alt="11 1100ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">11 1100ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_12_1200ms.png" target="_blank">
+            <img src="frames/hero/frame_12_1200ms.png" alt="12 1200ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">12 1200ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_13_1300ms.png" target="_blank">
+            <img src="frames/hero/frame_13_1300ms.png" alt="13 1300ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">13 1300ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/hero/frame_14_1400ms.png" target="_blank">
+            <img src="frames/hero/frame_14_1400ms.png" alt="14 1400ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">14 1400ms</div>
+        </div>
+      </div>
+
+      <h3 style="font-family: var(--font-display); font-size: 1.15rem; margin: 1.5rem 0 0.75rem 0; color: var(--accent);">Seam</h3>
+      <div class="frame-strip">
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_00_0ms.png" target="_blank">
+            <img src="frames/seam/frame_00_0ms.png" alt="00 0ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">00 0ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_01_100ms.png" target="_blank">
+            <img src="frames/seam/frame_01_100ms.png" alt="01 100ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">01 100ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_02_200ms.png" target="_blank">
+            <img src="frames/seam/frame_02_200ms.png" alt="02 200ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">02 200ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_03_300ms.png" target="_blank">
+            <img src="frames/seam/frame_03_300ms.png" alt="03 300ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">03 300ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_04_400ms.png" target="_blank">
+            <img src="frames/seam/frame_04_400ms.png" alt="04 400ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">04 400ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_05_500ms.png" target="_blank">
+            <img src="frames/seam/frame_05_500ms.png" alt="05 500ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">05 500ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_06_600ms.png" target="_blank">
+            <img src="frames/seam/frame_06_600ms.png" alt="06 600ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">06 600ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_07_700ms.png" target="_blank">
+            <img src="frames/seam/frame_07_700ms.png" alt="07 700ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">07 700ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_08_800ms.png" target="_blank">
+            <img src="frames/seam/frame_08_800ms.png" alt="08 800ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">08 800ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_09_900ms.png" target="_blank">
+            <img src="frames/seam/frame_09_900ms.png" alt="09 900ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">09 900ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_10_1000ms.png" target="_blank">
+            <img src="frames/seam/frame_10_1000ms.png" alt="10 1000ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">10 1000ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_11_1100ms.png" target="_blank">
+            <img src="frames/seam/frame_11_1100ms.png" alt="11 1100ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">11 1100ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_12_1200ms.png" target="_blank">
+            <img src="frames/seam/frame_12_1200ms.png" alt="12 1200ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">12 1200ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_13_1300ms.png" target="_blank">
+            <img src="frames/seam/frame_13_1300ms.png" alt="13 1300ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">13 1300ms</div>
+        </div>
+
+        <div class="frame-item">
+          <a class="img-link" href="frames/seam/frame_14_1400ms.png" target="_blank">
+            <img src="frames/seam/frame_14_1400ms.png" alt="14 1400ms" loading="lazy">
+          </a>
+          <div class="frame-lbl">14 1400ms</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SECTION 3: MULTI-VIEWPORT STATE INSPECTOR -->
+    <section class="sheet-section">
+      <h2>3. Multi-Viewport Storefront State Matrix (360px &rarr; 1920px)</h2>
+      <p class="sec-desc">
+        Select any state below to view its responsive layouts across mobile, tablet, desktop, and wide displays.
+      </p>
+      <div class="state-picker" id="statePicker"></div>
+      <div class="vp-columns" id="vpDisplay"></div>
+    </section>
+  </div>
+
+  <script>
+    const matrixData = {"404_error": {"1024px": {"reduced_motion": "../../reports/full_qa/404_error/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/404_error/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/404_error/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/404_error/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/404_error/1456px_tier1.png", "tier2": "../../reports/full_qa/404_error/1456px_tier2.png", "tier3": "../../reports/full_qa/404_error/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/404_error/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/404_error/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/404_error/360px_no_js.png", "reduced_motion": "../../reports/full_qa/404_error/360px_reduced_motion.png", "tier1": "../../reports/full_qa/404_error/360px_tier1.png", "tier2": "../../reports/full_qa/404_error/360px_tier2.png", "tier3": "../../reports/full_qa/404_error/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/404_error/390px_reduced_motion.png", "tier1": "../../reports/full_qa/404_error/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/404_error/768px_reduced_motion.png", "tier1": "../../reports/full_qa/404_error/768px_tier1.png"}}, "about": {"1024px": {"reduced_motion": "../../reports/full_qa/about/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/about/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/about/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/about/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/about/1456px_tier1.png", "tier2": "../../reports/full_qa/about/1456px_tier2.png", "tier3": "../../reports/full_qa/about/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/about/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/about/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/about/360px_no_js.png", "reduced_motion": "../../reports/full_qa/about/360px_reduced_motion.png", "tier1": "../../reports/full_qa/about/360px_tier1.png", "tier2": "../../reports/full_qa/about/360px_tier2.png", "tier3": "../../reports/full_qa/about/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/about/390px_reduced_motion.png", "tier1": "../../reports/full_qa/about/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/about/768px_reduced_motion.png", "tier1": "../../reports/full_qa/about/768px_tier1.png"}}, "cart_empty": {"1024px": {"reduced_motion": "../../reports/full_qa/cart_empty/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cart_empty/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cart_empty/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cart_empty/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cart_empty/1456px_tier1.png", "tier2": "../../reports/full_qa/cart_empty/1456px_tier2.png", "tier3": "../../reports/full_qa/cart_empty/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cart_empty/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cart_empty/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cart_empty/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cart_empty/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cart_empty/360px_tier1.png", "tier2": "../../reports/full_qa/cart_empty/360px_tier2.png", "tier3": "../../reports/full_qa/cart_empty/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cart_empty/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cart_empty/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cart_empty/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cart_empty/768px_tier1.png"}}, "cat_cables-chargers-powerbanks": {"1024px": {"reduced_motion": "../../reports/full_qa/cat_cables-chargers-powerbanks/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cables-chargers-powerbanks/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cat_cables-chargers-powerbanks/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_cables-chargers-powerbanks/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cables-chargers-powerbanks/1456px_tier1.png", "tier2": "../../reports/full_qa/cat_cables-chargers-powerbanks/1456px_tier2.png", "tier3": "../../reports/full_qa/cat_cables-chargers-powerbanks/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cat_cables-chargers-powerbanks/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cables-chargers-powerbanks/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cat_cables-chargers-powerbanks/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_cables-chargers-powerbanks/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cables-chargers-powerbanks/360px_tier1.png", "tier2": "../../reports/full_qa/cat_cables-chargers-powerbanks/360px_tier2.png", "tier3": "../../reports/full_qa/cat_cables-chargers-powerbanks/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cat_cables-chargers-powerbanks/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cables-chargers-powerbanks/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cat_cables-chargers-powerbanks/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cables-chargers-powerbanks/768px_tier1.png"}}, "cat_cameras": {"1024px": {"reduced_motion": "../../reports/full_qa/cat_cameras/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cameras/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cat_cameras/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_cameras/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cameras/1456px_tier1.png", "tier2": "../../reports/full_qa/cat_cameras/1456px_tier2.png", "tier3": "../../reports/full_qa/cat_cameras/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cat_cameras/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cameras/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cat_cameras/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_cameras/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cameras/360px_tier1.png", "tier2": "../../reports/full_qa/cat_cameras/360px_tier2.png", "tier3": "../../reports/full_qa/cat_cameras/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cat_cameras/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cameras/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cat_cameras/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cameras/768px_tier1.png"}}, "cat_cases-protectors": {"1024px": {"reduced_motion": "../../reports/full_qa/cat_cases-protectors/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cases-protectors/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cat_cases-protectors/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_cases-protectors/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cases-protectors/1456px_tier1.png", "tier2": "../../reports/full_qa/cat_cases-protectors/1456px_tier2.png", "tier3": "../../reports/full_qa/cat_cases-protectors/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cat_cases-protectors/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cases-protectors/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cat_cases-protectors/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_cases-protectors/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cases-protectors/360px_tier1.png", "tier2": "../../reports/full_qa/cat_cases-protectors/360px_tier2.png", "tier3": "../../reports/full_qa/cat_cases-protectors/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cat_cases-protectors/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cases-protectors/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cat_cases-protectors/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_cases-protectors/768px_tier1.png"}}, "cat_earphones-headphones": {"1024px": {"reduced_motion": "../../reports/full_qa/cat_earphones-headphones/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_earphones-headphones/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cat_earphones-headphones/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_earphones-headphones/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_earphones-headphones/1456px_tier1.png", "tier2": "../../reports/full_qa/cat_earphones-headphones/1456px_tier2.png", "tier3": "../../reports/full_qa/cat_earphones-headphones/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cat_earphones-headphones/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_earphones-headphones/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cat_earphones-headphones/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_earphones-headphones/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_earphones-headphones/360px_tier1.png", "tier2": "../../reports/full_qa/cat_earphones-headphones/360px_tier2.png", "tier3": "../../reports/full_qa/cat_earphones-headphones/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cat_earphones-headphones/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_earphones-headphones/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cat_earphones-headphones/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_earphones-headphones/768px_tier1.png"}}, "cat_keyboards-mice": {"1024px": {"reduced_motion": "../../reports/full_qa/cat_keyboards-mice/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_keyboards-mice/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cat_keyboards-mice/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_keyboards-mice/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_keyboards-mice/1456px_tier1.png", "tier2": "../../reports/full_qa/cat_keyboards-mice/1456px_tier2.png", "tier3": "../../reports/full_qa/cat_keyboards-mice/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cat_keyboards-mice/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_keyboards-mice/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cat_keyboards-mice/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_keyboards-mice/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_keyboards-mice/360px_tier1.png", "tier2": "../../reports/full_qa/cat_keyboards-mice/360px_tier2.png", "tier3": "../../reports/full_qa/cat_keyboards-mice/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cat_keyboards-mice/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_keyboards-mice/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cat_keyboards-mice/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_keyboards-mice/768px_tier1.png"}}, "cat_other": {"1024px": {"reduced_motion": "../../reports/full_qa/cat_other/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_other/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cat_other/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_other/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_other/1456px_tier1.png", "tier2": "../../reports/full_qa/cat_other/1456px_tier2.png", "tier3": "../../reports/full_qa/cat_other/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cat_other/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_other/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cat_other/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_other/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_other/360px_tier1.png", "tier2": "../../reports/full_qa/cat_other/360px_tier2.png", "tier3": "../../reports/full_qa/cat_other/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cat_other/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_other/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cat_other/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_other/768px_tier1.png"}}, "cat_smartphones": {"1024px": {"reduced_motion": "../../reports/full_qa/cat_smartphones/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartphones/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cat_smartphones/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_smartphones/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartphones/1456px_tier1.png", "tier2": "../../reports/full_qa/cat_smartphones/1456px_tier2.png", "tier3": "../../reports/full_qa/cat_smartphones/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cat_smartphones/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartphones/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cat_smartphones/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_smartphones/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartphones/360px_tier1.png", "tier2": "../../reports/full_qa/cat_smartphones/360px_tier2.png", "tier3": "../../reports/full_qa/cat_smartphones/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cat_smartphones/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartphones/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cat_smartphones/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartphones/768px_tier1.png"}}, "cat_smartwatches-bands": {"1024px": {"reduced_motion": "../../reports/full_qa/cat_smartwatches-bands/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartwatches-bands/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cat_smartwatches-bands/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_smartwatches-bands/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartwatches-bands/1456px_tier1.png", "tier2": "../../reports/full_qa/cat_smartwatches-bands/1456px_tier2.png", "tier3": "../../reports/full_qa/cat_smartwatches-bands/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cat_smartwatches-bands/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartwatches-bands/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cat_smartwatches-bands/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_smartwatches-bands/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartwatches-bands/360px_tier1.png", "tier2": "../../reports/full_qa/cat_smartwatches-bands/360px_tier2.png", "tier3": "../../reports/full_qa/cat_smartwatches-bands/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cat_smartwatches-bands/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartwatches-bands/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cat_smartwatches-bands/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_smartwatches-bands/768px_tier1.png"}}, "cat_speakers": {"1024px": {"reduced_motion": "../../reports/full_qa/cat_speakers/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_speakers/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cat_speakers/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_speakers/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_speakers/1456px_tier1.png", "tier2": "../../reports/full_qa/cat_speakers/1456px_tier2.png", "tier3": "../../reports/full_qa/cat_speakers/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cat_speakers/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_speakers/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cat_speakers/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_speakers/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_speakers/360px_tier1.png", "tier2": "../../reports/full_qa/cat_speakers/360px_tier2.png", "tier3": "../../reports/full_qa/cat_speakers/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cat_speakers/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_speakers/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cat_speakers/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_speakers/768px_tier1.png"}}, "cat_tvs": {"1024px": {"reduced_motion": "../../reports/full_qa/cat_tvs/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_tvs/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/cat_tvs/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_tvs/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_tvs/1456px_tier1.png", "tier2": "../../reports/full_qa/cat_tvs/1456px_tier2.png", "tier3": "../../reports/full_qa/cat_tvs/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/cat_tvs/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_tvs/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/cat_tvs/360px_no_js.png", "reduced_motion": "../../reports/full_qa/cat_tvs/360px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_tvs/360px_tier1.png", "tier2": "../../reports/full_qa/cat_tvs/360px_tier2.png", "tier3": "../../reports/full_qa/cat_tvs/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/cat_tvs/390px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_tvs/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/cat_tvs/768px_reduced_motion.png", "tier1": "../../reports/full_qa/cat_tvs/768px_tier1.png"}}, "catalog_index": {"1024px": {"reduced_motion": "../../reports/full_qa/catalog_index/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/catalog_index/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/catalog_index/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/catalog_index/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/catalog_index/1456px_tier1.png", "tier2": "../../reports/full_qa/catalog_index/1456px_tier2.png", "tier3": "../../reports/full_qa/catalog_index/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/catalog_index/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/catalog_index/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/catalog_index/360px_no_js.png", "reduced_motion": "../../reports/full_qa/catalog_index/360px_reduced_motion.png", "tier1": "../../reports/full_qa/catalog_index/360px_tier1.png", "tier2": "../../reports/full_qa/catalog_index/360px_tier2.png", "tier3": "../../reports/full_qa/catalog_index/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/catalog_index/390px_reduced_motion.png", "tier1": "../../reports/full_qa/catalog_index/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/catalog_index/768px_reduced_motion.png", "tier1": "../../reports/full_qa/catalog_index/768px_tier1.png"}}, "compare_empty": {"1024px": {"reduced_motion": "../../reports/full_qa/compare_empty/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/compare_empty/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/compare_empty/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/compare_empty/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/compare_empty/1456px_tier1.png", "tier2": "../../reports/full_qa/compare_empty/1456px_tier2.png", "tier3": "../../reports/full_qa/compare_empty/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/compare_empty/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/compare_empty/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/compare_empty/360px_no_js.png", "reduced_motion": "../../reports/full_qa/compare_empty/360px_reduced_motion.png", "tier1": "../../reports/full_qa/compare_empty/360px_tier1.png", "tier2": "../../reports/full_qa/compare_empty/360px_tier2.png", "tier3": "../../reports/full_qa/compare_empty/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/compare_empty/390px_reduced_motion.png", "tier1": "../../reports/full_qa/compare_empty/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/compare_empty/768px_reduced_motion.png", "tier1": "../../reports/full_qa/compare_empty/768px_tier1.png"}}, "home": {"1024px": {"reduced_motion": "../../reports/full_qa/home/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/home/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/home/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/home/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/home/1456px_tier1.png", "tier2": "../../reports/full_qa/home/1456px_tier2.png", "tier3": "../../reports/full_qa/home/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/home/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/home/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/home/360px_no_js.png", "reduced_motion": "../../reports/full_qa/home/360px_reduced_motion.png", "tier1": "../../reports/full_qa/home/360px_tier1.png", "tier2": "../../reports/full_qa/home/360px_tier2.png", "tier3": "../../reports/full_qa/home/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/home/390px_reduced_motion.png", "tier1": "../../reports/full_qa/home/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/home/768px_reduced_motion.png", "tier1": "../../reports/full_qa/home/768px_tier1.png"}}, "login": {"1024px": {"reduced_motion": "../../reports/full_qa/login/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/login/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/login/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/login/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/login/1456px_tier1.png", "tier2": "../../reports/full_qa/login/1456px_tier2.png", "tier3": "../../reports/full_qa/login/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/login/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/login/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/login/360px_no_js.png", "reduced_motion": "../../reports/full_qa/login/360px_reduced_motion.png", "tier1": "../../reports/full_qa/login/360px_tier1.png", "tier2": "../../reports/full_qa/login/360px_tier2.png", "tier3": "../../reports/full_qa/login/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/login/390px_reduced_motion.png", "tier1": "../../reports/full_qa/login/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/login/768px_reduced_motion.png", "tier1": "../../reports/full_qa/login/768px_tier1.png"}}, "orders_tracking_lookup": {"1024px": {"reduced_motion": "../../reports/full_qa/orders_tracking_lookup/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/orders_tracking_lookup/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/orders_tracking_lookup/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/orders_tracking_lookup/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/orders_tracking_lookup/1456px_tier1.png", "tier2": "../../reports/full_qa/orders_tracking_lookup/1456px_tier2.png", "tier3": "../../reports/full_qa/orders_tracking_lookup/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/orders_tracking_lookup/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/orders_tracking_lookup/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/orders_tracking_lookup/360px_no_js.png", "reduced_motion": "../../reports/full_qa/orders_tracking_lookup/360px_reduced_motion.png", "tier1": "../../reports/full_qa/orders_tracking_lookup/360px_tier1.png", "tier2": "../../reports/full_qa/orders_tracking_lookup/360px_tier2.png", "tier3": "../../reports/full_qa/orders_tracking_lookup/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/orders_tracking_lookup/390px_reduced_motion.png", "tier1": "../../reports/full_qa/orders_tracking_lookup/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/orders_tracking_lookup/768px_reduced_motion.png", "tier1": "../../reports/full_qa/orders_tracking_lookup/768px_tier1.png"}}, "product_in_stock": {"1024px": {"reduced_motion": "../../reports/full_qa/product_in_stock/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/product_in_stock/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/product_in_stock/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/product_in_stock/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/product_in_stock/1456px_tier1.png", "tier2": "../../reports/full_qa/product_in_stock/1456px_tier2.png", "tier3": "../../reports/full_qa/product_in_stock/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/product_in_stock/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/product_in_stock/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/product_in_stock/360px_no_js.png", "reduced_motion": "../../reports/full_qa/product_in_stock/360px_reduced_motion.png", "tier1": "../../reports/full_qa/product_in_stock/360px_tier1.png", "tier2": "../../reports/full_qa/product_in_stock/360px_tier2.png", "tier3": "../../reports/full_qa/product_in_stock/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/product_in_stock/390px_reduced_motion.png", "tier1": "../../reports/full_qa/product_in_stock/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/product_in_stock/768px_reduced_motion.png", "tier1": "../../reports/full_qa/product_in_stock/768px_tier1.png"}}, "product_multi_media": {"1024px": {"reduced_motion": "../../reports/full_qa/product_multi_media/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/product_multi_media/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/product_multi_media/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/product_multi_media/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/product_multi_media/1456px_tier1.png", "tier2": "../../reports/full_qa/product_multi_media/1456px_tier2.png", "tier3": "../../reports/full_qa/product_multi_media/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/product_multi_media/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/product_multi_media/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/product_multi_media/360px_no_js.png", "reduced_motion": "../../reports/full_qa/product_multi_media/360px_reduced_motion.png", "tier1": "../../reports/full_qa/product_multi_media/360px_tier1.png", "tier2": "../../reports/full_qa/product_multi_media/360px_tier2.png", "tier3": "../../reports/full_qa/product_multi_media/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/product_multi_media/390px_reduced_motion.png", "tier1": "../../reports/full_qa/product_multi_media/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/product_multi_media/768px_reduced_motion.png", "tier1": "../../reports/full_qa/product_multi_media/768px_tier1.png"}}, "register": {"1024px": {"reduced_motion": "../../reports/full_qa/register/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/register/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/register/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/register/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/register/1456px_tier1.png", "tier2": "../../reports/full_qa/register/1456px_tier2.png", "tier3": "../../reports/full_qa/register/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/register/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/register/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/register/360px_no_js.png", "reduced_motion": "../../reports/full_qa/register/360px_reduced_motion.png", "tier1": "../../reports/full_qa/register/360px_tier1.png", "tier2": "../../reports/full_qa/register/360px_tier2.png", "tier3": "../../reports/full_qa/register/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/register/390px_reduced_motion.png", "tier1": "../../reports/full_qa/register/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/register/768px_reduced_motion.png", "tier1": "../../reports/full_qa/register/768px_tier1.png"}}, "search_empty": {"1024px": {"reduced_motion": "../../reports/full_qa/search_empty/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/search_empty/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/search_empty/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/search_empty/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/search_empty/1456px_tier1.png", "tier2": "../../reports/full_qa/search_empty/1456px_tier2.png", "tier3": "../../reports/full_qa/search_empty/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/search_empty/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/search_empty/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/search_empty/360px_no_js.png", "reduced_motion": "../../reports/full_qa/search_empty/360px_reduced_motion.png", "tier1": "../../reports/full_qa/search_empty/360px_tier1.png", "tier2": "../../reports/full_qa/search_empty/360px_tier2.png", "tier3": "../../reports/full_qa/search_empty/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/search_empty/390px_reduced_motion.png", "tier1": "../../reports/full_qa/search_empty/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/search_empty/768px_reduced_motion.png", "tier1": "../../reports/full_qa/search_empty/768px_tier1.png"}}, "search_many_results": {"1024px": {"reduced_motion": "../../reports/full_qa/search_many_results/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/search_many_results/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/search_many_results/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/search_many_results/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/search_many_results/1456px_tier1.png", "tier2": "../../reports/full_qa/search_many_results/1456px_tier2.png", "tier3": "../../reports/full_qa/search_many_results/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/search_many_results/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/search_many_results/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/search_many_results/360px_no_js.png", "reduced_motion": "../../reports/full_qa/search_many_results/360px_reduced_motion.png", "tier1": "../../reports/full_qa/search_many_results/360px_tier1.png", "tier2": "../../reports/full_qa/search_many_results/360px_tier2.png", "tier3": "../../reports/full_qa/search_many_results/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/search_many_results/390px_reduced_motion.png", "tier1": "../../reports/full_qa/search_many_results/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/search_many_results/768px_reduced_motion.png", "tier1": "../../reports/full_qa/search_many_results/768px_tier1.png"}}, "search_no_results": {"1024px": {"reduced_motion": "../../reports/full_qa/search_no_results/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/search_no_results/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/search_no_results/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/search_no_results/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/search_no_results/1456px_tier1.png", "tier2": "../../reports/full_qa/search_no_results/1456px_tier2.png", "tier3": "../../reports/full_qa/search_no_results/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/search_no_results/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/search_no_results/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/search_no_results/360px_no_js.png", "reduced_motion": "../../reports/full_qa/search_no_results/360px_reduced_motion.png", "tier1": "../../reports/full_qa/search_no_results/360px_tier1.png", "tier2": "../../reports/full_qa/search_no_results/360px_tier2.png", "tier3": "../../reports/full_qa/search_no_results/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/search_no_results/390px_reduced_motion.png", "tier1": "../../reports/full_qa/search_no_results/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/search_no_results/768px_reduced_motion.png", "tier1": "../../reports/full_qa/search_no_results/768px_tier1.png"}}, "search_typed": {"1024px": {"reduced_motion": "../../reports/full_qa/search_typed/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/search_typed/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/search_typed/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/search_typed/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/search_typed/1456px_tier1.png", "tier2": "../../reports/full_qa/search_typed/1456px_tier2.png", "tier3": "../../reports/full_qa/search_typed/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/search_typed/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/search_typed/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/search_typed/360px_no_js.png", "reduced_motion": "../../reports/full_qa/search_typed/360px_reduced_motion.png", "tier1": "../../reports/full_qa/search_typed/360px_tier1.png", "tier2": "../../reports/full_qa/search_typed/360px_tier2.png", "tier3": "../../reports/full_qa/search_typed/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/search_typed/390px_reduced_motion.png", "tier1": "../../reports/full_qa/search_typed/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/search_typed/768px_reduced_motion.png", "tier1": "../../reports/full_qa/search_typed/768px_tier1.png"}}, "wishlist_empty": {"1024px": {"reduced_motion": "../../reports/full_qa/wishlist_empty/1024px_reduced_motion.png", "tier1": "../../reports/full_qa/wishlist_empty/1024px_tier1.png"}, "1456px": {"no_js": "../../reports/full_qa/wishlist_empty/1456px_no_js.png", "reduced_motion": "../../reports/full_qa/wishlist_empty/1456px_reduced_motion.png", "tier1": "../../reports/full_qa/wishlist_empty/1456px_tier1.png", "tier2": "../../reports/full_qa/wishlist_empty/1456px_tier2.png", "tier3": "../../reports/full_qa/wishlist_empty/1456px_tier3.png"}, "1920px": {"reduced_motion": "../../reports/full_qa/wishlist_empty/1920px_reduced_motion.png", "tier1": "../../reports/full_qa/wishlist_empty/1920px_tier1.png"}, "360px": {"no_js": "../../reports/full_qa/wishlist_empty/360px_no_js.png", "reduced_motion": "../../reports/full_qa/wishlist_empty/360px_reduced_motion.png", "tier1": "../../reports/full_qa/wishlist_empty/360px_tier1.png", "tier2": "../../reports/full_qa/wishlist_empty/360px_tier2.png", "tier3": "../../reports/full_qa/wishlist_empty/360px_tier3.png"}, "390px": {"reduced_motion": "../../reports/full_qa/wishlist_empty/390px_reduced_motion.png", "tier1": "../../reports/full_qa/wishlist_empty/390px_tier1.png"}, "768px": {"reduced_motion": "../../reports/full_qa/wishlist_empty/768px_reduced_motion.png", "tier1": "../../reports/full_qa/wishlist_empty/768px_tier1.png"}}};
+
+    const statePicker = document.getElementById('statePicker');
+    const vpDisplay = document.getElementById('vpDisplay');
+
+    const states = Object.keys(matrixData);
+    let activeState = states[0] || 'home';
+
+    function renderPicker() {
+      statePicker.innerHTML = '';
+      states.forEach(st => {
+        const btn = document.createElement('button');
+        btn.className = 'picker-btn' + (st === activeState ? ' active' : '');
+        btn.textContent = st.replace('cat_', 'Category: ').replace('_', ' ');
+        btn.onclick = () => {
+          activeState = st;
+          renderPicker();
+          renderVpCols();
+        };
+        statePicker.appendChild(btn);
+      });
+    }
+
+    function renderVpCols() {
+      vpDisplay.innerHTML = '';
+      const stateObj = matrixData[activeState] || {};
+      const viewports = ['360px', '390px', '768px', '1024px', '1456px', '1920px'];
+
+      viewports.forEach(vp => {
+        const modes = stateObj[vp] || {};
+        const tier1Src = modes['tier1'] || Object.values(modes)[0] || '';
+        if (!tier1Src) return;
+
+        const col = document.createElement('div');
+        col.className = 'vp-col';
+        col.innerHTML = `
+          <div class="vp-header">
+            <span class="vp-title">${vp}</span>
+            <span class="shot-tag">Tier 1</span>
+          </div>
+          <div class="vp-img-wrap">
+            <a href="${tier1Src}" target="_blank" title="Click to view full image">
+              <img src="${tier1Src}" alt="${activeState} at ${vp}" loading="lazy">
+            </a>
+          </div>
+        `;
+        vpDisplay.appendChild(col);
+      });
+    }
+
+    renderPicker();
+    renderVpCols();
+  </script>
+</body>
+</html>

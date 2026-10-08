@@ -151,7 +151,30 @@ def cart_add(request: HttpRequest, product_id: int) -> HttpResponse:
         success = False
 
     if is_json_request(request):
-        json_resp = JsonResponse({"success": success, "message": msg, "cart_count": cart.total_items})
+        summary = calculate_cart_summary(cart)
+        json_resp = JsonResponse({
+            "success": success,
+            "message": msg,
+            "cart_count": cart.total_items,
+            "item": {
+                "id": product.id,
+                "name": product.display_name,
+                "price": str(product.selling_price or Decimal("0.00")),
+                "formatted_price": f"₹{product.selling_price:,.0f}" if product.selling_price else "₹0",
+                "image_url": product.primary_image_url or "",
+                "quantity": quantity,
+            },
+            "summary": {
+                "subtotal": str(summary["subtotal"]),
+                "formatted_subtotal": f"₹{summary['subtotal']:,.0f}",
+                "grand_total": str(summary["grand_total"]),
+                "formatted_grand_total": f"₹{summary['grand_total']:,.0f}",
+                "free_shipping_progress": float(summary["free_shipping_progress"]),
+                "free_shipping_remaining": str(summary["free_shipping_remaining"]),
+                "formatted_free_shipping_remaining": f"₹{summary['free_shipping_remaining']:,.0f}",
+                "free_shipping_qualified": summary["free_shipping_progress"] >= 100,
+            },
+        })
         return _ensure_guest_cookie(json_resp, request)
 
     referrer = request.POST.get("next") or request.META.get("HTTP_REFERER") or "/cart/"
@@ -180,7 +203,31 @@ def cart_update(request: HttpRequest, product_id: int) -> HttpResponse:
         messages.info(request, "Item removed from cart.")
 
     if is_json_request(request):
-        return JsonResponse({"success": True, "cart_count": cart.total_items})
+        summary = calculate_cart_summary(cart)
+        line_item = next(
+            (ld for ld in summary.get("line_details", []) if ld.get("product") and ld["product"].id == product_id),
+            None,
+        )
+        return JsonResponse({
+            "success": True,
+            "cart_count": cart.total_items,
+            "item_removed": item is None,
+            "line_subtotal": str(line_item["line_subtotal"]) if line_item else "0.00",
+            "formatted_line_subtotal": f"₹{line_item['line_subtotal']:,.0f}" if line_item else "₹0",
+            "summary": {
+                "subtotal": str(summary["subtotal"]),
+                "formatted_subtotal": f"₹{summary['subtotal']:,.0f}",
+                "grand_total": str(summary["grand_total"]),
+                "formatted_grand_total": f"₹{summary['grand_total']:,.0f}",
+                "shipping_fee": str(summary["shipping_fee"]),
+                "free_shipping_progress": float(summary["free_shipping_progress"]),
+                "free_shipping_remaining": str(summary["free_shipping_remaining"]),
+                "formatted_free_shipping_remaining": f"₹{summary['free_shipping_remaining']:,.0f}",
+                "free_shipping_qualified": summary["free_shipping_progress"] >= 100,
+                "mrp_savings": str(summary["mrp_savings"]),
+                "formatted_mrp_savings": f"₹{summary['mrp_savings']:,.0f}",
+            },
+        })
 
     return redirect("cart_detail")
 

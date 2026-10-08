@@ -28,7 +28,28 @@
   }
 
   .price-histogram-bar {
+    transform-origin: bottom;
     transition: fill var(--transition-base), opacity var(--transition-base);
+  }
+
+  html:not([data-motion-tier="3"]) .price-histogram-bar {
+    animation: histogramBarGrow 400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes histogramBarGrow {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .price-histogram-bar {
+      animation: none !important;
+      transform: none !important;
+    }
   }
 
   .price-histogram-bar.is-in-range {

@@ -10,7 +10,7 @@
     <p class="empty-state-desc mb-6">
       The link you followed may be outdated, or the product has been unlisted from the catalogue.
     </p>
-    <div class="empty-state-actions flex gap-4 justify-center">
+    <div class="empty-state-actions flex flex-wrap gap-4 justify-center">
       <a href="{% url 'home' %}" class="btn btn-primary">Back to the shop</a>
       <button type="button" class="btn btn-secondary" onclick="const input = document.getElementById('search-input'); if (input) { input.focus(); window.scrollTo({top: 0, behavior: 'smooth'}); }">Search the catalogue</button>
     </div>

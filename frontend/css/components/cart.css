@@ -215,4 +215,229 @@
     font-weight: 700;
     color: var(--world-accent);
   }
+
+  /* Live Update Crossfade (120ms) */
+  .fade-updating {
+    opacity: 0.2;
+    transition: opacity 120ms ease;
+  }
+
+  /* Header Bag Counter Vertical Slide */
+  .bag-badge {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: middle;
+  }
+
+  .bag-badge.badge-tick {
+    animation: badgeSlideTick 160ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes badgeSlideTick {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+      color: var(--world-accent);
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+      color: var(--world-accent);
+    }
+  }
+
+  /* Mini-Bag Drawer (<dialog>) */
+  .mini-bag-dialog {
+    border: none;
+    padding: 0;
+    background: transparent;
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: var(--z-modal, 100);
+  }
+
+  .mini-bag-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 250ms ease-out;
+  }
+
+  .mini-bag-dialog[open]::backdrop {
+    opacity: 1;
+  }
+
+  .mini-bag-panel {
+    width: min(440px, 100vw);
+    height: 100vh;
+    background: var(--world-surface);
+    border-left: 1px solid var(--world-rule);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-6);
+    transform: translateX(100%);
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    overflow-y: auto;
+  }
+
+  .mini-bag-dialog[open] .mini-bag-panel {
+    transform: translateX(0);
+  }
+
+  @media (max-width: 639px) {
+    .mini-bag-dialog {
+      inset: auto 0 0 0;
+    }
+    .mini-bag-panel {
+      width: 100vw;
+      height: auto;
+      max-height: 85vh;
+      border-left: none;
+      border-top: 1px solid var(--world-rule);
+      border-radius: var(--radius-2) var(--radius-2) 0 0;
+      transform: translateY(100%);
+      box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12);
+    }
+    .mini-bag-dialog[open] .mini-bag-panel {
+      transform: translateY(0);
+    }
+  }
+
+  .mini-bag-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--world-rule);
+    margin-bottom: var(--space-4);
+  }
+
+  .mini-bag-title {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .mini-bag-count-badge {
+    font-size: var(--step--1);
+    color: var(--world-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mini-bag-close-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--world-muted);
+    border-radius: var(--radius-sm, 2px);
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .mini-bag-close-btn:hover {
+    color: var(--world-accent);
+  }
+
+  .mini-bag-item-card {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-4);
+    background: var(--world-bg);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-1);
+    margin-bottom: var(--space-5);
+  }
+
+  .mini-bag-thumb-wrapper {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    background: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-sm, 2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .mini-bag-thumb-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+
+  .mini-bag-item-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mini-bag-item-name {
+    font-size: var(--step--1);
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: var(--space-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mini-bag-item-qty-price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+
+  .mini-bag-delivery-meter {
+    background: var(--world-bg);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-1);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-5);
+  }
+
+  .mini-bag-meter-label {
+    margin-bottom: var(--space-2);
+    font-size: var(--step--2);
+  }
+
+  .mini-bag-meter-track {
+    height: 4px;
+    background: var(--world-rule);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .mini-bag-meter-fill {
+    height: 100%;
+    background: var(--world-accent);
+    transition: width 350ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .mini-bag-subtotal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--world-rule);
+    margin-bottom: var(--space-5);
+    margin-top: auto;
+  }
+
+  .mini-bag-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
 }

@@ -146,3 +146,30 @@ Phase 5 introduced the cinematic editorial layer built on top of the Phase 4 uti
 - **Finish Swatches** (`.finish-swatch-list`): Circular color-coded hardware chips (`.finish-swatch-circle`) mapped to real electronics finishes (e.g. Space Black, Midnight, Chalk, Sage) via `colour_map.py` and `|colour_hex`.
 - **Secondary Media Slot**: Cleanly omitted unless genuine video or 3D plinth models are attached to the product record. Zero fake 3D canvases or empty frames.
 
+---
+
+## 10. Phase 8 Craft, Layout & Motion Standards
+
+### 10.1 Container & Baseline Alignment
+- **Single Structural Baseline**: Across every layout (Home, Category, PDP, Cart, Wishlist, Checkout, Account), the left horizontal coordinate ($x$) of the breadcrumb trail, page `<h1>`, and primary content grid must be identical.
+- **Zero Horizontal Overflow**: Every page must maintain `document.documentElement.scrollWidth <= window.innerWidth` across all viewports from 360px to 2560px.
+- **Vertical Spacing Rhythm**: Gaps between consecutive content blocks are clamped to 24px–64px; empty bands exceeding 200px are strictly prohibited.
+
+### 10.2 Product Card Geometry & Typography
+- **Product Title**: Set in Plus Jakarta Sans 500 (Medium), clamped to exactly 2 lines (`-webkit-line-clamp: 2`). Clamped titles never truncate mid-phrase.
+- **Price Row**: Fixed 1-line height with tabular figures (`font-variant-numeric: tabular-nums`). Current price and MRP never collide or break onto multiple lines.
+- **Image Scaling**: Rendered images are capped at $\le 1.5\times$ natural dimensions (lead editorial plate capped at $\le 2.0\times$), preventing pixelation or blurred artwork.
+- **Plate Color Delta**: Background color of plate mats matches product image corner pixels within $\le 4$ RGB delta units via `mix-blend-mode: multiply`.
+
+### 10.3 Iconography & Form Controls
+- **24px Icon Set**: Redrawn at 24px with 1.5px stroke, round caps, and round joins (Search, Heart, Bag, User, Menu, Close, Chevron, Arrow). No spinner-like search icons.
+- **Search Field**: Rectangular geometry (`border-radius: 2px`), 44px height, max-width 520px, with `/` keyboard shortcut badge.
+- **Interactive Tap Targets**: Every link and button provides at least 44px tap target height (24px in dense lists with sufficient spacing).
+- **Active State**: Standardized button active press: `transform: translateY(1px)`.
+
+### 10.4 Tax & Commercial Copy Honesty
+- **Bill of Supply Mode**: When operating under the GST Composition Scheme or Bill of Supply mode, prices are net. No GST percentage or tax extraction lines are displayed to the shopper.
+- **MRP Savings**: Expressed strictly as informational comparison text ("Retail Savings (MRP) ₹X"), never as a mathematical subtraction from items subtotal.
+- **No Invented Claims**: Descriptions describe genuine catalog items without invented audio-engineer hyperbole or false manufacturer claims.
+
+

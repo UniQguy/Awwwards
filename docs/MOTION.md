@@ -142,3 +142,65 @@ ELECTROCART implements an automated capability probe on initial page load (`fron
 2. **Developer Motion Override Query**:
    - Usage: `?motion=1`, `?motion=2`, or `?motion=3` forces the tier.
    - Protection: Active only when `settings.MOTION_DEBUG` is True (development / test). Stripped cleanly by `MotionDebugMiddleware` in production.
+
+---
+
+## 4. Phase 8c Motion Enhancements
+
+### A. WP1: Entrance Choreography (Editorial Hero)
+- **Component**: `frontend/js/editorial.js` (`initHeroEntranceChoreography`) & `frontend/css/components/editorial-hero.css`
+- **Trigger**: Initial visit to editorial home page in the current browser session.
+- **Duration**: Total choreography completes in under 1.6s.
+- **Sequence**:
+  1. Headline reveals line-by-line: `.hero-line-mask` with `overflow: hidden`, inner `.hero-line-inner` animates `translateY(100%)` to `translateY(0)` (650ms editorial cubic bezier `cubic-bezier(0.22, 1, 0.36, 1)`, 90ms stagger).
+  2. Cutout tokens scale from `0.85` and fade in (320ms, 80ms stagger) once their host line reveals.
+  3. Lead editorial plate rises 24px (`translateY(24px)` to `0`) and fades in with a 160ms delay.
+  4. A single specular sweep crosses the plate (`.hero-specular-sweep` keyframe, 700ms, runs once).
+  5. Subtitle and primary call-to-action buttons fade up into resting position.
+- **Resilience & Accessibility Invariants**:
+  - `sessionStorage.getItem("hero_entered")` ensures choreography executes strictly once per browser session.
+  - Active only for Tier 1 and Tier 2.
+  - Reduced Motion (`prefers-reduced-motion`) and Tier 3 bypass all transforms and masks instantly (`opacity: 1; transform: none; animation: none`).
+  - 2.0s safety fallback timeout unconditionally removes `.hero-animating` to prevent any possibility of permanently hidden text.
+  - Text remains 100% selectable and visible for search engines, screen readers, and No-JS clients.
+
+### B. WP2: Chapter Narrative & Fixed Indicator
+- **Component**: `templates/catalog/home.html`, `frontend/js/modules/chapter_transitions.js`, `frontend/css/layout-editorial.css`
+- **Indicator Element**: Fixed left desktop vertical indicator `<aside id="chapter-nav-indicator" class="chapter-nav-indicator">` and mobile sticky header badge `<span id="header-chapter-badge" class="header-chapter-badge">`.
+- **Trigger**: Intersection of category chapter spreads (`.spread[data-world]`).
+- **Observer Mechanics**: Driven by `IntersectionObserver` with `rootMargin: "-45% 0px -45% 0px"`. Zero continuous scroll listeners.
+- **Narrative Format**: Tabular counter (`02 / 06`) with category display name (`Acoustics & Sound`). Updates `aria-live="off"` text, header world chromatic thread, and dynamic focus rings.
+
+### C. WP3: Plate & Card Micro-Interactions
+- **Component**: `frontend/css/components/editorial-plate.css` & `frontend/js/main.js`
+- **Tactile Hover/Focus Lift**:
+  - Fine pointer (`(pointer: fine)`): 4px lift (`translateY(-4px)`), 1.02 image scale, and 6px editorial arrow slide.
+  - Touch / Coarse pointer: Zero transform overrides (`transform: none !important`), eliminating stuck hover states on mobile taps.
+  - Tier 3 & Reduced Motion: Flat border/ring indication; zero movement.
+- **Image Entry Fade & Lift**: Implemented via native `HTMLImageElement.decode()` with a 200ms timeout fallback. Images decode off the main thread and crossfade into the mat smoothly.
+- **Price Histogram Entry**: `histogramBarGrow` keyframe animation scales bars smoothly from baseline (`transform: scaleY(0)` to `scaleY(1)`).
+
+### D. WP4: Multi-Page View Transitions
+- **Component**: `frontend/css/base.css` & `frontend/js/main.js`
+- **Architecture**: Native `@view-transition { navigation: auto; }` cross-document transitions.
+- **Timing**: 220ms smooth opacity crossfade on `::view-transition-old(root)` and `::view-transition-new(root)`.
+- **Card-to-PDP Morphology**: Clicking a product card assigns `view-transition-name: product-plate` to the source image, transitioning seamlessly into the product detail primary plate.
+- **Accessibility**: Automatically suppressed when `prefers-reduced-motion: reduce` is active.
+
+### E. WP5: The Bag Moment & Mini-Bag Drawer
+- **Component**: `templates/includes/mini_bag.html`, `frontend/js/modules/fetch-forms.js`, `frontend/js/modules/quantity-stepper.js`, `frontend/css/components/cart.css`
+- **Confirmation State**: Submitting "Add to Bag" immediately morphs button copy to `✓ Added` with green background tint for 900ms before restoring resting state.
+- **Header Badge Tick**: Header counter updates with a 160ms vertical slide tick (`.badge-tick`), announced via ARIA live region (`#live-announcer`).
+- **Native Mini-Bag Drawer**: Opens native `<dialog id="mini-bag-dialog">` sliding smoothly from the right edge on desktop and sliding from the bottom sheet on mobile viewports.
+- **Live In-Drawer Stepper**: Quantity +/- buttons execute asynchronous AJAX updates, cross-fading item subtotal and grand total figures (120ms `.fade-updating`) and recalculating free shipping threshold meter without full-page reloads.
+
+### F. WP6: Small Excellence & Compositor Optimization
+- **Active Button Press**: Standardized across all interactive buttons to `transform: translateY(1px)`.
+- **Editorial Underlines**: Hyperlinks utilize transitionable `text-decoration-color` and `text-underline-offset`.
+- **Tabular Figures**: Every price, counter, SKU, timestamp, and indicator enforces `font-variant-numeric: tabular-nums` and `font-feature-settings: "tnum" 1`, eliminating visual jitter during updates.
+- **Compositor Header Thread**: Scroll progress indicator runs strictly on compositor layer using `transform: scaleX(...)` with `transform-origin: left`.
+
+### G. WP7: Performance & LCP Preloading
+- **LCP Preload**: Home template includes `<link rel="preload" as="image" href="..." fetchpriority="high">` targeting the primary hero plate image.
+- **Zero Layout Shift**: Strict aspect-ratio and dimension reservation across all plate containers and hero banners.
+

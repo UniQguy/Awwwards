@@ -41,7 +41,7 @@ data/*.csv
 data/*.zip
 
 # Database & SQLite Artifacts
-*.sqlite3
+*.sqlite3*
 *.db
 
 # Logs & Diagnostics

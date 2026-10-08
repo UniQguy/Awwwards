@@ -12,10 +12,47 @@
     transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
   }
 
-  .plate-collectible:hover,
-  .plate-collectible:focus-within {
-    border-color: var(--world-accent);
-    box-shadow: var(--lift-2);
+  @media (hover: hover) and (pointer: fine) {
+    html:not([data-motion-tier="3"]) .plate-collectible:hover,
+    html:not([data-motion-tier="3"]) .plate-collectible:focus-within {
+      border-color: var(--world-accent);
+      box-shadow: var(--lift-2);
+      transform: translateY(-4px);
+    }
+
+    html:not([data-motion-tier="3"]) .plate-collectible:hover .plate-mat-img,
+    html:not([data-motion-tier="3"]) .plate-collectible:focus-within .plate-mat-img {
+      transform: scale(1.02);
+    }
+
+    html:not([data-motion-tier="3"]) .plate-collectible:hover .card-arrow-glyph,
+    html:not([data-motion-tier="3"]) .plate-collectible:focus-within .card-arrow-glyph {
+      opacity: 1;
+      transform: translateX(6px);
+    }
+  }
+
+  @media (pointer: coarse) {
+    .plate-collectible:hover,
+    .plate-collectible:focus-within,
+    .plate-collectible .plate-mat-img,
+    .plate-collectible .card-arrow-glyph {
+      transform: none !important;
+    }
+  }
+
+  html[data-motion-tier="3"] .plate-collectible,
+  html[data-motion-tier="3"] .plate-collectible .plate-mat-img,
+  html[data-motion-tier="3"] .plate-collectible .card-arrow-glyph {
+    transform: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plate-collectible,
+    .plate-collectible .plate-mat-img,
+    .plate-collectible .card-arrow-glyph {
+      transform: none !important;
+    }
   }
 
   .plate-mat {

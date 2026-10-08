@@ -10,7 +10,7 @@
     <p class="empty-state-desc mb-6">
       If your session expired, retry your last action or return to the shop catalogue.
     </p>
-    <div class="empty-state-actions flex gap-4 justify-center">
+    <div class="empty-state-actions flex flex-wrap gap-4 justify-center">
       <a href="{% if retry_url %}{{ retry_url }}{% elif request.META.HTTP_REFERER %}{{ request.META.HTTP_REFERER }}{% else %}{% url 'cart_detail' %}{% endif %}" class="btn btn-primary">
         Retry last action
       </a>

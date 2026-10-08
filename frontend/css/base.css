@@ -53,17 +53,27 @@
     outline-offset: 2px;
   }
 
-  /* Link Styling */
+  /* Link Styling (WP6: underline draw/offset transition) */
   a {
     color: var(--world-text);
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
-    transition: color var(--dur-utility) var(--ease-utility);
+    transition: color 200ms ease, text-decoration-color 200ms ease, text-underline-offset 200ms ease;
   }
 
   a:hover {
     color: var(--world-accent);
+    text-decoration-color: var(--world-accent);
+    text-underline-offset: 5px;
+  }
+
+  /* Tabular Numbers on all prices, counts, SKUs, and coordinates (WP6) */
+  .price, .price-current, .price-mrp-struck, [class*="price"],
+  .badge, [class*="badge"], [class*="count"], [class*="sku"],
+  .chapter-numeral, .chapter-indicator-count, .stepper-input,
+  time, .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 
   /* Hairlines & Dividers */
@@ -152,6 +162,45 @@
     .pill {
       border: 1px solid CanvasText;
     }
+  }
+}
+
+/* WP4: Page Transitions (View Transitions API where supported, calm fallback) */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 220ms ease-out both vt-fade-out;
+}
+
+::view-transition-new(root) {
+  animation: 220ms ease-in both vt-fade-in;
+}
+
+@keyframes vt-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 

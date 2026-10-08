@@ -452,15 +452,18 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* 2px Active World Scroll Progress Thread */
+  /* 2px Active World Scroll Progress Thread (WP6: compositor layer transform scaleX) */
   .header-progress-thread {
     position: absolute;
     bottom: -1px;
     left: 0;
     height: 2px;
-    width: 0%;
+    width: 100%;
+    transform-origin: left center;
+    transform: scaleX(0);
+    will-change: transform;
     background-color: var(--world-accent);
-    transition: width 0.1s linear, background-color 350ms var(--ease-editorial, ease);
+    transition: transform 0.1s linear, background-color 350ms var(--ease-editorial, ease);
     z-index: 2;
   }
 

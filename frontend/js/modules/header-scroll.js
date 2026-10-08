@@ -55,8 +55,8 @@ export function initHeaderScroll() {
     const updateProgress = () => {
       const scrollY = window.scrollY || window.pageYOffset;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? Math.min(100, Math.max(0, (scrollY / docHeight) * 100)) : 0;
-      progressThread.style.width = `${progress}%`;
+      const ratio = docHeight > 0 ? Math.min(1, Math.max(0, scrollY / docHeight)) : 0;
+      progressThread.style.transform = `scaleX(${ratio})`;
       ticking = false;
     };
 

@@ -36,6 +36,63 @@ function initPasswordToggle() {
   });
 }
 
+function initImageEntryFadeAndLift() {
+  const tier = document.documentElement.dataset.motionTier || "1";
+  const isReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (tier === "3" || isReduced) return;
+
+  const images = document.querySelectorAll(".plate-mat-img, .product-plate img, .hero-plate-slot img, .product-frame-img");
+  images.forEach((img) => {
+    if (img.complete && img.naturalWidth > 0) return;
+
+    img.style.opacity = "0";
+    img.style.transform = "translateY(8px)";
+    img.style.transition = "opacity 240ms ease-out, transform 240ms cubic-bezier(0.22, 1, 0.36, 1)";
+
+    let revealed = false;
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      img.style.opacity = "1";
+      img.style.transform = "translateY(0)";
+    };
+
+    const timer = setTimeout(reveal, 200);
+
+    if (typeof img.decode === "function") {
+      img.decode().then(() => {
+        clearTimeout(timer);
+        reveal();
+      }).catch(() => {
+        clearTimeout(timer);
+        reveal();
+      });
+    } else {
+      img.addEventListener("load", () => {
+        clearTimeout(timer);
+        reveal();
+      }, { once: true });
+    }
+  });
+}
+
+function initCardViewTransitions() {
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("a[href*='/p/']");
+    if (!link) return;
+    const isReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (isReduced) return;
+
+    const card = link.closest(".plate-collectible, .product-card, .cart-line-item");
+    if (card) {
+      const img = card.querySelector("img");
+      if (img) {
+        img.style.viewTransitionName = "product-plate";
+      }
+    }
+  });
+}
+
 function bootstrap() {
   initMotionTier();
   initMotionToggleButton();
@@ -51,6 +108,8 @@ function bootstrap() {
   initFetchForms();
   initStickyPurchaseBar();
   initPasswordToggle();
+  initImageEntryFadeAndLift();
+  initCardViewTransitions();
 }
 
 if (document.readyState === "loading") {

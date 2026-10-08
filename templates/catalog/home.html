@@ -6,6 +6,12 @@
 {% block body_data_layer %} data-layer="editorial"{% endblock %}
 {% block editorial_script %}{% vite_asset 'frontend/js/editorial.js' %}{% endblock %}
 
+{% block extra_head %}
+  {% if hero_plate_product and hero_plate_product.primary_image_url %}
+    <link rel="preload" as="image" href="{{ hero_plate_product.primary_image_url }}" fetchpriority="high">
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="container">
   <!-- 1. HERO SECTION (WP2) -->
@@ -17,7 +23,7 @@
 
       <h1 class="hero-headline" id="hero-heading">
         {% if cutout_cable or cutout_watch or cutout_earphones %}
-          Everything you <span class="cutout-bound"><em>plug in</em>{% if cutout_cable %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_cable.primary_image_url }}" alt="" width="36" height="36" loading="eager" onerror="this.parentElement.style.display='none'"></span>{% endif %},</span> <span class="cutout-bound"><em>put on</em>{% if cutout_watch %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_watch.primary_image_url }}" alt="" width="36" height="36" loading="eager" onerror="this.parentElement.style.display='none'"></span>{% endif %},</span> or <span class="cutout-bound"><em>listen with</em>{% if cutout_earphones %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_earphones.primary_image_url }}" alt="" width="36" height="36" loading="eager" onerror="this.parentElement.style.display='none'"></span>{% endif %}.</span>
+          <span class="hero-line-mask"><span class="hero-line-inner">Everything you <span class="cutout-bound"><em>plug in</em>{% if cutout_cable %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_cable.primary_image_url }}" alt="" width="36" height="36" loading="eager" onerror="this.parentElement.style.display='none'"></span>{% endif %},</span></span></span> <span class="hero-line-mask"><span class="hero-line-inner"><span class="cutout-bound"><em>put on</em>{% if cutout_watch %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_watch.primary_image_url }}" alt="" width="36" height="36" loading="eager" onerror="this.parentElement.style.display='none'"></span>{% endif %},</span></span></span> <span class="hero-line-mask"><span class="hero-line-inner">or <span class="cutout-bound"><em>listen with</em>{% if cutout_earphones %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_earphones.primary_image_url }}" alt="" width="36" height="36" loading="eager" onerror="this.parentElement.style.display='none'"></span>{% endif %}.</span></span></span>
         {% else %}
           Everything you plug in, put on, or listen with.
         {% endif %}
@@ -36,6 +42,7 @@
     {% if hero_plate_product %}
       <div class="hero-plate-slot" id="hero-plate-slot" data-hero-img="{{ hero_plate_product.primary_image_url }}">
         <div class="hero-webgl-canvas-container" id="hero-webgl-canvas-container" aria-hidden="true"></div>
+        <div class="hero-specular-sweep" aria-hidden="true"></div>
         {% include "includes/collectible_plate.html" with product=hero_plate_product eager=True %}
         {% if hero.is_auto %}
           <p class="hero-marginalia">Selected by number of ratings on Amazon</p>
@@ -79,9 +86,15 @@
 
 <!-- 3. CHAPTERS (WP3: Composed 3-Plate Unit & Contrast Worlds) -->
 {% if chapters %}
+  <aside class="chapter-nav-indicator" id="chapter-nav-indicator" aria-hidden="false" tabindex="-1">
+    <span class="chapter-indicator-count" id="chapter-indicator-count">01 / {{ chapters|length|stringformat:"02d" }}</span>
+    <span class="chapter-indicator-title" id="chapter-indicator-title">{{ chapters.0.category.name }}</span>
+  </aside>
+
   <div>
     {% for chapter in chapters %}
-      <section class="spread chapter-spread" data-world="{{ chapter.category.accent_key }}" aria-labelledby="chapter-{{ chapter.category.id }}">
+      <section class="spread chapter-spread" data-world="{{ chapter.category.accent_key }}" data-chapter-index="{{ forloop.counter|stringformat:"02d" }}" data-chapter-total="{{ chapters|length|stringformat:"02d" }}" data-chapter-name="{{ chapter.category.name }}" aria-labelledby="chapter-{{ chapter.category.id }}">
+        <div class="chapter-wipe" aria-hidden="true"></div>
         <div class="chapter-top-bar" aria-hidden="true"></div>
         <div class="container chapter-grid">
           <!-- Left Column: Chapter metadata and live stats (cols 1-4) -->

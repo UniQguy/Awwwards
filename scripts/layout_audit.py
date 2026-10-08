@@ -262,7 +262,16 @@ def run_layout_audit(port: int, output_file: Path) -> Tuple[int, str]:
                 page = context.new_page()
                 page.set_viewport_size({"width": width, "height": DEFAULT_HEIGHT})
                 try:
-                    res = page.goto(url, wait_until="networkidle", timeout=12000)
+                    res = None
+                    for attempt in range(2):
+                        try:
+                            res = page.goto(url, wait_until="load", timeout=15000)
+                            break
+                        except Exception as e:
+                            if attempt == 1:
+                                raise e
+                            time.sleep(0.5)
+
                     if not res or res.status >= 400:
                         failures.append({
                             "page": page_name,

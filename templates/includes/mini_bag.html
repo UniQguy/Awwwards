@@ -1,0 +1,48 @@
+<dialog id="mini-bag-dialog" class="mini-bag-dialog" aria-labelledby="mini-bag-heading">
+  <div class="mini-bag-panel">
+    <!-- Header -->
+    <header class="mini-bag-header">
+      <div class="flex items-center gap-2">
+        <h2 id="mini-bag-heading" class="mini-bag-title">Added to Bag</h2>
+        <span class="mini-bag-count-badge" id="mini-bag-count-badge"></span>
+      </div>
+      <button type="button" class="mini-bag-close-btn" id="mini-bag-close-btn" aria-label="Close bag drawer">
+        <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-close"></use></svg>
+      </button>
+    </header>
+
+    <!-- Added Item Display -->
+    <div class="mini-bag-item-card" id="mini-bag-item-card">
+      <div class="mini-bag-thumb-wrapper" id="mini-bag-thumb-wrapper">
+        <img src="" alt="" id="mini-bag-thumb-img" class="mini-bag-thumb-img" width="64" height="64" loading="eager">
+      </div>
+      <div class="mini-bag-item-info">
+        <p class="mini-bag-item-name" id="mini-bag-item-name"></p>
+        <p class="mini-bag-item-qty-price">
+          <span class="caption">Qty <strong id="mini-bag-item-qty">1</strong></span>
+          <span class="price-current ml-2" id="mini-bag-item-price"></span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Free Delivery Progress Meter -->
+    <div class="mini-bag-delivery-meter" id="mini-bag-delivery-meter">
+      <p class="mini-bag-meter-label caption" id="mini-bag-meter-label"></p>
+      <div class="mini-bag-meter-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="mini-bag-meter-fill" id="mini-bag-meter-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Subtotal Breakdown -->
+    <div class="mini-bag-subtotal-row">
+      <span class="caption">Bag Subtotal</span>
+      <span class="price-current" id="mini-bag-subtotal-val"></span>
+    </div>
+
+    <!-- Actions -->
+    <div class="mini-bag-actions">
+      <a href="{% url 'cart_detail' %}" class="btn btn-secondary btn-block">View Bag</a>
+      <a href="{% url 'checkout_start' %}" class="btn btn-primary btn-block">Proceed to Checkout &rarr;</a>
+    </div>
+  </div>
+</dialog>

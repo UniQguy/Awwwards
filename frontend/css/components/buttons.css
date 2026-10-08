@@ -25,7 +25,7 @@
   }
 
   .btn:active:not(:disabled) {
-    transform: translateY(0);
+    transform: translateY(1px);
   }
 
   /* Primary Button */

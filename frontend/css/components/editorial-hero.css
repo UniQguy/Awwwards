@@ -98,6 +98,166 @@
     font-style: italic;
   }
 
+  .hero-line-mask {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+
+  .hero-line-inner {
+    display: inline-block;
+    vertical-align: bottom;
+    will-change: transform;
+  }
+
+  /* Specular Sweep on Plate Entry */
+  .hero-specular-sweep {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    overflow: hidden;
+    border-radius: var(--radius-2);
+  }
+
+  .hero-specular-sweep::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 60%;
+    height: 200%;
+    background: linear-gradient(
+      105deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.35) 50%,
+      transparent 80%
+    );
+    transform: rotate(25deg);
+    opacity: 0;
+  }
+
+  /* WP1: Entrance Choreography (Tier 1 & Tier 2) */
+  html[data-motion-tier="1"] .hero-composition.hero-animate-prep .hero-line-inner,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-prep .hero-line-inner {
+    transform: translateY(100%);
+  }
+
+  html[data-motion-tier="1"] .hero-composition.hero-animate-prep .cutout,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-prep .cutout {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  html[data-motion-tier="1"] .hero-composition.hero-animate-prep .hero-plate-slot,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-prep .hero-plate-slot {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  html[data-motion-tier="1"] .hero-composition.hero-animate-prep .hero-live-stat,
+  html[data-motion-tier="1"] .hero-composition.hero-animate-prep .hero-actions,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-prep .hero-live-stat,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-prep .hero-actions {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  /* When running: trigger transitions with stagger */
+  html[data-motion-tier="1"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(1) .hero-line-inner,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(1) .hero-line-inner {
+    transform: translateY(0);
+    transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html[data-motion-tier="1"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(2) .hero-line-inner,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(2) .hero-line-inner {
+    transform: translateY(0);
+    transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1) 90ms;
+  }
+
+  html[data-motion-tier="1"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(3) .hero-line-inner,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(3) .hero-line-inner {
+    transform: translateY(0);
+    transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+  }
+
+  /* Cutouts fade in and scale up after each word */
+  html[data-motion-tier="1"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(1) .cutout,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(1) .cutout {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 320ms ease-out 300ms, transform 320ms cubic-bezier(0.22, 1, 0.36, 1) 300ms;
+  }
+
+  html[data-motion-tier="1"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(2) .cutout,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(2) .cutout {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 320ms ease-out 380ms, transform 320ms cubic-bezier(0.22, 1, 0.36, 1) 380ms;
+  }
+
+  html[data-motion-tier="1"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(3) .cutout,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-run .hero-line-mask:nth-of-type(3) .cutout {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 320ms ease-out 460ms, transform 320ms cubic-bezier(0.22, 1, 0.36, 1) 460ms;
+  }
+
+  /* Plate rises 24px and fades with 160ms delay */
+  html[data-motion-tier="1"] .hero-composition.hero-animate-run .hero-plate-slot,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-run .hero-plate-slot {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 650ms ease-out 160ms, transform 650ms cubic-bezier(0.22, 1, 0.36, 1) 160ms;
+  }
+
+  /* Specular sweep across plate once */
+  html[data-motion-tier="1"] .hero-composition.hero-animate-run .hero-specular-sweep::after,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-run .hero-specular-sweep::after {
+    animation: heroSpecularSweep 850ms cubic-bezier(0.22, 1, 0.36, 1) 750ms 1 normal forwards;
+  }
+
+  @keyframes heroSpecularSweep {
+    0% {
+      left: -100%;
+      opacity: 0;
+    }
+    30% {
+      opacity: 0.8;
+    }
+    100% {
+      left: 180%;
+      opacity: 0;
+    }
+  }
+
+  /* Subline and actions fade up last */
+  html[data-motion-tier="1"] .hero-composition.hero-animate-run .hero-live-stat,
+  html[data-motion-tier="1"] .hero-composition.hero-animate-run .hero-actions,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-run .hero-live-stat,
+  html[data-motion-tier="2"] .hero-composition.hero-animate-run .hero-actions {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 400ms ease-out 750ms, transform 400ms cubic-bezier(0.22, 1, 0.36, 1) 750ms;
+  }
+
+  /* Reduced motion & Tier 3: Zero transforms, instant display */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-composition.hero-animate-prep .hero-line-inner,
+    .hero-composition.hero-animate-prep .cutout,
+    .hero-composition.hero-animate-prep .hero-plate-slot,
+    .hero-composition.hero-animate-prep .hero-live-stat,
+    .hero-composition.hero-animate-prep .hero-actions {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .hero-specular-sweep {
+      display: none !important;
+    }
+  }
+
   /* Hero Plate Slot & WebGL Layer */
   .hero-plate-slot {
     position: relative;

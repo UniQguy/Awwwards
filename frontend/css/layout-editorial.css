@@ -34,6 +34,73 @@
     background-color: var(--world-accent);
   }
 
+  /* Chapter Indicator (WP2: Desktop Fixed Left Edge & Mobile Header Badge) */
+  .chapter-nav-indicator {
+    position: fixed;
+    left: clamp(0.75rem, 2vw, 2rem);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: var(--z-sticky, 40);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 240ms ease-out;
+  }
+
+  .chapter-nav-indicator.is-visible {
+    opacity: 1;
+  }
+
+  .chapter-indicator-count {
+    font-family: var(--font-mono, monospace);
+    font-size: var(--step--2, 0.75rem);
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+    color: var(--world-accent);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .chapter-indicator-title {
+    font-family: var(--font-body, inherit);
+    font-size: var(--step--2, 0.75rem);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--world-muted, #666);
+    max-width: 130px;
+    line-height: 1.25;
+  }
+
+  @media (max-width: 1023px) {
+    .chapter-nav-indicator {
+      display: none !important;
+    }
+  }
+
+  .header-chapter-badge {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm, 2px);
+    background-color: var(--world-surface, rgba(0,0,0,0.04));
+    color: var(--world-accent);
+    border: 1px solid var(--world-rule, transparent);
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .header-chapter-badge {
+      display: none !important;
+    }
+  }
+
   /* Chapter container & inner asymmetric split */
   .chapter-spread {
     overflow-x: clip;
@@ -268,6 +335,13 @@
     height: auto;
     object-fit: contain;
     mix-blend-mode: multiply;
+    view-transition-name: product-plate;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .product-frame-img {
+      view-transition-name: none !important;
+    }
   }
 
   .product-frame-caption {

@@ -19,24 +19,73 @@ import { initSmallMotions } from "./modules/small_motions.js";
 import { initPriceHistogram } from "./modules/price_histogram.js";
 
 function bootstrapEditorial() {
-  // 1. Initialize editorial scroll and chapter wipes
+  // 1. Initialize hero entrance choreography (Tier 1 & 2 only, once per session)
+  initHeroEntranceChoreography();
+
+  // 2. Initialize editorial scroll and chapter wipes
   initScroller();
   initChapterTransitions();
 
-  // 2. Initialize collectible card 3D tilt
+  // 3. Initialize collectible card 3D tilt
   initCollectibleCards();
 
-  // 3. Initialize cycling inline cutouts in hero headline
+  // 4. Initialize cycling inline cutouts in hero headline
   initHeadlineCutouts();
 
-  // 4. Initialize section hairline draw & heading reveals
+  // 5. Initialize section hairline draw & heading reveals
   initSmallMotions();
 
-  // 5. Initialize dual-thumb price histogram (utility enhancement on category detail)
+  // 6. Initialize dual-thumb price histogram (utility enhancement on category detail)
   initPriceHistogram();
 
-  // 6. Initialize WebGL dynamic loader for homepage hero plate
+  // 7. Initialize WebGL dynamic loader for homepage hero plate
   setupHeroWebGLLoader();
+}
+
+/**
+ * Editorial Hero Entrance Choreography (WP1).
+ * Runs on editorial pages (homepage), Tier 1 and Tier 2 only, once per session.
+ * Skipped on reduced motion or Tier 3.
+ */
+export function initHeroEntranceChoreography() {
+  const heroComp = document.querySelector(".hero-composition");
+  if (!heroComp) return;
+
+  const tier = parseInt(document.documentElement.dataset.motionTier || "1", 10);
+  const isReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Skipped on Tier 3 or prefers-reduced-motion
+  if (tier === 3 || isReduced) return;
+
+  // Run once per browser session
+  try {
+    if (sessionStorage.getItem("hero_entered")) {
+      return;
+    }
+    sessionStorage.setItem("hero_entered", "1");
+  } catch (_) {
+    // SessionStorage unavailable (e.g. private mode)
+  }
+
+  // Hide initial elements using the prep class
+  heroComp.classList.add("hero-animate-prep");
+
+  // Safety timeout: reveals everything after 2.0s so content is never stuck
+  const safetyTimer = setTimeout(() => {
+    heroComp.classList.remove("hero-animate-prep");
+    heroComp.classList.remove("hero-animate-run");
+  }, 2000);
+
+  // Trigger staged reveal on next animation frames
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      heroComp.classList.add("hero-animate-run");
+      setTimeout(() => {
+        heroComp.classList.remove("hero-animate-prep");
+        clearTimeout(safetyTimer);
+      }, 1650);
+    });
+  });
 }
 
 /**

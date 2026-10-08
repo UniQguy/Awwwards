@@ -202,3 +202,41 @@
   - `scripts/audit_copy_honesty.py`: 100% compliance with honesty guidelines (zero fake reviews, zero lorem/TODO, zero banned hype words, zero customer-facing exclamation marks).
   - `scripts/clean_clone_check.ps1`: 100% reproducible clean clone test in fresh environment completing in 32s.
   - `scripts/launch_audit.py`: Automated 9-gate pre-flight deployment audit passing all checks.
+
+### 8. Phase 8: Systematic Defect Repair & Final Regression
+- **Phase 8a (Correctness, Data Truth & Flow)**:
+  - **F-01**: Closed guest checkout 403 Forbidden defect by adding `http://127.0.0.1:8000` and `http://localhost:8000` to `CSRF_TRUSTED_ORIGINS`, ensuring session step verification fallback redirect, and custom 403 CSRF view with retry link.
+  - **F-02**: Closed category classification defect by overhauling keyword token boundaries in `data/category_rules.json` and adding exclusion lists (e.g. phone models excluded from cameras; streaming sticks excluded from TVs). Reclassified 1,281 catalog products via `scripts/reclassify_products.py`.
+  - **F-03**: Closed specification parsing defect by updating `apps/catalog/services/spec_extractor.py` regexes so centimeters are never misparsed as inches. Plausibility sanity checks enforce valid diagonal screen dimensions.
+  - **F-04**: Closed copy honesty violations across templates. Replaced invented hype descriptions with calm, factual specifications matching authentic catalog data.
+  - **F-05**: Closed tax mode contradiction. In Composition Dealer / Bill of Supply mode, prices are net; no GST lines are charged or displayed.
+  - **F-06**: Closed cart arithmetic defect. MRP savings reformatted strictly as informational retail savings comparison, not a subtraction from items subtotal.
+  - **F-07**: Closed search suggestions panel behavior in real browser.
+  - **F-12**: Closed duplicate chapter picks; enforced distinct product selection per category chapter spread.
+  - **Harness**: Built `scripts/e2e_browser.py` driving Playwright Chromium against background test server.
+- **Phase 8b (Layout & Design Repair)**:
+  - **F-08 to F-10**: Hero 400px empty space eliminated; cutout white square backgrounds blended; chapter grid balanced to avoid orphaned 4th plates.
+  - **F-11**: Product card typography switched to Plus Jakarta Sans 500, clamped to 2 lines; price row collision resolved; category labels deduplicated.
+  - **F-13**: Plate background color matched with product artwork corners within 4 RGB units.
+  - **F-14**: Category world accent colors synchronized with header rule, focus rings, and active chapter indication.
+  - **F-15 to F-18**: Categories index resized to avoid 800px upscaling; "How Purchasing Works" restructured into honest 2-column layout; brand directory formatting stabilized with flex-wrap; colophon aligned.
+  - **F-19 to F-24**: Auth forms aligned to single left baseline; wishlist container aligned; 24px icon set redrawn with 1.5px strokes; footer dev-speak cleaned; error pages restyled; cart summary fixed.
+  - **Harness**: Built `scripts/layout_audit.py` auditing 8 viewports (360px to 2560px) with 0 defects detected.
+- **Phase 8c (Motion, Interaction Polish & Final Regression)**:
+  - **WP0**: Motion baseline recorded in `docs/ui-review/motion_before.md` and frame captures in `docs/ui-review/frames/`.
+  - **WP1**: Hero entrance choreography (masked line stagger, specular sweep, plate rise, sessionStorage single-run guard, 2.0s safety reveal timeout).
+  - **WP2**: Fixed desktop left chapter indicator (`02 / 06`) and sticky mobile header badge (`02/06`) driven by `IntersectionObserver` with `rootMargin: "-45% 0px -45% 0px"`.
+  - **WP3**: Tactile hover lift (4px), image scale (1.02), arrow slide (6px) on fine pointer; zero-transform override on touch and Tier 3; image entry fade via `HTMLImageElement.decode()`.
+  - **WP4**: Multi-page View Transitions with 220ms crossfade and morphing `product-plate` transition name.
+  - **WP5**: The Bag Moment: button morphs to `✓ Added` for 900ms, header count badge vertical slide tick (160ms), native `<dialog id="mini-bag-dialog">`, live quantity fetch and amount crossfade (120ms).
+  - **WP6**: 1px active button press, transitionable link underlines, tabular numerals on all numeric indicators, compositor `scaleX` scroll thread.
+  - **WP7**: Preloaded LCP hero plate with `fetchpriority="high"`.
+  - **WP8**: Full QA matrix suite (`scripts/full_qa.py`): 26 page states across 6 viewports and 5 motion/script modes (468 evaluations) with **0 defects**. Pure keyboard-only purchase walkthrough passed end-to-end (20 keystrokes, 0 pointer).
+  - **WP9**: Built interactive visual contact sheet in `docs/ui-review/contact_sheet.html`.
+- **Final Test Matrix Verification**:
+  - Django Test Suite: **261 passed**, 0 failed in 47.2s.
+  - Vitest Unit Suite: **52 passed**, 0 failed in 7.6s.
+  - Layout Craft Audit: **0 defects** across 8 viewports (360px to 2560px).
+  - Copy Honesty Audit: **PASSED** (0 fake reviews, 0 lorem, 0 banned words, 0 customer exclamation marks).
+  - Full QA Regression: **468 evaluations, 0 defects**. Keyboard checkout confirmed.
+

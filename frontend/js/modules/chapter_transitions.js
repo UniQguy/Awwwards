@@ -34,8 +34,56 @@ export function initChapterTransitions() {
   // 2. Diagonal Wipe Transitions
   setupDiagonalWipes(chapters);
 
-  // 3. React to tier changes
+  // 3. Chapter Indicator & Mobile Badge tracking
+  setupChapterIndicator(chapters);
+
+  // 4. React to tier changes
   window.addEventListener("motiontierchange", handleTierChange);
+}
+
+/**
+ * Tracks the active chapter crossing the viewport middle to update the
+ * desktop chapter indicator and mobile header chapter badge.
+ *
+ * @param {NodeList} chapters
+ */
+export function setupChapterIndicator(chapters) {
+  if (typeof IntersectionObserver === "undefined") return;
+
+  const desktopIndicator = document.getElementById("chapter-nav-indicator");
+  const countEl = document.getElementById("chapter-indicator-count");
+  const titleEl = document.getElementById("chapter-indicator-title");
+  const mobileBadge = document.getElementById("header-chapter-badge");
+
+  if (!desktopIndicator && !mobileBadge) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = entry.target.dataset.chapterIndex || "01";
+          const total = entry.target.dataset.chapterTotal || "06";
+          const name = entry.target.dataset.chapterName || "";
+
+          if (countEl) countEl.textContent = `${index} / ${total}`;
+          if (titleEl) titleEl.textContent = name;
+          if (desktopIndicator) desktopIndicator.classList.add("is-visible");
+
+          if (mobileBadge) {
+            mobileBadge.textContent = `${index}/${total}`;
+            mobileBadge.hidden = false;
+          }
+        }
+      });
+    },
+    {
+      rootMargin: "-45% 0px -45% 0px",
+      threshold: 0,
+    }
+  );
+
+  chapters.forEach((ch) => observer.observe(ch));
+  intersectionObservers.push(observer);
 }
 
 /**
