@@ -143,36 +143,64 @@
       <h2 class="summary-title">Final Total</h2>
 
       <dl class="summary-totals-dl">
-        <dt>Items Subtotal</dt>
+        <dt>Items</dt>
         <dd>{{ summary.subtotal|inr }}</dd>
 
         {% if summary.applied_discount > 0 %}
-          <dt class="text-success">Coupon Savings</dt>
+          <dt class="text-success">Coupon</dt>
           <dd class="text-success">-{{ summary.applied_discount|inr }}</dd>
         {% endif %}
 
-        <dt>Delivery Fee</dt>
+        <dt>Delivery</dt>
         <dd>
           {% if summary.shipping_fee > 0 %}
             {{ summary.shipping_fee|inr }}
           {% else %}
-            <span class="text-success">FREE</span>
+            {% if summary.standard_shipping_fee %}<del class="text-muted">{{ summary.standard_shipping_fee|inr }}</del> {% endif %}<span class="text-success">FREE</span>
           {% endif %}
         </dd>
 
-        <dt class="caption">GST Tax</dt>
-        <dd class="caption">
-          Included ({{ summary.tax_amount|inr }})
-        </dd>
+        {% if summary.cod_fee > 0 %}
+          <dt>COD fee</dt>
+          <dd>{{ summary.cod_fee|inr }}</dd>
+        {% endif %}
+
+        {% if seller_mode == "gst" and summary.tax_amount > 0 %}
+          <dt class="caption">Includes GST</dt>
+          <dd class="caption">
+            {{ summary.tax_amount|inr }}
+          </dd>
+          {% if summary.tax_allocation %}
+            {% if summary.tax_allocation.intra_state %}
+              <dt class="caption text-muted pl-2">CGST</dt>
+              <dd class="caption text-muted">{{ summary.tax_allocation.total_cgst|inr }}</dd>
+              <dt class="caption text-muted pl-2">SGST</dt>
+              <dd class="caption text-muted">{{ summary.tax_allocation.total_sgst|inr }}</dd>
+            {% else %}
+              <dt class="caption text-muted pl-2">IGST</dt>
+              <dd class="caption text-muted">{{ summary.tax_allocation.total_igst|inr }}</dd>
+            {% endif %}
+          {% endif %}
+        {% endif %}
       </dl>
 
       <div class="summary-grand-total">
-        <span class="total-label">Payable Total</span>
+        <span class="total-label">Total</span>
         <span class="total-amount">{{ summary.grand_total|inr }}</span>
       </div>
 
-      <div class="alert alert-info caption">
-        A compliant GST Tax Invoice or Bill of Supply with sequential numbering will be automatically generated upon order completion.
+      {% if summary.mrp_savings > 0 %}
+        <p class="summary-mrp-savings caption text-success mt-2 mb-4">
+          You save {{ summary.mrp_savings|inr }} compared with the listed MRP.
+        </p>
+      {% endif %}
+
+      <div class="alert alert-info caption mt-4">
+        {% if seller_mode == "bill_of_supply" %}
+          A Bill of Supply with sequential numbering will be generated upon order completion.
+        {% else %}
+          A GST Tax Invoice with sequential numbering will be generated upon order completion.
+        {% endif %}
       </div>
     </aside>
   </div>

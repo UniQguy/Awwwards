@@ -91,13 +91,16 @@ def robots_txt(request):
 
 def csrf_failure(request, reason=""):
     """
-    Renders custom 403 page when CSRF token verification fails.
+    Renders custom 403 CSRF page with calm retry copy.
     """
-    print(f"CSRF FAILURE REASON: {reason} for path {request.path}")
+    retry_url = request.META.get("HTTP_REFERER") or "/cart/"
     return render(
         request,
-        "403.html",
-        {"reason": f"Security verification failed: {reason}"},
+        "403_csrf.html",
+        {
+            "retry_url": retry_url,
+            "reason": reason,
+        },
         status=403,
     )
 
@@ -107,6 +110,8 @@ def error_400(request, exception=None):
 
 
 def error_403(request, exception=None):
+    if exception and "Ratelimited" in type(exception).__name__:
+        return error_429(request, exception)
     return render(request, "403.html", status=403)
 
 

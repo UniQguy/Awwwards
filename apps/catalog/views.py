@@ -10,7 +10,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.db.models import Count, Min, Q
+from django.db.models import Count, Max, Min, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
@@ -22,6 +22,7 @@ from apps.catalog.services.editorial import (
     eligible_cutout_products,
     hero_products,
     home_chapters,
+    home_headline_cutouts,
     index_rows,
 )
 from apps.catalog.services.price_distribution import PRICE_BRACKETS
@@ -44,8 +45,11 @@ def home(request: HttpRequest) -> HttpResponse:
     # 1. Hero
     hero_res = hero_products(n=3)
     hero_plate_product = hero_res.products[0] if hero_res.products else None
-    cutout_candidates = hero_res.products[1:] if len(hero_res.products) > 1 else hero_res.products
-    cutouts = eligible_cutout_products(cutout_candidates, max_cutouts=3)
+    headline_cutouts = home_headline_cutouts()
+    cutout_cable = headline_cutouts.get("cable")
+    cutout_watch = headline_cutouts.get("watch")
+    cutout_earphones = headline_cutouts.get("earphones")
+    cutouts = [c for c in [cutout_cable, cutout_watch, cutout_earphones] if c is not None]
 
     # 2. Stats for live hero sentence
     total_listings = Product.objects.filter(is_available=True, selling_price__gt=0).count()
@@ -62,6 +66,8 @@ def home(request: HttpRequest) -> HttpResponse:
     # 5. How Buying Works data
     shipping_config = ShippingConfig.get_solo()
     free_shipping_threshold = shipping_config.free_shipping_threshold
+    standard_shipping_fee = shipping_config.standard_fee
+    shipping_fee_confirmed = shipping_config.is_standard_fee_confirmed
     seller_gstin = getattr(settings, "SELLER_GSTIN", "")
     is_bill_of_supply = not bool(seller_gstin)
     razorpay_enabled = bool(getattr(settings, "RAZORPAY_KEY_ID", ""))
@@ -89,6 +95,9 @@ def home(request: HttpRequest) -> HttpResponse:
     context = {
         "hero": hero_res,
         "hero_plate_product": hero_plate_product,
+        "cutout_cable": cutout_cable,
+        "cutout_watch": cutout_watch,
+        "cutout_earphones": cutout_earphones,
         "cutouts": cutouts,
         "cutout_cycle_data": cutout_cycle_data,
         "total_listings": total_listings,
@@ -97,6 +106,8 @@ def home(request: HttpRequest) -> HttpResponse:
         "index_rows": index_list,
         "chapters": chapters,
         "free_shipping_threshold": free_shipping_threshold,
+        "standard_shipping_fee": standard_shipping_fee,
+        "shipping_fee_confirmed": shipping_fee_confirmed,
         "is_bill_of_supply": is_bill_of_supply,
         "razorpay_enabled": razorpay_enabled,
         "brands": brands,
@@ -112,7 +123,23 @@ def category_list(request: HttpRequest) -> HttpResponse:
     """
     categories = list(Category.objects.filter(is_active=True).order_by("display_order", "name"))
     category_spreads = [category_spread(cat) for cat in categories]
-    return render(request, "catalog/category_list.html", {"category_spreads": category_spreads})
+    total_listings = Product.objects.filter(is_available=True, selling_price__gt=0).count()
+    price_aggs = Product.objects.filter(is_available=True, selling_price__gt=0).aggregate(
+        min_price=Min("selling_price"),
+        max_price=Max("selling_price"),
+    )
+    min_price = price_aggs["min_price"] or Decimal("0.00")
+    max_price = price_aggs["max_price"] or Decimal("0.00")
+    return render(
+        request,
+        "catalog/category_list.html",
+        {
+            "category_spreads": category_spreads,
+            "total_listings": total_listings,
+            "min_price": min_price,
+            "max_price": max_price,
+        },
+    )
 
 
 @require_GET

@@ -10,9 +10,11 @@ from django.urls import include, path
 from apps.core.sitemaps import sitemaps
 from apps.core.views import (
     about,
+    csrf_failure,
     error_400,
     error_403,
     error_404,
+    error_429,
     error_500,
     health_check,
     legal_privacy,
@@ -51,7 +53,12 @@ urlpatterns = [
     path("legal/refunds/", legal_refunds, name="legal_refunds"),
 
     # QA and Test Endpoints
+    path("400-test/", error_400, name="error_400_test"),
+    path("403-test/", error_403, name="error_403_test"),
+    path("403-csrf-test/", csrf_failure, name="csrf_failure_test"),
     path("404-test-page/", error_404, name="error_404_test"),
+    path("429-test/", error_429, name="error_429_test"),
+    path("500-test/", error_500, name="error_500_test"),
 
     # Catalog & Editorial Storefront
     path("", include("apps.catalog.urls")),

@@ -3,11 +3,8 @@
     <div class="footer-colophon-grid">
       <div class="footer-col">
         <h2 class="footer-col-title">About Electrocart</h2>
-        <p>A calm, considered destination for precision electronics and audio equipment in India.</p>
+        <p>Electrocart is a demonstration store. Catalogue prices come from an older dataset and stock levels are sample data.</p>
         <p class="caption">Prices in Indian Rupee (₹). Dispatched from {{ seller_mode.seller_state }}.</p>
-        <div class="footer-meta-note">
-          <strong>Notice:</strong> Demonstration catalog. All brand trademarks belong to their respective owners.
-        </div>
       </div>
 
       <div class="footer-col">
@@ -34,8 +31,8 @@
             <p>{{ seller_mode.seller_address }}</p>
           {% endif %}
           <p>
-            {% if seller_mode.is_bill_of_supply %}
-              Composition Dealer / Unregistered. Issuing Bill of Supply.
+            {% if seller_mode == "bill_of_supply" %}
+              Bills of supply are issued. No GST is charged.
             {% else %}
               GSTIN: {{ seller_mode.seller_gstin }}
             {% endif %}
@@ -53,7 +50,7 @@
 
     <div class="footer-bottom-brand">
       <a href="{% url 'home' %}" class="footer-display-wordmark">ELECTROCART</a>
-      <p class="footer-legal-copy">&copy; {% now "Y" %} {{ seller_mode.seller_legal_name }}. Crafted with semantic HTML &amp; native web standards.</p>
+      <p class="footer-legal-copy">&copy; {% now "Y" %} Electrocart</p>
     </div>
   </div>
 </footer>

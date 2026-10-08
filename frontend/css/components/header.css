@@ -164,6 +164,87 @@
     color: var(--world-muted);
   }
 
+  /* Search Suggestions Dropdown */
+  .search-suggestions-container {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    right: 0;
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-2);
+    box-shadow: var(--lift-2);
+    z-index: var(--z-popover);
+    overflow: hidden;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+
+  .search-suggestions-container[hidden] {
+    display: none;
+  }
+
+  .search-suggestions-list {
+    list-style: none;
+    margin: 0;
+    padding: var(--space-1) 0;
+  }
+
+  .suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    color: var(--world-text);
+    text-decoration: none;
+    cursor: pointer;
+    font-size: var(--step--1);
+    line-height: 1.3;
+    transition: background-color var(--dur-utility) var(--ease-utility);
+  }
+
+  .suggestion-item:hover,
+  .suggestion-item[aria-selected="true"],
+  .suggestion-item.is-selected {
+    background-color: var(--color-warm-paper-2, #ebe9e1);
+    color: var(--world-text);
+  }
+
+  .suggestion-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 6px;
+    border-radius: var(--radius-1);
+    background-color: var(--world-bg);
+    color: var(--world-muted);
+    flex-shrink: 0;
+  }
+
+  .suggestion-title {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .suggestion-price {
+    font-weight: 600;
+    font-size: var(--step--1);
+    color: var(--world-text);
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .suggestion-see-all {
+    border-top: 1px solid var(--world-rule);
+    margin-top: var(--space-1);
+    padding-top: var(--space-2);
+    font-weight: 500;
+    color: var(--world-accent);
+  }
+
   @media (max-width: 768px) {
     .header-search-form {
       display: none;

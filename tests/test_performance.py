@@ -101,7 +101,7 @@ class PerformanceOptimizationTests(TestCase):
             self.assertIn("Cache-Control", response.headers)
             self.assertIn("no-store", response.headers["Cache-Control"])
             self.assertIn("private", response.headers["Cache-Control"])
-            self.assertEqual(response.headers.get("Referrer-Policy"), "no-referrer")
+            self.assertEqual(response.headers.get("Referrer-Policy"), "same-origin")
 
     def test_whitenoise_immutable_test(self):
         """WhiteNoise immutable file test correctly identifies hashed and Vite dist assets."""

@@ -28,7 +28,7 @@ class SensitivePageHeadersMiddleware:
 
         path = request.path_info
         if any(path.startswith(prefix) for prefix in SENSITIVE_PREFIXES):
-            response["Referrer-Policy"] = "no-referrer"
+            response["Referrer-Policy"] = "same-origin"
             response["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
             response["Pragma"] = "no-cache"
 

@@ -174,10 +174,27 @@ class Product(TimeStampedModel):
     @property
     def highlight_spec_summary(self) -> str:
         """
-        Returns up to three highlight specifications joined with middle dots (e.g. '6 GB · 128 GB · 5G').
-        Prefetches safe: reads from preloaded specifications if available.
+        Returns validated specifications in a stable category order joined with middle dots.
+        (e.g., TVs: size · resolution; phones: RAM · storage · battery; watches: display size).
         """
+        from apps.catalog.services.spec_extractor import CATEGORY_CAPTION_SPEC_ORDER
+
         specs = list(self.specifications.all())
+        if not specs:
+            return ""
+
+        cat_slug = self.category.slug if self.category else ""
+        order_keys = CATEGORY_CAPTION_SPEC_ORDER.get(cat_slug, [])
+
+        spec_map = {s.key: s.value for s in specs}
+        ordered_values = []
+        for k in order_keys:
+            if k in spec_map:
+                ordered_values.append(spec_map[k])
+
+        if ordered_values:
+            return " · ".join(ordered_values[:3])
+
         highlights = [s.value for s in specs if s.is_highlight][:3]
         if not highlights:
             highlights = [s.value for s in specs[:3]]

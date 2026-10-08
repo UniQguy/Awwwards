@@ -75,7 +75,7 @@ class CategorySpreadAndProductSheetTest(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(resp.context["show_marquee"])
-        self.assertContains(resp, "Monograph Marquee")
+        self.assertContains(resp, "Category Overview")
         self.assertContains(resp, "category-marquee")
 
     def test_marquee_hidden_when_filtering(self):
@@ -84,7 +84,7 @@ class CategorySpreadAndProductSheetTest(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(resp.context["show_marquee"])
-        self.assertNotContains(resp, "Monograph Marquee")
+        self.assertNotContains(resp, "Category Overview")
         self.assertNotContains(resp, "category-marquee")
 
     def test_marquee_hidden_on_page_2(self):
@@ -98,7 +98,7 @@ class CategorySpreadAndProductSheetTest(TestCase):
         """Category index (/categories/) renders monograph spreads with live stats and picks."""
         resp = self.client.get(reverse("category_list"))
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "Category Monograph Index")
+        self.assertContains(resp, "All categories")
         self.assertContains(resp, "Audio &amp; Monitors")
         self.assertContains(resp, "Curated listings")
 

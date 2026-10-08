@@ -106,23 +106,39 @@ def search_suggest(request: HttpRequest) -> JsonResponse:
         return JsonResponse({"products": [], "categories": [], "brands": []})
 
     # 1. Matching categories (max 2)
-    categories = list(
-        Category.objects.filter(is_active=True, name__icontains=query)
+    categories = [
+        {"name": c["name"], "slug": c["slug"], "url": f"/c/{c['slug']}/"}
+        for c in Category.objects.filter(is_active=True, name__icontains=query)
+        .order_by("name")
         .values("name", "slug")[:2]
-    )
+    ]
 
     # 2. Matching brands (max 2)
     known_brands = get_known_brands()
-    matching_brands = [b for b in known_brands if query in b.lower()][:2]
+    matching_brands_raw = [b for b in known_brands if query in b.lower()][:2]
+    brand_items = [{"name": b, "url": f"/search/?brand={b}"} for b in matching_brands_raw]
 
-    # 3. Matching products (max 4)
-    products = list(
-        Product.objects.filter(is_available=True, selling_price__gt=0, search_text__icontains=query)
-        .values("id", "display_name", "slug", "selling_price", "parsed_brand")[:4]
-    )
+    # 3. Matching products (up to remaining slots so total <= 8)
+    remaining_slots = max(1, 8 - len(categories) - len(brand_items))
+    products = [
+        {
+            "id": p["id"],
+            "display_name": p["display_name"],
+            "slug": p["slug"],
+            "selling_price": str(p["selling_price"]) if p["selling_price"] else None,
+            "parsed_brand": p["parsed_brand"],
+            "url": f"/p/{p['slug']}/",
+        }
+        for p in Product.objects.filter(
+            is_available=True, selling_price__gt=0, search_text__icontains=query
+        )
+        .order_by("-source_rating_count", "-source_rating")
+        .values("id", "display_name", "slug", "selling_price", "parsed_brand")[:remaining_slots]
+    ]
 
     return JsonResponse({
         "products": products,
         "categories": categories,
-        "brands": matching_brands,
+        "brands": matching_brands_raw,
+        "brand_items": brand_items,
     })

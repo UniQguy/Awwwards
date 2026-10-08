@@ -45,13 +45,15 @@ def razorpay_checkout_page(request: HttpRequest, order_number: str) -> HttpRespo
     if order.payment_status == Order.PAYMENT_STATUS_CAPTURED:
         return redirect("order_success", order_number=order.order_number)
 
-    key_id = getattr(settings, "RAZORPAY_KEY_ID", "rzp_test_placeholder")
+    key_id = getattr(settings, "RAZORPAY_KEY_ID", "")
+    keys_unconfigured = not key_id or key_id == "rzp_test_placeholder"
     amount_paise = int(order.total_amount * 100)
     can_cod = (order.total_amount <= Decimal("50000.00"))
 
     context = {
         "order": order,
         "key_id": key_id,
+        "keys_unconfigured": keys_unconfigured,
         "amount_paise": amount_paise,
         "can_cod": can_cod,
         "token": request.GET.get("token") or request.session.get(f"order_token_{order.order_number}"),

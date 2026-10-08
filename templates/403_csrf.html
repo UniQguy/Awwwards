@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}That Didn't Go Through — ELECTROCART{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="empty-state-card text-center p-8">
+    <h1 class="display-m mb-3">That didn't go through.</h1>
+    <p class="body text-muted max-w-md mx-auto mb-6">
+      Your session may have expired. Reload the page and try again.
+    </p>
+    <div class="flex gap-4 justify-center">
+      <a href="{% if retry_url %}{{ retry_url }}{% elif request.META.HTTP_REFERER %}{{ request.META.HTTP_REFERER }}{% else %}{% url 'cart_detail' %}{% endif %}" class="btn btn-primary">
+        Reload and Try Again
+      </a>
+      <a href="{% url 'home' %}" class="btn btn-secondary">
+        Return to Home
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

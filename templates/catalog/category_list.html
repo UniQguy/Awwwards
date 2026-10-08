@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load core_tags django_vite %}
 
-{% block title %}Category Monograph Index — ELECTROCART{% endblock %}
-{% block meta_description %}Explore our curated monographs spanning precision audio, mechanical keyboards, and studio instruments.{% endblock %}
+{% block title %}All Categories — ELECTROCART{% endblock %}
+{% block meta_description %}{{ total_listings }} listings across categories, from {{ min_price|inr }} to {{ max_price|inr }}.{% endblock %}
 {% block body_data_layer %} data-layer="editorial"{% endblock %}
 {% block editorial_script %}{% vite_asset 'frontend/js/editorial.js' %}{% endblock %}
 
@@ -16,14 +16,14 @@
   </nav>
 
   <header class="mb-10">
-    <h1 class="display-l">Category Monograph Index</h1>
+    <h1 class="display-l">All categories</h1>
     <p class="subhead max-w-md mt-2">
-      An architectural directory of specialized hardware worlds, calibrated materials, and acoustic instruments.
+      {{ total_listings }} listings, from {{ min_price|inr }} to {{ max_price|inr }}.
     </p>
   </header>
 </div>
 
-<!-- Monograph Spreads: One tall spread per category alternating offsets -->
+<!-- Category Spreads: One tall spread per category alternating offsets -->
 <div class="monograph-category-index">
   {% for spread in category_spreads %}
     <section class="spread" data-world="{{ spread.category.accent_key }}" aria-labelledby="cat-title-{{ spread.category.id }}">
@@ -33,7 +33,7 @@
           <div class="chapter-label">
             <span class="chapter-numeral">{{ forloop.counter|stringformat:"02d" }}</span>
             <span class="chapter-hairline"></span>
-            <span>Monograph</span>
+            <span>Category</span>
           </div>
 
           <h2 class="display-l mb-3" id="cat-title-{{ spread.category.id }}">

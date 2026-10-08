@@ -11,24 +11,31 @@
       <p class="caption mt-1">Order #{{ order.order_number }} &bull; Amount: <strong>{{ order.total_amount|inr }}</strong></p>
     </header>
 
-    <div class="mb-6">
-      <p class="body-sm mb-5">
-        Click below to launch the secure Razorpay payment modal to pay via UPI, Card, or NetBanking.
-      </p>
+    {% if keys_unconfigured %}
+      <div class="alert alert-info mb-6 text-left">
+        <p><strong>Online payment gateway is unconfigured.</strong></p>
+        <p class="caption mt-1">Live payment gateway credentials have not been configured for this store. You can complete your order using Cash on Delivery below.</p>
+      </div>
+    {% else %}
+      <div class="mb-6">
+        <p class="body-sm mb-5">
+          Click below to launch the secure Razorpay payment modal to pay via UPI, Card, or NetBanking.
+        </p>
 
-      <button id="rzp-button1" class="btn btn-primary btn-lg">
-        Pay {{ order.total_amount|inr }} Now
-      </button>
+        <button id="rzp-button1" class="btn btn-primary btn-lg">
+          Pay {{ order.total_amount|inr }} Now
+        </button>
 
-      <!-- Standard Hidden Post Verification Form -->
-      <form id="verify-form" action="{% url 'payments:razorpay_verify' %}" method="post" class="sr-only">
-        {% csrf_token %}
-        <input type="hidden" name="order_number" value="{{ order.order_number }}">
-        <input type="hidden" name="razorpay_payment_id" id="rp-payment-id">
-        <input type="hidden" name="razorpay_order_id" id="rp-order-id" value="order_fake_{{ order.order_number }}">
-        <input type="hidden" name="razorpay_signature" id="rp-signature">
-      </form>
-    </div>
+        <!-- Standard Hidden Post Verification Form -->
+        <form id="verify-form" action="{% url 'payments:razorpay_verify' %}" method="post" class="sr-only">
+          {% csrf_token %}
+          <input type="hidden" name="order_number" value="{{ order.order_number }}">
+          <input type="hidden" name="razorpay_payment_id" id="rp-payment-id">
+          <input type="hidden" name="razorpay_order_id" id="rp-order-id" value="order_fake_{{ order.order_number }}">
+          <input type="hidden" name="razorpay_signature" id="rp-signature">
+        </form>
+      </div>
+    {% endif %}
 
     <!-- No-Script & COD Fallback Section -->
     <noscript>

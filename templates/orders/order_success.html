@@ -110,8 +110,9 @@
         <p class="caption mb-4">
           You can cancel this order prior to warehouse departure. Inventory reservations will be instantly restored.
         </p>
-        <form action="{% url 'order_cancel' order_number=order.order_number %}" method="post">
+        <form action="{% url 'order_cancel' order_number=order.order_number %}{% if token %}?token={{ token }}{% endif %}" method="post">
           {% csrf_token %}
+          {% if token %}<input type="hidden" name="token" value="{{ token }}">{% endif %}
           <button type="submit" class="btn btn-sm btn-danger">Cancel Order</button>
         </form>
       </div>
@@ -119,7 +120,7 @@
       <div class="alert alert-danger text-center">
         <strong>This order has been cancelled.</strong>
         {% if order.credit_notes.exists %}
-          A statutory GST Credit Note has been generated.
+          A GST Credit Note has been generated.
         {% endif %}
       </div>
     {% endif %}

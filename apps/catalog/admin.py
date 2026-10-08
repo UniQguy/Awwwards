@@ -36,6 +36,12 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     ordering = ["display_order", "name"]
 
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        field = super().formfield_for_dbfield(db_field, **kwargs)
+        if db_field.name == "description":
+            field.help_text = "owner to write"
+        return field
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):

@@ -109,7 +109,7 @@ class CatalogViewsTests(TestCase):
         response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "ELECTROCART")
-        self.assertContains(response, "Studio Acoustic Reference")
+        self.assertContains(response, "The categories")
         self.assertContains(response, "Sennheiser HD 650")
         self.assertContains(response, "Earphones &amp; Headphones")
 

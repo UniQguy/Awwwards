@@ -111,11 +111,11 @@ class CoreViewsAndMiddlewareTests(TestCase):
     def test_sensitive_headers_middleware_on_sensitive_paths(self):
         # Sensitive routes like /orders/
         response = self.client.get("/orders/track/")
-        self.assertEqual(response.headers.get("Referrer-Policy"), "no-referrer")
+        self.assertEqual(response.headers.get("Referrer-Policy"), "same-origin")
         self.assertIn("no-store", response.headers.get("Cache-Control", ""))
 
         response = self.client.get("/checkout/")
-        self.assertEqual(response.headers.get("Referrer-Policy"), "no-referrer")
+        self.assertEqual(response.headers.get("Referrer-Policy"), "same-origin")
         self.assertIn("no-store", response.headers.get("Cache-Control", ""))
 
     def test_public_path_not_burdened_by_no_store(self):

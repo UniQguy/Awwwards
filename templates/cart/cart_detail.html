@@ -115,60 +115,72 @@
               </form>
             </div>
           {% else %}
-            <form action="{% url 'coupon_apply' %}" method="post" class="flex gap-2" data-fetch-enhance>
+            <form action="{% url 'coupon_apply' %}" method="post" data-fetch-enhance>
               {% csrf_token %}
-              <label for="id-coupon-code" class="sr-only">Coupon code</label>
-              <input
-                type="text"
-                id="id-coupon-code"
-                name="code"
-                class="form-control"
-                placeholder="Promo code (e.g. WELCOME10)"
-                autocomplete="off"
-              >
-              <button type="submit" class="btn btn-secondary">Apply</button>
+              <label for="id-coupon-code" class="form-label mb-1">Promo code</label>
+              <div class="flex gap-2">
+                <input
+                  type="text"
+                  id="id-coupon-code"
+                  name="code"
+                  class="form-control"
+                  placeholder="Enter code"
+                  autocomplete="off"
+                >
+                <button type="submit" class="btn btn-secondary">Apply</button>
+              </div>
             </form>
           {% endif %}
         </div>
 
         <!-- Financial Totals -->
         <dl class="summary-totals-dl">
-          <dt>Items Subtotal</dt>
+          <dt>Items</dt>
           <dd>{{ summary.subtotal|inr }}</dd>
 
-          {% if summary.mrp_savings > 0 %}
-            <dt class="text-success">Retail Savings (MRP)</dt>
-            <dd class="text-success">-{{ summary.mrp_savings|inr }}</dd>
-          {% endif %}
-
           {% if summary.applied_discount > 0 %}
-            <dt class="text-success">Coupon Savings</dt>
+            <dt class="text-success">Coupon</dt>
             <dd class="text-success">-{{ summary.applied_discount|inr }}</dd>
           {% endif %}
 
-          <dt>Shipping Fee</dt>
+          <dt>Delivery</dt>
           <dd>
             {% if summary.shipping_fee > 0 %}
               {{ summary.shipping_fee|inr }}
             {% else %}
-              <span class="text-success">FREE</span>
+              {% if summary.standard_shipping_fee %}<del class="text-muted">{{ summary.standard_shipping_fee|inr }}</del> {% endif %}<span class="text-success">FREE</span>
             {% endif %}
           </dd>
 
-          <dt class="caption">Taxes (GST)</dt>
-          <dd class="caption">
-            Included ({{ summary.tax_amount|inr }})
-          </dd>
+          {% if summary.cod_fee > 0 %}
+            <dt>COD fee</dt>
+            <dd>{{ summary.cod_fee|inr }}</dd>
+          {% endif %}
+
+          {% if seller_mode == "gst" and summary.tax_amount > 0 %}
+            <dt class="caption">Includes GST</dt>
+            <dd class="caption">
+              {{ summary.tax_amount|inr }}
+            </dd>
+          {% endif %}
         </dl>
 
         <div class="summary-grand-total">
-          <span class="total-label">Grand Total</span>
+          <span class="total-label">Total</span>
           <span class="total-amount">{{ summary.grand_total|inr }}</span>
         </div>
 
-        <p class="caption mb-4">
-          Prices are inclusive of applicable GST under Indian tax regulations.
-        </p>
+        {% if summary.mrp_savings > 0 %}
+          <p class="summary-mrp-savings caption text-success mt-2 mb-4">
+            You save {{ summary.mrp_savings|inr }} compared with the listed MRP.
+          </p>
+        {% endif %}
+
+        {% if seller_mode == "gst" %}
+          <p class="caption mb-4">
+            Prices include GST.
+          </p>
+        {% endif %}
 
         <a href="{% url 'checkout_start' %}" class="btn btn-primary btn-block">
           Proceed to Checkout &rarr;
@@ -180,7 +192,7 @@
       <h2 class="heading mb-2">Your Shopping Bag is empty</h2>
       <p class="sr-only">Your Shopping Cart is Empty</p>
       <p class="subhead max-w-md mx-auto mb-4">
-        Browse our catalog to discover precision audio monitors, mechanical peripherals, and photography tech.
+        Browse our catalogue to discover audio, keyboards, cameras, and personal electronics.
       </p>
       <a href="{% url 'category_list' %}" class="btn btn-primary">Browse Categories</a>
     </div>

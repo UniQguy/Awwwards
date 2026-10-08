@@ -35,7 +35,15 @@
         placeholder="Search electronics, audio, gear..."
         required
         autocomplete="off"
+        role="combobox"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-controls="search-suggestions-list"
+        aria-autocomplete="list"
       >
+      <div id="search-suggestions-container" class="search-suggestions-container" hidden>
+        <ul id="search-suggestions-list" class="search-suggestions-list" role="listbox" aria-label="Search suggestions"></ul>
+      </div>
     </form>
 
     <nav class="header-nav" aria-label="Account and bag navigation">

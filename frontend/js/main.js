@@ -13,6 +13,7 @@ import { initHeaderScroll } from "./modules/header-scroll.js";
 import { initMessagesDismiss } from "./modules/messages-dismiss.js";
 import { initFetchForms } from "./modules/fetch-forms.js";
 import { initStickyPurchaseBar } from "./modules/sticky-purchase-bar.js";
+import { initSearchSuggest } from "./modules/search-suggest.js";
 import { initMotionTier, initMotionToggleButton } from "./modules/capability.js";
 
 function bootstrap() {
@@ -20,6 +21,7 @@ function bootstrap() {
   initMotionToggleButton();
   initMenuPanel();
   initSearchSheet();
+  initSearchSuggest();
   initFilterSheet();
   initQuantityStepper();
   initCopyToClipboard();

@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>500 Server Error — ELECTROCART</title>
+  <title>System Error — ELECTROCART</title>
+  <link rel="stylesheet" href="{% static 'dist/css/styles.css' %}">
 </head>
 <body data-world="earphones-headphones">
   <header class="site-header">
@@ -14,17 +15,19 @@
     </div>
   </header>
   <main id="main-content" class="container section">
-    <div class="empty-state-card text-center">
-      <h1 class="empty-state-title">500 — Server Error</h1>
-      <p class="empty-state-desc">Something unexpected occurred while processing your request. Our engineering team has been notified. Please try again shortly.</p>
-      <div class="empty-state-actions">
+    <div class="empty-state-card text-center p-8">
+      <h1 class="display-m mb-3">Something broke on our side.</h1>
+      <p class="body text-muted max-w-md mx-auto mb-6">
+        Your bag is safe. Please try again shortly.
+      </p>
+      <div class="flex gap-4 justify-center">
         <a href="/" class="btn btn-primary">Return to Homepage</a>
       </div>
     </div>
   </main>
   <footer class="site-footer">
     <div class="container text-center caption">
-      <p>&copy; ELECTROCART. All rights reserved.</p>
+      <p>&copy; ELECTROCART</p>
     </div>
   </footer>
 </body>

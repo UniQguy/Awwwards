@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}429 Too Many Requests — ELECTROCART{% endblock %}
+{% block title %}Too Many Attempts — ELECTROCART{% endblock %}
 
 {% block content %}
 <div class="container section">
-  <div class="empty-state-card">
-    <svg class="empty-state-mark" aria-hidden="true"><use href="#icon-alert"></use></svg>
-    <h1 class="empty-state-title">429 — Too Many Requests</h1>
-    <p class="empty-state-desc">You have made too many requests in a short period. Please wait a moment and try again.</p>
-    <div class="empty-state-actions">
+  <div class="empty-state-card text-center p-8">
+    <h1 class="display-m mb-3">Too many attempts in a short time.</h1>
+    <p class="body text-muted max-w-md mx-auto mb-6">
+      Please wait a minute and try again.
+    </p>
+    <div class="flex gap-4 justify-center">
       <a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a>
     </div>
   </div>

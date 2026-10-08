@@ -16,6 +16,7 @@ from apps.catalog.models import (
     Product,
 )
 from apps.catalog.services.brands import get_known_brands
+from apps.catalog.services.families import family_key
 
 
 @dataclass(frozen=True)
@@ -72,6 +73,37 @@ class BrandItem:
     """An allow-listed brand with real purchasable listing count."""
     name: str
     product_count: int
+
+
+def home_headline_cutouts() -> dict[str, Optional[Product]]:
+    """
+    Returns the three products for the home hero headline:
+    - cable: from 'cables-chargers-powerbanks' (after 'plug in')
+    - watch: from 'smartwatches-bands' (after 'put on')
+    - earphones: from 'earphones-headphones' (after 'listen with')
+    Each chosen deterministically by highest rating count, price, id.
+    """
+    target_slugs = {
+        "cable": "cables-chargers-powerbanks",
+        "watch": "smartwatches-bands",
+        "earphones": "earphones-headphones",
+    }
+    result = {}
+    for key, slug in target_slugs.items():
+        prod = (
+            Product.objects.filter(
+                category__slug=slug,
+                is_available=True,
+                selling_price__gt=Decimal("0.00"),
+                media__media_type="image",
+            )
+            .select_related("category")
+            .prefetch_related("media")
+            .order_by("-source_rating_count", "-selling_price", "id")
+            .first()
+        )
+        result[key] = prod if (prod and prod.primary_image_url) else None
+    return result
 
 
 def eligible_cutout_products(products: Sequence[Product], max_cutouts: int = 3) -> List[Product]:
@@ -224,7 +256,7 @@ def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
             is_auto = True
 
         if not picks:
-            picks = list(
+            candidates = (
                 Product.objects.filter(
                     category=cat,
                     selling_price__gt=Decimal("0.00"),
@@ -232,17 +264,25 @@ def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
                 )
                 .select_related("category")
                 .prefetch_related("media", "specifications")
-                .order_by("-source_rating_count", "selling_price", "id")[:4]
+                .order_by("-source_rating_count", "-selling_price", "id")
             )
+            deduped_picks = []
+            seen_families = set()
+            for prod in candidates:
+                fam = family_key(prod.raw_name)
+                if fam not in seen_families:
+                    seen_families.add(fam)
+                    deduped_picks.append(prod)
+                    if len(deduped_picks) >= 4:
+                        break
+            picks = deduped_picks
             is_auto = True
 
-        # Factual editorial line
-        if col and col.title:
-            editorial_line = f"{col.title}: {col.intro}" if col.intro else col.title
-        elif cat.description and cat.description.strip():
-            editorial_line = cat.description.strip()
-        else:
-            editorial_line = f"{p_count} listings from ₹{p_min} to ₹{p_max}."
+        editorial_line = (
+            cat.description.strip()
+            if cat.description and cat.description.strip()
+            else f"{p_count} listings from ₹{p_min} to ₹{p_max}."
+        )
 
         chapters.append(
             HomeChapter(
@@ -334,17 +374,28 @@ def category_spread(category: Category) -> CategorySpreadResult:
         is_auto = True
 
     if not picks:
-        picks = list(
+        candidates = (
             base_qs.select_related("category")
             .prefetch_related("media", "specifications")
-            .order_by("-source_rating_count", "selling_price", "id")[:4]
+            .order_by("-source_rating_count", "-selling_price", "id")
         )
+        deduped_picks = []
+        seen_families = set()
+        for prod in candidates:
+            fam = family_key(prod.raw_name)
+            if fam not in seen_families:
+                seen_families.add(fam)
+                deduped_picks.append(prod)
+                if len(deduped_picks) >= 4:
+                    break
+        picks = deduped_picks
         is_auto = True
 
-    if category.description and category.description.strip():
-        editorial_line = category.description.strip()
-    else:
-        editorial_line = f"{listing_count} listings from ₹{price_min} to ₹{price_max}."
+    editorial_line = (
+        category.description.strip()
+        if category.description and category.description.strip()
+        else f"{listing_count} listings from ₹{price_min} to ₹{price_max}."
+    )
 
     return CategorySpreadResult(
         category=category,

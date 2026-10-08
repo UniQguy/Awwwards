@@ -2,7 +2,7 @@
 {% load core_tags django_vite %}
 
 {% block title %}ELECTROCART — Curated Electronics Catalogue{% endblock %}
-{% block meta_description %}A biennial monograph of precision audio, tactile keyboards, and considered personal electronics. Clean typography and honest commerce.{% endblock %}
+{% block meta_description %}A catalogue of audio, keyboards, and personal electronics. Clean typography and honest commerce.{% endblock %}
 {% block body_data_layer %} data-layer="editorial"{% endblock %}
 {% block editorial_script %}{% vite_asset 'frontend/js/editorial.js' %}{% endblock %}
 
@@ -12,7 +12,7 @@
   <section class="hero-composition" aria-labelledby="hero-heading">
     <div>
       <h1 class="hero-headline" id="hero-heading">
-        Instruments for listening{% if cutouts.0 %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutouts.0.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}, tools for thought{% if cutouts.1 %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutouts.1.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}, and objects of pure utility{% if cutouts.2 %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutouts.2.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}.
+        Everything you plug in{% if cutout_cable %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_cable.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}, put on{% if cutout_watch %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_watch.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}, or listen with{% if cutout_earphones %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_earphones.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}.
       </h1>
 
       <p class="hero-live-stat">
@@ -39,8 +39,8 @@
   <!-- 2. TYPOGRAPHIC CATEGORY INDEX -->
   <section class="section" aria-labelledby="index-heading">
     <div class="flex justify-between items-baseline mb-4">
-      <h2 id="index-heading" class="label">Category Directory</h2>
-      <span class="caption">{{ total_categories }} dedicated hardware monograph worlds</span>
+      <h2 id="index-heading" class="label">The categories</h2>
+      <span class="caption">{{ total_categories }} categories</span>
     </div>
 
     <ul class="typographic-index-list">
@@ -129,34 +129,31 @@
 <div class="container section">
   <!-- 4. HOW BUYING WORKS HERE -->
   <section aria-labelledby="buying-heading">
-    <h2 id="buying-heading" class="label mb-4">How Purchasing Works</h2>
+    <h2 id="buying-heading" class="label mb-4">How buying works</h2>
 
     <div class="how-buying-works">
       <div class="how-buying-passage">
-        <span class="how-buying-lead">Prices and Tax</span>
+        <span class="how-buying-lead">Prices</span>
         <p class="how-buying-text">
-          {% if is_bill_of_supply %}
-            All displayed prices are net under Bill of Supply mode with zero added charges.
+          {% if seller_mode == "bill_of_supply" %}
+            Prices are shown as listed. No GST is charged on this store's bills of supply.
           {% else %}
-            All catalog prices are inclusive of applicable GST under Indian tax regulations. No surprise additions at checkout.
+            Prices include GST. The invoice shows the tax split.
           {% endif %}
         </p>
       </div>
 
       <div class="how-buying-passage">
-        <span class="how-buying-lead">Delivery by PIN Code</span>
+        <span class="how-buying-lead">Delivery</span>
         <p class="how-buying-text">
-          Orders above {{ free_shipping_threshold|inr }} qualify for free standard delivery across serviceable Indian PIN codes. Orders below include a standard shipping fee calculated before payment.
+          Delivery is free on orders of {{ free_shipping_threshold|inr }} or more; below that {% if shipping_fee_confirmed %}it is {{ standard_shipping_fee|inr }}{% else %}a delivery fee applies{% endif %}. Enter your PIN code on any product to see the estimate.
         </p>
       </div>
 
       <div class="how-buying-passage">
-        <span class="how-buying-lead">Payment Authorization</span>
+        <span class="how-buying-lead">Payment</span>
         <p class="how-buying-text">
-          Cash on Delivery is supported for serviceable destinations within statutory limits.
-          {% if razorpay_enabled %}
-            Online card, UPI, and net-banking transactions are authenticated through our verified payment gateway.
-          {% endif %}
+          Pay on delivery where your PIN allows it.{% if razorpay_enabled %} Pay online by card, UPI or net banking.{% endif %}
         </p>
       </div>
     </div>
@@ -165,20 +162,18 @@
   <!-- 5. ALLOW-LISTED BRANDS FLOW -->
   {% if brands %}
     <section class="section-sm" aria-labelledby="brands-heading">
-      <h2 id="brands-heading" class="label mb-2">Manufacturers &amp; Brands</h2>
+      <h2 id="brands-heading" class="label mb-2">The brands</h2>
       <p class="brands-flow-paragraph">
-        Explore hardware manufactured by
-        {% for b in brands %}
-          <a href="{% url 'search_results' %}?brand={{ b.name|urlencode }}" class="brand-flow-link">{{ b.name }}</a><span class="brand-flow-count">{{ b.product_count }}</span>{% if not forloop.last %} &middot; {% endif %}
-        {% endfor %}.
+        Brands in the catalogue:
+        {% for b in brands %}<span class="brand-flow-item" style="white-space: nowrap;"><a href="{% url 'search_results' %}?brand={{ b.name|urlencode }}" class="brand-flow-link">{{ b.name }}</a> <span class="brand-flow-count">({{ b.product_count }})</span></span>{% if not forloop.last %}, {% endif %}{% endfor %}.
       </p>
     </section>
   {% endif %}
 
   <!-- 6. CLOSING LINE -->
-  <section class="section text-center">
-    <p class="display-m mb-4">A catalogue of precision electronics and honest craft.</p>
-    <a href="{% url 'category_list' %}" class="btn btn-primary">Browse the complete catalogue &rarr;</a>
+  <section class="section">
+    <p class="display-m mb-4">Start with the category you need.</p>
+    <a href="{% url 'category_list' %}" class="btn btn-primary">Browse all categories &rarr;</a>
   </section>
 </div>
 

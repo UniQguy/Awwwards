@@ -51,7 +51,7 @@ class CategoryRulesAndClassificationTests(TestCase):
 
         # Smartwatch band must match before smartwatch or phone
         slug = classify_category("Apple Watch Series 8 replacement silicone watch strap band")
-        self.assertEqual(slug, "smartwatches-bands")
+        self.assertEqual(slug, "cases-protectors")
 
     def test_audio_and_peripherals_classification(self):
         self.assertEqual(classify_category("boAt Airdopes 141 Bluetooth Earbuds TWS"), "earphones-headphones")

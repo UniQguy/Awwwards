@@ -122,7 +122,9 @@
               <option value="{{ code }}" {% if form_data.state == code %}selected{% endif %}>{{ name }}</option>
             {% endfor %}
           </select>
-          <p class="form-help">Determines CGST+SGST vs IGST statutory tax split.</p>
+          {% if seller_mode == "gst" %}
+            <p class="form-help">Used to determine CGST+SGST or IGST tax split.</p>
+          {% endif %}
         </div>
 
         {% if user.is_authenticated %}

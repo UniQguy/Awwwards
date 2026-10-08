@@ -11,6 +11,7 @@ Scans all HTML templates and email templates for:
 
 import os
 import re
+import sys
 from pathlib import Path
 
 BANNED_WORDS = [
@@ -18,15 +19,15 @@ BANNED_WORDS = [
     "unbeatable",
     "guaranteed",
     "genuine",
-]
-
-# Nuanced words that might legitimately appear in code/specs (e.g. 'best' in best-seller or brand, 'original' in original price/MRP)
-# but should NOT be used as emotional hype adjectives in promotional copy
-CONTEXT_WATCH_WORDS = [
+    "precision",
+    "craft",
+    "calibrated",
+    "architectural",
+    "specialized",
     "premium",
-    "authentic",
-    "best",
-    "original",
+    "statutory",
+    "pure utility",
+    "composition dealer",
 ]
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -51,12 +52,14 @@ def audit_templates():
         content = file_path.read_text(encoding="utf-8")
         lines = content.splitlines()
 
+        is_invoice = "invoice.html" in file_path.name.lower()
+
         for idx, line in enumerate(lines, 1):
             line_lower = line.lower()
 
-            # Ignore comments and scripts/styles/meta
+            # Ignore comments
             stripped = line.strip()
-            if stripped.startswith("{#") or stripped.startswith("<!--") or stripped.startswith("//"):
+            if stripped.startswith("{#") or stripped.startswith("<!--") or stripped.startswith("//") or stripped.startswith("/*"):
                 continue
 
             # 1. Check schema.org review markup
@@ -70,23 +73,29 @@ def audit_templates():
             if "todo:" in line_lower or "todo " in line_lower:
                 lorem_findings.append((rel_path, idx, line.strip()))
 
+            # Extract user-facing visible text (strip template tags & HTML markup)
+            clean_text = re.sub(r"\{%.*?%\}", "", line)
+            clean_text = re.sub(r"\{\{.*?\}\}", "", clean_text)
+            clean_text = re.sub(r"<[^>]+>", " ", clean_text)
+            clean_lower = clean_text.lower().strip()
+
             # 3. Check banned words
             for word in BANNED_WORDS:
-                # match word boundary
+                # In invoice.html, mandatory statutory invoice declarations are permitted
+                if is_invoice and word == "statutory":
+                    continue
                 if re.search(r"\b" + re.escape(word) + r"\b", line_lower):
                     findings.append((rel_path, idx, word, line.strip()))
 
-            # 4. Exclamation marks in user-facing text (excluding django template tags {% ... %} or {{ ... }} or regex or SVG paths)
-            # Remove template tags first
-            clean_line = re.sub(r"\{%.*?%\}", "", line)
-            clean_line = re.sub(r"\{\{.*?\}\}", "", clean_line)
-            clean_line = re.sub(r"<[^>]+>", "", clean_line)  # remove HTML tags
-            if "!" in clean_line:
-                # Exclude != and common JS/code constructs
-                if not re.search(r"!==?|<!|-->|&excl;", clean_line):
-                    # Check if it has letters before the !
-                    if re.search(r"[a-zA-Z]{2,}\s*!", clean_line):
-                        exclamation_findings.append((rel_path, idx, clean_line.strip()))
+            # 4. Check 'monograph' in shopper-facing text (excluding HTML comments/classes)
+            if re.search(r"\bmonograph\b", clean_lower):
+                findings.append((rel_path, idx, "monograph", line.strip()))
+
+            # 5. Exclamation marks in user-facing text
+            if "!" in clean_text:
+                if not re.search(r"!==?|<!|-->|&excl;", clean_text):
+                    if re.search(r"[a-zA-Z]{2,}\s*!", clean_text):
+                        exclamation_findings.append((rel_path, idx, clean_text.strip()))
 
     print("\n--- 1. SCHEMA.ORG REVIEWS & RATINGS CHECK ---")
     if schema_findings:
@@ -104,13 +113,13 @@ def audit_templates():
     else:
         print("PASS: Zero lorem ipsum or TODO placeholders in templates.")
 
-    print("\n--- 3. BANNED HYPE WORDS CHECK ---")
+    print("\n--- 3. BANNED HYPE & HONESTY WORDS CHECK ---")
     if findings:
         print(f"FINDINGS ({len(findings)}):")
         for f in findings:
             print(f"  {f[0]}:{f[1]} [word: {f[2]}] -> {f[3]}")
     else:
-        print("PASS: Zero banned hype words detected.")
+        print("PASS: Zero banned hype or invented honesty words detected.")
 
     print("\n--- 4. EXCLAMATION MARKS IN USER-FACING COPY ---")
     if exclamation_findings:
@@ -120,12 +129,33 @@ def audit_templates():
     else:
         print("PASS: Zero customer-facing exclamation marks.")
 
+    # 5. Check Category descriptions in database if Django is loaded
+    try:
+        import django
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+        django.setup()
+        from apps.catalog.models import Category
+        non_blank_cats = list(Category.objects.exclude(description="").values_list("name", "description"))
+        if non_blank_cats:
+            print("\n--- 5. CATEGORY DESCRIPTIONS CHECK ---")
+            print(f"FINDINGS ({len(non_blank_cats)} non-blank category descriptions):")
+            for c_name, c_desc in non_blank_cats:
+                print(f"  Category '{c_name}': {c_desc}")
+            success_db = False
+        else:
+            print("\n--- 5. CATEGORY DESCRIPTIONS CHECK ---")
+            print("PASS: Zero invented marketing descriptions in Category models.")
+            success_db = True
+    except Exception as e:
+        success_db = True
+
     print("\n" + "=" * 70)
-    success = (len(schema_findings) == 0 and len(lorem_findings) == 0 and len(findings) == 0)
+    success = (len(schema_findings) == 0 and len(lorem_findings) == 0 and len(findings) == 0 and success_db)
     print(f"OVERALL HONESTY AUDIT: {'PASSED' if success else 'NEEDS ATTENTION'}")
     print("=" * 70)
     return success
 
 
 if __name__ == "__main__":
-    audit_templates()
+    passed = audit_templates()
+    sys.exit(0 if passed else 1)

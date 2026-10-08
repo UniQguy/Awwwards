@@ -49,7 +49,11 @@ def _validate_order_access(request: HttpRequest, order: Order) -> bool:
     if request.user.is_authenticated and order.user == request.user:
         return True
 
-    token = request.GET.get("token") or request.session.get(f"order_token_{order.order_number}")
+    token = (
+        request.GET.get("token")
+        or request.POST.get("token")
+        or request.session.get(f"order_token_{order.order_number}")
+    )
     session_token = request.session.get(f"order_token_{order.order_number}")
     if token and token == session_token:
         return True
@@ -89,11 +93,13 @@ def checkout_start(request: HttpRequest) -> HttpResponse:
     return render(request, "orders/checkout_start.html", context)
 
 
-@require_POST
-def checkout_guest(request: HttpRequest) -> HttpResponseRedirect:
+def checkout_guest(request: HttpRequest) -> HttpResponse:
     """
     Captures guest customer contact info before shipping address entry.
+    Redirects GET requests back to checkout_start.
     """
+    if request.method != "POST":
+        return redirect("checkout_start")
     email = request.POST.get("email", "").strip()
     phone = request.POST.get("phone", "").strip()
     full_name = request.POST.get("full_name", "").strip()

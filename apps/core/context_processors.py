@@ -74,9 +74,29 @@ def storefront_context(request):
     # 5. Seller & GST Compliance Mode
     seller_gstin = getattr(settings, "SELLER_GSTIN", "").strip()
     is_bill_of_supply = not bool(seller_gstin)
+    mode_str = "gst" if bool(seller_gstin) else "bill_of_supply"
     seller_state = getattr(settings, "SELLER_STATE", "Karnataka")
     seller_legal_name = getattr(settings, "SELLER_LEGAL_NAME", "ELECTROCART RETAIL PRIVATE LIMITED")
     seller_address = getattr(settings, "SELLER_ADDRESS", "")
+
+    class SellerMode(str):
+        def __new__(cls, val, **kwargs):
+            obj = str.__new__(cls, val)
+            for k, v in kwargs.items():
+                setattr(obj, k, v)
+            return obj
+
+        def __getitem__(self, item):
+            return getattr(self, item, "")
+
+    seller_mode_obj = SellerMode(
+        mode_str,
+        is_bill_of_supply=is_bill_of_supply,
+        seller_gstin=seller_gstin,
+        seller_state=seller_state,
+        seller_legal_name=seller_legal_name,
+        seller_address=seller_address,
+    )
 
     # 6. Sample stock status
     has_sample_stock = Inventory.objects.filter(is_sample_data=True).exists()
@@ -88,13 +108,12 @@ def storefront_context(request):
         "compare_count": compare_count,
         "compare_tray": compare_tray,
         "nav_categories": nav_categories,
-        "seller_mode": {
-            "is_bill_of_supply": is_bill_of_supply,
-            "seller_gstin": seller_gstin,
-            "seller_state": seller_state,
-            "seller_legal_name": seller_legal_name,
-            "seller_address": seller_address,
-        },
+        "seller_mode": seller_mode_obj,
+        "is_bill_of_supply": is_bill_of_supply,
+        "seller_gstin": seller_gstin,
+        "seller_state": seller_state,
+        "seller_legal_name": seller_legal_name,
+        "seller_address": seller_address,
         "has_sample_stock": has_sample_stock,
         "site_url": getattr(settings, "SITE_URL", "http://localhost:8000"),
         "motion_debug": getattr(settings, "MOTION_DEBUG", False),

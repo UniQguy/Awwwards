@@ -149,3 +149,82 @@ class CheckoutViewsTests(TestCase):
         # Cart must be cleared
         resp_cart = self.client.get(reverse("cart_detail"))
         self.assertContains(resp_cart, "Your Shopping Cart is Empty")
+
+    def test_guest_checkout_flow_with_strict_csrf_enforcement(self):
+        """
+        Regression test for F-01: Verifies guest checkout end-to-end under strict CSRF enforcement.
+        Follows the exact shopper click path with cookies and CSRF tokens.
+        """
+        from django.test import Client
+        csrf_client = Client(enforce_csrf_checks=True)
+
+        # 1. Add product to cart
+        resp_prod = csrf_client.get(f"/p/{self.product.slug}/")
+        csrf_token = csrf_client.cookies["csrftoken"].value
+        resp_add = csrf_client.post(
+            f"/cart/add/{self.product.id}/",
+            {"quantity": 1, "csrfmiddlewaretoken": csrf_token},
+            HTTP_REFERER=f"http://testserver/p/{self.product.slug}/",
+            follow=True,
+        )
+        self.assertEqual(resp_add.status_code, 200)
+
+        # 2. View cart and proceed to checkout
+        resp_cart = csrf_client.get("/cart/")
+        self.assertEqual(resp_cart.status_code, 200)
+
+        resp_chk = csrf_client.get("/checkout/")
+        self.assertEqual(resp_chk.status_code, 200)
+        self.assertContains(resp_chk, "Guest Checkout")
+        csrf_token = csrf_client.cookies["csrftoken"].value
+
+        # 3. Submit guest form - MUST NOT return 403 Forbidden
+        guest_data = {
+            "full_name": "Arun Kumar",
+            "email": "arun.guest@example.com",
+            "phone": "9876543210",
+            "csrfmiddlewaretoken": csrf_token,
+        }
+        resp_guest = csrf_client.post(
+            "/checkout/guest/",
+            guest_data,
+            HTTP_REFERER="http://testserver/checkout/",
+            follow=True,
+        )
+        self.assertEqual(resp_guest.status_code, 200)
+        self.assertTemplateUsed(resp_guest, "orders/checkout_address.html")
+
+        # 4. Submit address form
+        csrf_token = csrf_client.cookies["csrftoken"].value
+        addr_data = {
+            "full_name": "Arun Kumar",
+            "phone": "9876543210",
+            "line1": "Flat 101, Palm Avenue",
+            "city": "Bengaluru",
+            "state": "Karnataka",
+            "pincode": "560001",
+            "csrfmiddlewaretoken": csrf_token,
+        }
+        resp_addr = csrf_client.post(
+            "/checkout/address/",
+            addr_data,
+            HTTP_REFERER="http://testserver/checkout/address/",
+            follow=True,
+        )
+        self.assertEqual(resp_addr.status_code, 200)
+        self.assertTemplateUsed(resp_addr, "orders/checkout_review.html")
+
+        # 5. Place order COD
+        csrf_token = csrf_client.cookies["csrftoken"].value
+        resp_place = csrf_client.post(
+            "/checkout/place/",
+            {"payment_method": "cod", "csrfmiddlewaretoken": csrf_token},
+            HTTP_REFERER="http://testserver/checkout/review/",
+            follow=True,
+        )
+        self.assertEqual(resp_place.status_code, 200)
+        self.assertTemplateUsed(resp_place, "orders/order_success.html")
+        order = Order.objects.filter(guest_email="arun.guest@example.com").first()
+        self.assertIsNotNone(order)
+        self.assertEqual(order.status, Order.STATUS_CONFIRMED)
+

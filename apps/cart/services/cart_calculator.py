@@ -111,6 +111,7 @@ def calculate_cart_summary(
         "mrp_total": mrp_total,
         "mrp_savings": mrp_savings,
         "shipping_fee": shipping_fee,
+        "standard_shipping_fee": cfg.standard_fee,
         "free_shipping_threshold": free_threshold,
         "free_shipping_progress": free_shipping_progress,
         "free_shipping_progress_pct": free_shipping_progress,
