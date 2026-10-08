@@ -1,5 +1,5 @@
 @layer components {
-  /* Collectible Plate (Technique H): 1px rule frame, inner mat in --world-surface, multiply blend */
+  /* Collectible Plate: 1px rule frame, plate surface in --world-surface, multiply blend */
   .plate-collectible {
     position: relative;
     background-color: var(--world-surface);
@@ -22,12 +22,12 @@
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
-    background-color: var(--world-bg);
+    background-color: var(--world-surface);
     border-radius: var(--radius-1);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--space-6);
+    padding: 8%;
     overflow: hidden;
   }
 
@@ -46,7 +46,7 @@
   }
 
   .plate-body {
-    padding-top: var(--space-4);
+    padding-top: var(--space-3);
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -58,92 +58,106 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
     margin-bottom: var(--space-1);
+    font-weight: 600;
   }
 
   .plate-title {
-    font-family: var(--font-display);
-    font-size: var(--step-1);
-    line-height: 1.3;
-    font-weight: 600;
+    font-family: var(--font-text);
+    font-size: 16px;
+    line-height: 1.35;
+    font-weight: 500;
     color: var(--world-text);
-    margin-bottom: var(--space-2);
-  }
-
-  .plate-title a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .plate-title a:hover {
-    color: var(--world-accent);
+    margin-bottom: var(--space-1);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .plate-caption {
-    font-size: var(--step--1);
+    font-size: var(--step--2);
     color: var(--world-muted);
     line-height: 1.4;
-    margin-bottom: var(--space-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: var(--space-2);
   }
 
   .plate-footer {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     margin-top: auto;
     padding-top: var(--space-3);
     border-top: 1px solid var(--world-rule);
+    position: relative;
   }
 
-  .plate-view-link {
-    font-size: var(--step--1);
+  .card-price-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    white-space: nowrap;
+  }
+
+  .price-current {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
     font-weight: 600;
+    color: var(--world-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .price-mrp-wrapper {
+    font-size: var(--step--2);
+    color: var(--world-muted);
+    white-space: nowrap;
+  }
+
+  .price-mrp-struck {
+    text-decoration: line-through;
+    color: var(--world-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .price-savings-row {
+    margin-top: 2px;
+  }
+
+  .price-savings-note {
+    font-size: var(--step--2);
+    color: var(--color-success, #2D6A4F);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .card-arrow-glyph {
+    font-size: var(--step-0);
     color: var(--world-accent);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-  }
-
-  .plate-view-link:hover {
-    text-decoration: underline;
-  }
-
-  /* Specular Glare Layer on Mat */
-  .plate-mat::after {
-    content: "";
-    position: absolute;
-    inset: 0;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity var(--dur-utility) var(--ease-utility), transform var(--dur-utility) var(--ease-utility);
     pointer-events: none;
-    border-radius: inherit;
-    background: radial-gradient(
-      circle at var(--tilt-glare-x, 50%) var(--tilt-glare-y, 50%),
-      color-mix(in srgb, var(--world-white) 35%, transparent) 0%,
-      transparent 70%
-    );
-    opacity: var(--tilt-glare-opacity, 0);
-    transition: opacity var(--transition-base);
+    margin-left: auto;
   }
 
-  /* Technique H: 3D Perspective Tilt */
-  [data-tilt-card] {
-    transform-style: preserve-3d;
-    transform: perspective(1000px) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg));
-    transition: transform 350ms var(--ease-editorial, cubic-bezier(0.22, 1, 0.36, 1)), box-shadow var(--transition-base), border-color var(--transition-base);
+  .plate-collectible:hover .card-arrow-glyph,
+  .plate-collectible:focus-within .card-arrow-glyph,
+  .product-card:hover .card-arrow-glyph,
+  .product-card:focus-within .card-arrow-glyph {
+    opacity: 1;
+    transform: translateX(0);
   }
 
-  [data-tilt-card].is-tilting {
-    transition: none;
-  }
-
-  /* Tier 3 and Reduced Motion: disable 3D tilt */
-  html[data-motion-tier="3"] [data-tilt-card] {
-    transform: none;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    [data-tilt-card] {
-      transform: none;
-    }
+  /* Lead Plate Variant (4/5 Aspect Ratio) */
+  .chapter-lead-slot .plate-mat {
+    aspect-ratio: 4 / 5;
   }
 }
-

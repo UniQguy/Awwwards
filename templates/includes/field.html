@@ -1,20 +1,59 @@
 {% if field %}
-  <div class="form-group {% if field.errors %}has-error{% endif %}">
-    <label for="{{ field.id_for_label }}" class="form-label">
-      <span>{{ field.label }}</span>
-      {% if field.field.required %}<span class="form-required" aria-hidden="true">*</span>{% endif %}
-    </label>
+  {% if field.field.widget.input_type == "checkbox" %}
+    <div class="form-group-checkbox {% if field.errors %}has-error{% endif %}">
+      <div class="form-check-row">
+        {{ field }}
+        <label for="{{ field.id_for_label }}" class="form-check-label">
+          <span>{{ field.label }}</span>
+          {% if field.field.required %}<span class="form-required-text">(required)</span>{% endif %}
+        </label>
+      </div>
+      {% if field.errors %}
+        {% for error in field.errors %}
+          <p class="form-error" id="error-{{ field.id_for_label }}" role="alert">
+            <span class="error-bullet" aria-hidden="true">&bull;</span> {{ error }}
+          </p>
+        {% endfor %}
+      {% endif %}
+      {% if field.help_text %}
+        <p class="form-help" id="help-{{ field.id_for_label }}">{{ field.help_text }}</p>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="form-group {% if field.errors %}has-error{% endif %}">
+      <label for="{{ field.id_for_label }}" class="form-label">
+        <span class="form-label-text">{{ field.label }}</span>
+        {% if field.field.required %}<span class="form-required-text">(required)</span>{% endif %}
+      </label>
 
-    {{ field }}
+      {% if field.field.widget.input_type == "password" %}
+        <div class="password-input-group">
+          <div class="password-input-wrap">
+            {{ field }}
+          </div>
+          <button
+            type="button"
+            class="password-toggle-btn"
+            aria-label="Show password"
+            aria-pressed="false"
+            data-password-toggle
+          >Show</button>
+        </div>
+      {% else %}
+        {{ field }}
+      {% endif %}
 
-    {% if field.errors %}
-      {% for error in field.errors %}
-        <p class="form-error" id="error-{{ field.id_for_label }}" role="alert">{{ error }}</p>
-      {% endfor %}
-    {% endif %}
+      {% if field.errors %}
+        {% for error in field.errors %}
+          <p class="form-error" id="error-{{ field.id_for_label }}" role="alert">
+            <span class="error-bullet" aria-hidden="true">&bull;</span> {{ error }}
+          </p>
+        {% endfor %}
+      {% endif %}
 
-    {% if field.help_text %}
-      <p class="form-help" id="help-{{ field.id_for_label }}">{{ field.help_text }}</p>
-    {% endif %}
-  </div>
+      {% if field.help_text and "password" not in field.name %}
+        <p class="form-help" id="help-{{ field.id_for_label }}">{{ field.help_text }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
 {% endif %}

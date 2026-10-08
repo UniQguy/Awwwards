@@ -105,35 +105,52 @@ def search_suggest(request: HttpRequest) -> JsonResponse:
     if len(query) < 2:
         return JsonResponse({"products": [], "categories": [], "brands": []})
 
-    # 1. Matching categories (max 2)
+    # 1. Matching categories (max 2) with counts
+    from django.db.models import Count, Q
     categories = [
-        {"name": c["name"], "slug": c["slug"], "url": f"/c/{c['slug']}/"}
+        {
+            "name": c.name,
+            "slug": c.slug,
+            "url": f"/c/{c.slug}/",
+            "count": c.product_count,
+        }
         for c in Category.objects.filter(is_active=True, name__icontains=query)
-        .order_by("name")
-        .values("name", "slug")[:2]
+        .annotate(product_count=Count("products", filter=Q(products__is_available=True)))
+        .order_by("name")[:2]
     ]
 
-    # 2. Matching brands (max 2)
+    # 2. Matching brands (max 3) with live counts
     known_brands = get_known_brands()
-    matching_brands_raw = [b for b in known_brands if query in b.lower()][:2]
-    brand_items = [{"name": b, "url": f"/search/?brand={b}"} for b in matching_brands_raw]
+    matching_brands_raw = [b for b in known_brands if query in b.lower()][:3]
+    brand_items = []
+    for b in matching_brands_raw:
+        b_count = Product.objects.filter(is_available=True, parsed_brand__iexact=b).count()
+        brand_items.append({
+            "name": b,
+            "url": f"/search/?brand={b}",
+            "count": b_count,
+        })
 
-    # 3. Matching products (up to remaining slots so total <= 8)
-    remaining_slots = max(1, 8 - len(categories) - len(brand_items))
-    products = [
-        {
-            "id": p["id"],
-            "display_name": p["display_name"],
-            "slug": p["slug"],
-            "selling_price": str(p["selling_price"]) if p["selling_price"] else None,
-            "parsed_brand": p["parsed_brand"],
-            "url": f"/p/{p['slug']}/",
-        }
-        for p in Product.objects.filter(
+    # 3. Matching products (up to max 5) with thumbnail and Fraunces price
+    remaining_slots = min(5, max(1, 8 - len(categories) - len(brand_items)))
+    product_objs = (
+        Product.objects.filter(
             is_available=True, selling_price__gt=0, search_text__icontains=query
         )
-        .order_by("-source_rating_count", "-source_rating")
-        .values("id", "display_name", "slug", "selling_price", "parsed_brand")[:remaining_slots]
+        .prefetch_related("media")
+        .order_by("-source_rating_count", "-source_rating")[:remaining_slots]
+    )
+    products = [
+        {
+            "id": p.id,
+            "display_name": p.display_name,
+            "slug": p.slug,
+            "selling_price": str(p.selling_price) if p.selling_price else None,
+            "parsed_brand": p.parsed_brand or "",
+            "image_url": p.primary_image_url,
+            "url": f"/p/{p.slug}/",
+        }
+        for p in product_objs
     ]
 
     return JsonResponse({

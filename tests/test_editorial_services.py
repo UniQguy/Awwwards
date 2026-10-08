@@ -153,7 +153,7 @@ class EditorialServicesTest(TestCase):
         self.assertEqual(ch_audio.price_min, Decimal("500.00"))
         self.assertEqual(ch_audio.price_max, Decimal("2500.00"))
         self.assertEqual(ch_audio.editorial_line, "Precision acoustic instruments and studio reference gear.")
-        self.assertEqual(len(ch_audio.picks), 4)
+        self.assertEqual(len(ch_audio.picks), 3)
 
         # Keyboards chapter
         ch_kb = chapters[1]

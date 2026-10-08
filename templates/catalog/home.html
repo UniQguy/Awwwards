@@ -7,12 +7,20 @@
 {% block editorial_script %}{% vite_asset 'frontend/js/editorial.js' %}{% endblock %}
 
 {% block content %}
-<div class="container section-sm">
-  <!-- 1. HERO SECTION -->
+<div class="container">
+  <!-- 1. HERO SECTION (WP2) -->
   <section class="hero-composition" aria-labelledby="hero-heading">
-    <div>
+    <div class="hero-text-col">
+      <div class="hero-label-line">
+        <span class="hero-listings-label">{{ total_listings }} listings</span>
+      </div>
+
       <h1 class="hero-headline" id="hero-heading">
-        Everything you plug in{% if cutout_cable %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_cable.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}, put on{% if cutout_watch %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_watch.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}, or listen with{% if cutout_earphones %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_earphones.primary_image_url }}" alt="" width="36" height="36" loading="eager"></span>{% endif %}.
+        {% if cutout_cable or cutout_watch or cutout_earphones %}
+          Everything you <span class="cutout-bound"><em>plug in</em>{% if cutout_cable %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_cable.primary_image_url }}" alt="" width="36" height="36" loading="eager" onerror="this.parentElement.style.display='none'"></span>{% endif %},</span> <span class="cutout-bound"><em>put on</em>{% if cutout_watch %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_watch.primary_image_url }}" alt="" width="36" height="36" loading="eager" onerror="this.parentElement.style.display='none'"></span>{% endif %},</span> or <span class="cutout-bound"><em>listen with</em>{% if cutout_earphones %}<span class="cutout" aria-hidden="true"><img class="cutout-img" src="{{ cutout_earphones.primary_image_url }}" alt="" width="36" height="36" loading="eager" onerror="this.parentElement.style.display='none'"></span>{% endif %}.</span>
+        {% else %}
+          Everything you plug in, put on, or listen with.
+        {% endif %}
       </h1>
 
       <p class="hero-live-stat">
@@ -69,17 +77,15 @@
   </section>
 </div>
 
-<!-- 3. CHAPTERS (Full-bleed monograph worlds) -->
+<!-- 3. CHAPTERS (WP3: Composed 3-Plate Unit & Contrast Worlds) -->
 {% if chapters %}
   <div>
     {% for chapter in chapters %}
-      <section class="spread" data-world="{{ chapter.category.accent_key }}" aria-labelledby="chapter-{{ chapter.category.id }}">
-        {% if not forloop.first %}
-          <div class="chapter-wipe" aria-hidden="true" data-wipe-world="{{ chapter.category.accent_key }}"></div>
-        {% endif %}
+      <section class="spread chapter-spread" data-world="{{ chapter.category.accent_key }}" aria-labelledby="chapter-{{ chapter.category.id }}">
+        <div class="chapter-top-bar" aria-hidden="true"></div>
         <div class="container chapter-grid">
-          <!-- Left Column: Chapter metadata and live stats -->
-          <div>
+          <!-- Left Column: Chapter metadata and live stats (cols 1-4) -->
+          <div class="chapter-text-col">
             <div class="chapter-label">
               <span class="chapter-numeral">{{ forloop.counter|stringformat:"02d" }}</span>
               <span class="chapter-hairline"></span>
@@ -88,37 +94,61 @@
 
             <h2 class="display-l mb-3" id="chapter-{{ chapter.category.id }}">{{ chapter.category.name }}</h2>
 
-            <p class="pull">{{ chapter.editorial_line }}</p>
+            <p class="pull mb-4">{{ chapter.editorial_line }}</p>
 
-            <div class="marginalia">
-              <div class="marginalia-stat">
-                <span class="marginalia-label">Curated listings</span>
-                <span class="marginalia-value">{{ chapter.product_count }}</span>
+            <dl class="chapter-stats-list">
+              <div class="chapter-stat-item">
+                <dt class="chapter-stat-label">Curated listings</dt>
+                <dd class="chapter-stat-val">{{ chapter.product_count }}</dd>
               </div>
-              <div class="marginalia-stat">
-                <span class="marginalia-label">Catalogue range</span>
-                <span class="marginalia-value">{{ chapter.price_min|inr }} &ndash; {{ chapter.price_max|inr }}</span>
+              <div class="chapter-stat-item">
+                <dt class="chapter-stat-label">Catalogue range</dt>
+                <dd class="chapter-stat-val">{{ chapter.price_min|inr }} &ndash; {{ chapter.price_max|inr }}</dd>
               </div>
+            </dl>
+
+            <div class="chapter-enter-action">
+              <a href="{% url 'category_detail' slug=chapter.category.slug %}" class="chapter-enter-link">
+                Enter {{ chapter.category.name }} &rarr;
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Area: Composed 3-Plate Unit (cols 6-12) -->
+          <div class="chapter-plates-unit">
+            <div class="chapter-composed-grid">
+              {% for pick in chapter.picks %}
+                {% if forloop.first %}
+                  <div class="chapter-lead-slot">
+                    {% include "includes/collectible_plate.html" with product=pick %}
+                  </div>
+                {% elif forloop.counter == 2 %}
+                  <div class="chapter-stack-slot">
+                    {% include "includes/collectible_plate.html" with product=pick %}
+                {% elif forloop.counter == 3 %}
+                    {% include "includes/collectible_plate.html" with product=pick %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+              {% if chapter.picks|length == 2 %}
+                  </div>
+              {% endif %}
             </div>
 
-            <div class="mt-6">
-              <a href="{% url 'category_detail' slug=chapter.category.slug %}" class="btn btn-secondary">
-                Enter the Chapter &rarr;
-              </a>
+            <div class="chapter-mobile-snap" tabindex="0" role="region" aria-label="{{ chapter.category.name }} picks">
+              {% for pick in chapter.picks %}
+                <div class="chapter-mobile-snap-item">
+                  {% include "includes/collectible_plate.html" with product=pick %}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="chapter-mobile-counter" aria-hidden="true">
+              <span class="mobile-snap-index">1</span> / {{ chapter.picks|length }}
             </div>
 
             {% if chapter.is_auto %}
-              <p class="caption mt-2 text-muted">Selected by number of ratings on Amazon</p>
+              <p class="chapter-caption">Selected by number of ratings on Amazon</p>
             {% endif %}
-          </div>
-
-          <!-- Right Area: Collectible plates mosaic / mobile snap -->
-          <div>
-            <div class="chapter-plates-mosaic">
-              {% for pick in chapter.picks %}
-                {% include "includes/collectible_plate.html" with product=pick %}
-              {% endfor %}
-            </div>
           </div>
         </div>
       </section>
@@ -127,56 +157,69 @@
 {% endif %}
 
 <div class="container section">
-  <!-- 4. HOW BUYING WORKS HERE -->
-  <section aria-labelledby="buying-heading">
-    <h2 id="buying-heading" class="label mb-4">How buying works</h2>
-
-    <div class="how-buying-works">
-      <div class="how-buying-passage">
-        <span class="how-buying-lead">Prices</span>
-        <p class="how-buying-text">
-          {% if seller_mode == "bill_of_supply" %}
-            Prices are shown as listed. No GST is charged on this store's bills of supply.
-          {% else %}
-            Prices include GST. The invoice shows the tax split.
-          {% endif %}
-        </p>
+  <!-- 4. HOW BUYING WORKS HERE (WP5) -->
+  <section class="how-buying-section" aria-labelledby="buying-heading">
+    <div class="how-buying-grid">
+      <div class="how-buying-col-left">
+        <h2 id="buying-heading" class="label mb-3">How buying works</h2>
+        <p class="how-buying-lead-sentence">Straightforward commerce with transparent terms and no surprises.</p>
       </div>
 
-      <div class="how-buying-passage">
-        <span class="how-buying-lead">Delivery</span>
-        <p class="how-buying-text">
-          Delivery is free on orders of {{ free_shipping_threshold|inr }} or more; below that {% if shipping_fee_confirmed %}it is {{ standard_shipping_fee|inr }}{% else %}a delivery fee applies{% endif %}. Enter your PIN code on any product to see the estimate.
-        </p>
-      </div>
+      <div class="how-buying-col-right">
+        <dl class="how-buying-list">
+          <div class="how-buying-row">
+            <dt class="how-buying-term">Prices</dt>
+            <dd class="how-buying-desc">
+              {% if seller_mode == "bill_of_supply" %}
+                Prices are shown as listed. No GST is charged on this store's bills of supply.
+              {% else %}
+                Prices include GST. The invoice shows the tax split.
+              {% endif %}
+            </dd>
+          </div>
 
-      <div class="how-buying-passage">
-        <span class="how-buying-lead">Payment</span>
-        <p class="how-buying-text">
-          Pay on delivery where your PIN allows it.{% if razorpay_enabled %} Pay online by card, UPI or net banking.{% endif %}
-        </p>
+          <div class="how-buying-row">
+            <dt class="how-buying-term">Delivery</dt>
+            <dd class="how-buying-desc">
+              Delivery is free on orders of {{ free_shipping_threshold|inr }} or more; below that {% if shipping_fee_confirmed %}it is {{ standard_shipping_fee|inr }}{% else %}a delivery fee applies{% endif %}. Enter your PIN code on any product to see the estimate.
+            </dd>
+          </div>
+
+          <div class="how-buying-row">
+            <dt class="how-buying-term">Payment</dt>
+            <dd class="how-buying-desc">
+              Pay on delivery where your PIN allows it.{% if razorpay_enabled %} Pay online by card, UPI or net banking.{% endif %}
+            </dd>
+          </div>
+        </dl>
       </div>
     </div>
   </section>
 
-  <!-- 5. ALLOW-LISTED BRANDS FLOW -->
+  <!-- 5. ALLOW-LISTED BRANDS FLOW (WP5) -->
   {% if brands %}
-    <section class="section-sm" aria-labelledby="brands-heading">
-      <h2 id="brands-heading" class="label mb-2">The brands</h2>
-      <p class="brands-flow-paragraph">
-        Brands in the catalogue:
-        {% for b in brands %}<span class="brand-flow-item" style="white-space: nowrap;"><a href="{% url 'search_results' %}?brand={{ b.name|urlencode }}" class="brand-flow-link">{{ b.name }}</a> <span class="brand-flow-count">({{ b.product_count }})</span></span>{% if not forloop.last %}, {% endif %}{% endfor %}.
-      </p>
+    <section class="brands-flow-section" aria-labelledby="brands-heading">
+      <h2 id="brands-heading" class="label mb-3">The brands</h2>
+      <div class="brands-flow-wrap tag-list dense-list">
+        {% for b in brands|slice:":40" %}
+          <a href="{% url 'search_results' %}?brand={{ b.name|urlencode }}" class="brand-chip">
+            <span class="brand-chip-name">{{ b.name }}</span>
+            <span class="brand-chip-count">{{ b.product_count }}</span>
+          </a>
+        {% endfor %}
+      </div>
     </section>
   {% endif %}
 
-  <!-- 6. CLOSING LINE -->
-  <section class="section">
-    <p class="display-m mb-4">Start with the category you need.</p>
-    <a href="{% url 'category_list' %}" class="btn btn-primary">Browse all categories &rarr;</a>
+  <!-- 6. CLOSING LINE (WP5) -->
+  <section class="closing-callout-section">
+    <div class="closing-callout-hairline" aria-hidden="true"></div>
+    <div class="closing-callout-inner">
+      <p class="display-m mb-4">Start with the category you need.</p>
+      <a href="{% url 'category_list' %}" class="btn btn-primary">Browse all categories &rarr;</a>
+    </div>
   </section>
 </div>
 
 {{ cutout_cycle_data|json_script:"hero-cutouts-data" }}
 {% endblock %}
-

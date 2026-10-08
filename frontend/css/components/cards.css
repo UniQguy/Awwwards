@@ -145,7 +145,8 @@
   }
 
   .card-title {
-    font-size: var(--step--1);
+    font-family: var(--font-text);
+    font-size: 16px;
     font-weight: 500;
     color: var(--world-text);
     line-height: 1.35;
@@ -160,8 +161,31 @@
     color: inherit;
   }
 
-  .card-title a:hover {
-    color: var(--world-accent);
+  .card-spec-caption {
+    font-size: var(--step--2);
+    color: var(--world-muted);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-price-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: var(--space-1);
+  }
+
+  .price-savings-row {
+    margin-top: 2px;
+  }
+
+  .price-savings-note {
+    font-size: var(--step--2);
+    color: var(--color-success, #2D6A4F);
+    font-weight: 500;
+    white-space: nowrap;
   }
 
   /* Swatches and Options */
@@ -200,6 +224,24 @@
   .card-stock-note.is-out {
     color: var(--color-danger);
     font-weight: 500;
+  }
+
+  .card-arrow-glyph {
+    position: absolute;
+    bottom: var(--space-3);
+    right: var(--space-3);
+    font-size: var(--step-0);
+    color: var(--world-accent);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity var(--dur-utility) var(--ease-utility), transform var(--dur-utility) var(--ease-utility);
+    pointer-events: none;
+  }
+
+  .product-card:hover .card-arrow-glyph,
+  .product-card:focus-within .card-arrow-glyph {
+    opacity: 1;
+    transform: translateX(0);
   }
 
   .card-actions-row {

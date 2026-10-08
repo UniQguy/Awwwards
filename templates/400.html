@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}400 Bad Request — ELECTROCART{% endblock %}
+{% block title %}Bad Request — ELECTROCART{% endblock %}
 
 {% block content %}
 <div class="container section">
-  <div class="empty-state-card">
-    <svg class="empty-state-mark" aria-hidden="true"><use href="#icon-alert"></use></svg>
-    <h1 class="empty-state-title">400 — Bad Request</h1>
-    <p class="empty-state-desc">The request could not be understood or was missing required parameters.</p>
-    <div class="empty-state-actions">
-      <a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a>
+  <div class="empty-state-card text-center">
+    <div class="caption text-muted uppercase tracking-widest mb-2">400 &middot; Bad Request</div>
+    <h1 class="empty-state-title mb-3">Bad request.</h1>
+    <p class="empty-state-desc mb-6">The request could not be understood or was missing required parameters.</p>
+    <div class="empty-state-actions flex gap-4 justify-center">
+      <a href="{% url 'home' %}" class="btn btn-primary">Back to the shop</a>
     </div>
   </div>
 </div>

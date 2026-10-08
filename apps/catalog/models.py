@@ -200,6 +200,19 @@ class Product(TimeStampedModel):
             highlights = [s.value for s in specs[:3]]
         return " · ".join(highlights)
 
+    @property
+    def savings(self) -> Decimal:
+        """Returns positive savings between MRP and selling price if applicable."""
+        if self.mrp and self.selling_price and self.mrp > self.selling_price:
+            return self.mrp - self.selling_price
+        return Decimal("0.00")
+
+    @property
+    def family_key(self) -> str:
+        """Returns normalized family identifier from raw title."""
+        from apps.catalog.services.families import family_key
+        return family_key(self.raw_name)
+
     def save(self, *args, **kwargs):
         # Automatically update denormalized search_text
         brand = self.parsed_brand or ""

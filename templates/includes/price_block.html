@@ -4,17 +4,12 @@
     <div class="price-row">
       <span class="price-current">{{ product.selling_price|inr }}</span>
       {% if product.mrp and product.mrp > product.selling_price %}
-        <span class="price-mrp-wrapper">
-          MRP <span class="price-mrp-struck">{{ product.mrp|inr }}</span>
-        </span>
-        {% with pct=product.mrp|discount_percent:product.selling_price %}
-          {% if pct > 0 %}
-            <span class="price-savings-text" aria-label="{{ pct }} percent savings">Save {{ pct }}%</span>
-          {% endif %}
-        {% endwith %}
+        <span class="price-mrp-wrapper"><span class="price-mrp-struck">{{ product.mrp|inr }}</span></span>
       {% endif %}
     </div>
-    <span class="price-tax-note">Inclusive of all taxes</span>
+    {% if product.savings and product.savings > 0 %}
+      <div class="price-savings-row"><span class="price-savings-note">Save {{ product.savings|inr }}</span></div>
+    {% endif %}
   {% else %}
     <span class="text-muted caption">Price unavailable</span>
   {% endif %}

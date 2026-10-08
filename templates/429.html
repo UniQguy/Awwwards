@@ -4,14 +4,37 @@
 
 {% block content %}
 <div class="container section">
-  <div class="empty-state-card text-center p-8">
-    <h1 class="display-m mb-3">Too many attempts in a short time.</h1>
-    <p class="body text-muted max-w-md mx-auto mb-6">
-      Please wait a minute and try again.
+  <div class="empty-state-card text-center">
+    <div class="caption text-muted uppercase tracking-widest mb-2">429 &middot; Rate Limited</div>
+    <h1 class="empty-state-title mb-3">Too many attempts in a short time.</h1>
+    <p class="empty-state-desc mb-6">
+      Too many attempts in a short time. Please wait a minute before retrying.
     </p>
-    <div class="flex gap-4 justify-center">
-      <a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a>
+    <div class="empty-state-actions flex gap-4 justify-center">
+      <button id="rate-limit-retry" type="button" class="btn btn-secondary" disabled>
+        Retry in <span id="countdown">60</span>s
+      </button>
+      <a href="{% url 'home' %}" class="btn btn-primary">Back to the shop</a>
     </div>
   </div>
 </div>
+<script>
+  (function() {
+    let sec = 60;
+    const btn = document.getElementById('rate-limit-retry');
+    const span = document.getElementById('countdown');
+    const timer = setInterval(function() {
+      sec -= 1;
+      if (span) span.textContent = sec;
+      if (sec <= 0) {
+        clearInterval(timer);
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Retry now';
+          btn.onclick = function() { window.location.reload(); };
+        }
+      }
+    }, 1000);
+  })();
+</script>
 {% endblock %}

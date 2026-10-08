@@ -120,13 +120,26 @@ def eligible_cutout_products(products: Sequence[Product], max_cutouts: int = 3) 
     return eligible
 
 
+HERO_ELIGIBLE_CATEGORIES = [
+    "smartphones",
+    "tvs",
+    "speakers",
+    "smartwatches-bands",
+    "earphones-headphones",
+    "keyboards-mice",
+    "cameras",
+]
+
+
 def hero_products(n: int = 3) -> HeroResult:
     """
     Returns hero products for the homepage.
     Checks for active Collection with placement='home_hero'.
-    Fallback auto-select: priced, available, in-stock products with an image,
-    ranked by source_rating_count descending, one per category, deterministic.
+    Fallback auto-select excludes accessory categories (cables, cases, other)
+    and rotates through primary categories (phones, TVs, audio, cameras) by day-of-year.
     """
+    from datetime import date
+
     # 1. Check curated collection
     curated_col = (
         Collection.objects.filter(placement=Collection.PLACEMENT_HOME_HERO, is_active=True)
@@ -150,38 +163,49 @@ def hero_products(n: int = 3) -> HeroResult:
         if curated_prods:
             return HeroResult(products=curated_prods[:n], is_auto=False)
 
-    # 2. Fallback auto-select
-    # Order by rating count desc, selling price desc, id
-    candidates = (
+    # 2. Fallback auto-select: single query across eligible non-accessory categories
+    day_of_year = date.today().timetuple().tm_yday
+    num_cats = len(HERO_ELIGIBLE_CATEGORIES)
+    start_idx = day_of_year % num_cats
+    preferred_order = {
+        HERO_ELIGIBLE_CATEGORIES[(start_idx + offset) % num_cats]: offset
+        for offset in range(num_cats)
+    }
+
+    prods = (
         Product.objects.filter(
             selling_price__gt=Decimal("0.00"),
             is_available=True,
             media__media_type="image",
         )
+        .exclude(category__slug__in=["cables-chargers-powerbanks", "cases-protectors", "other"])
         .select_related("category")
         .prefetch_related("media", "specifications")
-        .distinct()
         .order_by("-source_rating_count", "-selling_price", "id")
     )
 
-    selected: List[Product] = []
-    seen_categories = set()
+    best_per_cat = {}
+    for p in prods:
+        if p.category_id not in best_per_cat and p.primary_image_url:
+            best_per_cat[p.category_id] = p
 
-    for p in candidates:
-        if p.category_id not in seen_categories:
-            seen_categories.add(p.category_id)
-            selected.append(p)
-            if len(selected) >= n:
-                break
+    sorted_candidates = sorted(
+        best_per_cat.values(),
+        key=lambda prod: preferred_order.get(prod.category.slug, 999),
+    )
 
-    return HeroResult(products=selected, is_auto=True)
+    return HeroResult(products=sorted_candidates[:n], is_auto=True)
+
+
+WARM_WORLDS = {"earphones-headphones", "speakers", "cameras", "keyboards-mice", "cases-protectors"}
+COOL_WORLDS = {"smartphones", "smartwatches-bands", "tvs", "cables-chargers-powerbanks", "other"}
 
 
 def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
     """
-    Active categories with at least 4 purchasable products, ordered by display_order.
-    Each with up to 4 picks (curated collection else auto-selected by rating then price),
-    plus real stats from the database (never hardcoded).
+    Active categories with at least 3 purchasable products.
+    Alternates warm and cool monograph worlds so adjacent chapters contrast.
+    Each chapter has exactly 3 diverse picks grouped by family_key (never 4, no orphan rows).
     """
     cats = (
         Category.objects.filter(is_active=True)
@@ -199,18 +223,34 @@ def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
                 filter=Q(products__selling_price__gt=Decimal("0.00"), products__is_available=True),
             ),
         )
-        .filter(purchasable_count__gt=0)
+        .filter(purchasable_count__gte=1)
         .order_by("display_order", "id")
     )
 
     if not cats:
         return []
 
-    cats_with_4 = [c for c in cats if c.purchasable_count >= 4]
-    cat_list = cats_with_4[:max_chapters] if cats_with_4 else list(cats[:max_chapters])
+    # Partition into warm and cool worlds, preserving display_order within each
+    warm_cats = [c for c in cats if c.accent_key in WARM_WORLDS]
+    cool_cats = [c for c in cats if c.accent_key in COOL_WORLDS]
+
+    # Interleave warm and cool
+    interleaved: List[Category] = []
+    w_idx, c_idx = 0, 0
+    while len(interleaved) < max_chapters and (w_idx < len(warm_cats) or c_idx < len(cool_cats)):
+        if w_idx < len(warm_cats):
+            interleaved.append(warm_cats[w_idx])
+            w_idx += 1
+            if len(interleaved) >= max_chapters:
+                break
+        if c_idx < len(cool_cats):
+            interleaved.append(cool_cats[c_idx])
+            c_idx += 1
+
+    cat_list = interleaved
     cat_ids = [c.id for c in cat_list]
 
-    # Pre-fetch curated chapter collections for these categories
+    # Pre-fetch curated chapter collections
     curated_map = {}
     collections = (
         Collection.objects.filter(
@@ -242,20 +282,20 @@ def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
         p_min = cat.price_min_agg or Decimal("0.00")
         p_max = cat.price_max_agg or Decimal("0.00")
 
-        # Picks
+        # Exactly 3 picks
         col = curated_map.get(cat.id)
         if col:
             picks = [
                 fp.product
                 for fp in col.featured_items.all()
                 if fp.product.is_purchasable
-            ][:4]
+            ][:3]
             is_auto = False
         else:
             picks = []
             is_auto = True
 
-        if not picks:
+        if len(picks) < 3:
             candidates = (
                 Product.objects.filter(
                     category=cat,
@@ -266,16 +306,16 @@ def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
                 .prefetch_related("media", "specifications")
                 .order_by("-source_rating_count", "-selling_price", "id")
             )
-            deduped_picks = []
-            seen_families = set()
+            deduped_picks = list(picks)
+            seen_families = {family_key(p.raw_name) for p in deduped_picks}
             for prod in candidates:
                 fam = family_key(prod.raw_name)
                 if fam not in seen_families:
                     seen_families.add(fam)
                     deduped_picks.append(prod)
-                    if len(deduped_picks) >= 4:
+                    if len(deduped_picks) >= 3:
                         break
-            picks = deduped_picks
+            picks = deduped_picks[:3]
             is_auto = True
 
         editorial_line = (

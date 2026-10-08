@@ -206,7 +206,7 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
         collapsed=collapsed,
     )
 
-    products_qs = search_result["products"].select_related("inventory").prefetch_related("media")
+    products_qs = search_result["products"].select_related("inventory").prefetch_related("media", "specifications")
 
     paginator = Paginator(products_qs, 24)
     page_obj = paginator.get_page(page_param)

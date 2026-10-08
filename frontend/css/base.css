@@ -1,4 +1,8 @@
 @layer base {
+  html, body {
+    overflow-x: clip;
+  }
+
   body {
     background-color: var(--world-bg);
     color: var(--world-text);
@@ -29,6 +33,9 @@
     top: var(--space-2);
     left: var(--space-2);
     z-index: var(--z-toast);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
     padding: var(--space-2) var(--space-4);
     background-color: var(--world-accent);
     color: var(--world-white);
@@ -72,6 +79,7 @@
     font-weight: 600;
     line-height: 1.2;
     text-wrap: balance;
+    overflow-wrap: break-word;
   }
 
   p {

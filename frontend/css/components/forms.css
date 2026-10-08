@@ -1,4 +1,70 @@
 @layer components {
+  /* Auth Layout (WP6: 2 columns on desktop, 440px form card) */
+  .auth-layout-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  @media (min-width: 1024px) {
+    .auth-layout-grid {
+      grid-template-columns: minmax(0, 1fr) 440px;
+      gap: var(--space-12);
+    }
+  }
+
+  .auth-info-panel {
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--space-2);
+  }
+
+  .auth-form-card {
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-2);
+    padding: var(--space-8);
+    box-shadow: var(--lift-1);
+    max-width: 440px;
+    width: 100%;
+  }
+
+  .auth-form-title {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-weight: 500;
+    margin-bottom: var(--space-6);
+    color: var(--world-text);
+  }
+
+  .auth-guest-prompt {
+    margin-top: var(--space-6);
+  }
+
+  .auth-card-footer {
+    border-top: 1px solid var(--world-rule);
+    padding-top: var(--space-4);
+    margin-top: var(--space-6);
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    font-size: var(--step--1);
+    color: var(--world-muted);
+  }
+
+  .auth-footer-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding-inline: var(--space-1);
+    color: var(--world-accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Form Controls */
   .form-group {
     display: flex;
     flex-direction: column;
@@ -6,16 +72,20 @@
     margin-bottom: var(--space-4);
   }
 
+  .form-group-checkbox {
+    margin-bottom: var(--space-4);
+  }
+
   .form-label {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
+    gap: var(--space-2);
     font-size: var(--step--1);
     font-weight: 600;
     color: var(--world-text);
   }
 
-  .form-required {
+  .form-required-text {
     font-size: var(--step--2);
     font-weight: 400;
     color: var(--world-muted);
@@ -56,6 +126,67 @@
     opacity: 0.7;
   }
 
+  /* Password Input with Show/Hide Toggle (WP6) */
+  .password-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .password-input-wrap {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .password-input-group .form-control {
+    padding-right: 64px;
+  }
+
+  .password-toggle-btn {
+    position: absolute;
+    right: 4px;
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--step--2);
+    font-weight: 600;
+    color: var(--world-accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-2);
+    border-radius: var(--radius-1);
+  }
+
+  .password-toggle-btn:hover {
+    text-decoration: underline;
+  }
+
+  .form-forgot-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+    margin-bottom: var(--space-3);
+  }
+
+  .form-forgot-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding-inline: var(--space-1);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .form-remember-row {
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
   /* Custom Select */
   select.form-control {
     appearance: none;
@@ -67,7 +198,24 @@
     cursor: pointer;
   }
 
-  /* Custom Checkbox & Radio (Accessible Native Controls) */
+  /* Custom Checkbox & Radio (Accessible Native Controls with row gap 12px) */
+  .form-check-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-block: var(--space-2);
+  }
+
+  .form-check-label {
+    font-size: var(--step--1);
+    color: var(--world-text);
+    cursor: pointer;
+    user-select: none;
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+
   .form-check {
     display: flex;
     align-items: flex-start;
@@ -80,11 +228,12 @@
   }
 
   .form-check input[type="checkbox"],
-  .form-check input[type="radio"] {
+  .form-check input[type="radio"],
+  .form-check-row input[type="checkbox"] {
     appearance: none;
     width: 20px;
     height: 20px;
-    margin-top: 2px;
+    margin: 0;
     background-color: var(--world-bg);
     border: 1px solid var(--world-field-border);
     border-radius: var(--radius-1);
@@ -100,7 +249,8 @@
     border-radius: 50%;
   }
 
-  .form-check input[type="checkbox"]::before {
+  .form-check input[type="checkbox"]::before,
+  .form-check-row input[type="checkbox"]::before {
     content: "";
     width: 10px;
     height: 10px;
@@ -121,16 +271,19 @@
   }
 
   .form-check input[type="checkbox"]:checked,
-  .form-check input[type="radio"]:checked {
+  .form-check input[type="radio"]:checked,
+  .form-check-row input[type="checkbox"]:checked {
     border-color: var(--world-accent);
   }
 
   .form-check input[type="checkbox"]:checked::before,
-  .form-check input[type="radio"]:checked::before {
+  .form-check input[type="radio"]:checked::before,
+  .form-check-row input[type="checkbox"]:checked::before {
     transform: scale(1);
   }
 
-  .form-check input:focus-visible {
+  .form-check input:focus-visible,
+  .form-check-row input:focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-offset);
   }

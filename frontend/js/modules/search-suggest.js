@@ -1,6 +1,6 @@
 /**
  * Accessible, debounced typeahead suggestions combobox.
- * Adheres to WAI-ARIA 1.2 Combobox pattern.
+ * Adheres to WAI-ARIA 1.2 Combobox pattern with groups, thumbnails, and keyboard support.
  */
 
 export function initSearchSuggest() {
@@ -8,6 +8,7 @@ export function initSearchSuggest() {
   const form = document.querySelector(".header-search-form");
   const container = document.querySelector("#search-suggestions-container");
   const list = document.querySelector("#search-suggestions-list");
+  const progressBar = document.querySelector("#search-progress-bar");
 
   if (!input || !form || !container || !list) return;
 
@@ -26,20 +27,27 @@ export function initSearchSuggest() {
       .replace(/'/g, "&#039;");
   }
 
+  function highlightMatch(text, query) {
+    if (!query) return escapeHTML(text);
+    const escapedText = escapeHTML(text);
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`(${escapedQuery})`, "gi");
+    return escapedText.replace(regex, "<mark class='search-match'>$1</mark>");
+  }
+
   function hideSuggestions() {
     container.hidden = true;
     input.setAttribute("aria-expanded", "false");
     input.removeAttribute("aria-activedescendant");
+    if (progressBar) progressBar.hidden = true;
     activeIndex = -1;
     list.innerHTML = "";
     items = [];
   }
 
   function showSuggestions() {
-    if (items.length > 0) {
-      container.hidden = false;
-      input.setAttribute("aria-expanded", "true");
-    }
+    container.hidden = false;
+    input.setAttribute("aria-expanded", "true");
   }
 
   function setActiveItem(index) {
@@ -74,86 +82,144 @@ export function initSearchSuggest() {
   }
 
   function renderSuggestions(data, query) {
+    if (progressBar) progressBar.hidden = true;
+
     const rawCategories = data.categories || [];
-    const rawBrands = data.brand_items || (data.brands || []).map((b) => (typeof b === "string" ? { name: b, url: `/search/?brand=${encodeURIComponent(b)}` } : b));
+    const rawBrands = data.brand_items || (data.brands || []).map((b) => (typeof b === "string" ? { name: b, url: `/search/?brand=${encodeURIComponent(b)}`, count: 0 } : b));
     const rawProducts = data.products || [];
 
     const builtItems = [];
+    let html = "";
 
-    // Categories (up to 2)
-    rawCategories.slice(0, 2).forEach((cat) => {
-      builtItems.push({
-        type: "category",
-        title: cat.name,
-        url: cat.url || `/c/${cat.slug}/`,
-        tag: "Category",
+    // Categories group (max 2)
+    if (rawCategories.length > 0) {
+      html += `<li class="suggestion-group-label" role="presentation">Categories</li>`;
+      rawCategories.slice(0, 2).forEach((cat) => {
+        const itemIdx = builtItems.length;
+        const countStr = cat.count !== undefined ? `<span class="suggestion-count">${cat.count}</span>` : "";
+        builtItems.push({
+          type: "category",
+          title: cat.name,
+          url: cat.url || `/c/${cat.slug}/`,
+        });
+
+        html += `
+          <li
+            id="suggestion-opt-${itemIdx}"
+            class="suggestion-item suggestion-category"
+            role="option"
+            aria-selected="false"
+            data-index="${itemIdx}"
+            data-url="${escapeHTML(cat.url || `/c/${cat.slug}/`)}"
+          >
+            <span class="suggestion-title">${highlightMatch(cat.name, query)}</span>
+            ${countStr}
+          </li>
+        `;
       });
-    });
+    }
 
-    // Brands (up to 2)
-    rawBrands.slice(0, 2).forEach((b) => {
-      builtItems.push({
-        type: "brand",
-        title: b.name,
-        url: b.url || `/search/?brand=${encodeURIComponent(b.name)}`,
-        tag: "Brand",
+    // Brands group (max 3)
+    if (rawBrands.length > 0) {
+      html += `<li class="suggestion-group-label" role="presentation">Brands</li>`;
+      rawBrands.slice(0, 3).forEach((b) => {
+        const itemIdx = builtItems.length;
+        const countStr = b.count ? `<span class="suggestion-count">${b.count}</span>` : "";
+        builtItems.push({
+          type: "brand",
+          title: b.name,
+          url: b.url || `/search/?brand=${encodeURIComponent(b.name)}`,
+        });
+
+        html += `
+          <li
+            id="suggestion-opt-${itemIdx}"
+            class="suggestion-item suggestion-brand-row"
+            role="option"
+            aria-selected="false"
+            data-index="${itemIdx}"
+            data-url="${escapeHTML(b.url || `/search/?brand=${encodeURIComponent(b.name)}`)}"
+          >
+            <span class="suggestion-title">${highlightMatch(b.name, query)}</span>
+            ${countStr}
+          </li>
+        `;
       });
-    });
+    }
 
-    // Products (fill up to max 8 total items)
-    const remainingSlots = Math.max(1, 8 - builtItems.length);
-    rawProducts.slice(0, remainingSlots).forEach((prod) => {
-      builtItems.push({
-        type: "product",
-        title: prod.display_name,
-        url: prod.url || `/p/${prod.slug}/`,
-        tag: "Product",
-        price: prod.selling_price ? `₹${Math.round(parseFloat(prod.selling_price))}` : "",
+    // Products group (max 5)
+    if (rawProducts.length > 0) {
+      html += `<li class="suggestion-group-label" role="presentation">Products</li>`;
+      rawProducts.slice(0, 5).forEach((prod) => {
+        const itemIdx = builtItems.length;
+        const formattedPrice = prod.selling_price ? `₹${Math.round(parseFloat(prod.selling_price)).toLocaleString("en-IN")}` : "";
+        const thumbHtml = prod.image_url
+          ? `<div class="suggestion-thumb-plate"><img src="${escapeHTML(prod.image_url)}" alt="" class="suggestion-thumb-img"></div>`
+          : `<div class="suggestion-thumb-plate"><span class="suggestion-thumb-placeholder">EC</span></div>`;
+
+        builtItems.push({
+          type: "product",
+          title: prod.display_name,
+          url: prod.url || `/p/${prod.slug}/`,
+        });
+
+        html += `
+          <li
+            id="suggestion-opt-${itemIdx}"
+            class="suggestion-item suggestion-product-row"
+            role="option"
+            aria-selected="false"
+            data-index="${itemIdx}"
+            data-url="${escapeHTML(prod.url || `/p/${prod.slug}/`)}"
+          >
+            ${thumbHtml}
+            <div class="suggestion-prod-info">
+              <span class="suggestion-title">${highlightMatch(prod.display_name, query)}</span>
+              ${prod.parsed_brand ? `<span class="suggestion-brand-sub">${escapeHTML(prod.parsed_brand)}</span>` : ""}
+            </div>
+            ${formattedPrice ? `<span class="suggestion-price">${escapeHTML(formattedPrice)}</span>` : ""}
+          </li>
+        `;
       });
-    });
+    }
 
+    // Empty state
     if (builtItems.length === 0) {
-      hideSuggestions();
+      list.innerHTML = `
+        <li class="suggestion-empty-state" role="presentation">
+          Nothing found for &ldquo;${escapeHTML(query)}&rdquo;. Try a brand or a product type.
+        </li>
+      `;
+      items = [];
+      showSuggestions();
       return;
     }
 
-    // Always append "See all results" row
+    // "See all results" row
+    const seeAllIdx = builtItems.length;
     builtItems.push({
       type: "all",
       title: `See all results for "${query}"`,
       url: `/search/?q=${encodeURIComponent(query)}`,
-      tag: "All",
     });
+
+    html += `
+      <li
+        id="suggestion-opt-${seeAllIdx}"
+        class="suggestion-item suggestion-see-all"
+        role="option"
+        aria-selected="false"
+        data-index="${seeAllIdx}"
+        data-url="/search/?q=${encodeURIComponent(query)}"
+      >
+        <span class="suggestion-title">See all results for &ldquo;${escapeHTML(query)}&rdquo; &rarr;</span>
+      </li>
+    `;
 
     items = builtItems;
     activeIndex = -1;
     input.removeAttribute("aria-activedescendant");
-
-    list.innerHTML = items
-      .map((item, idx) => {
-        const id = `suggestion-opt-${idx}`;
-        const isSeeAll = item.type === "all";
-        const tagHtml = isSeeAll ? "" : `<span class="suggestion-tag">${escapeHTML(item.tag)}</span>`;
-        const priceHtml = item.price ? `<span class="suggestion-price">${escapeHTML(item.price)}</span>` : "";
-        const seeAllClass = isSeeAll ? " suggestion-see-all" : "";
-
-        return `
-          <li
-            id="${id}"
-            class="suggestion-item${seeAllClass}"
-            role="option"
-            aria-selected="false"
-            data-index="${idx}"
-            data-url="${escapeHTML(item.url)}"
-          >
-            ${tagHtml}
-            <span class="suggestion-title">${escapeHTML(item.title)}</span>
-            ${priceHtml}
-          </li>
-        `;
-      })
-      .join("");
-
+    list.innerHTML = html;
     showSuggestions();
   }
 
@@ -163,6 +229,7 @@ export function initSearchSuggest() {
     }
 
     abortController = new AbortController();
+    if (progressBar) progressBar.hidden = false;
 
     fetch(`/search/suggest/?q=${encodeURIComponent(query)}`, {
       signal: abortController.signal,
@@ -176,6 +243,7 @@ export function initSearchSuggest() {
         renderSuggestions(data, query);
       })
       .catch((err) => {
+        if (progressBar) progressBar.hidden = true;
         if (err.name !== "AbortError") {
           hideSuggestions();
         }
@@ -183,7 +251,7 @@ export function initSearchSuggest() {
   }
 
   // Handle typing with 150ms debounce
-  input.addEventListener("input", (e) => {
+  input.addEventListener("input", () => {
     const val = input.value.trim();
     originalQuery = val;
 
@@ -237,7 +305,6 @@ export function initSearchSuggest() {
           e.preventDefault();
           navigateTo(items[activeIndex].url);
         }
-        // If activeIndex is -1, let form submit naturally
         break;
 
       case "Escape":
@@ -248,6 +315,15 @@ export function initSearchSuggest() {
       case "Tab":
         hideSuggestions();
         break;
+    }
+  });
+
+  // Shortcut hint '/' binds to focus search field when not in another input
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) {
+      e.preventDefault();
+      input.focus();
+      input.select();
     }
   });
 

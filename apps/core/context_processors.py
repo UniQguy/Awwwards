@@ -60,9 +60,11 @@ def storefront_context(request):
         if wishlist:
             wishlist_count = wishlist.items.count()
 
-    # 3. Active Nav Categories
+    # 3. Active Nav Categories with live product counts
+    from django.db.models import Count, Q
     nav_categories = list(
         Category.objects.filter(is_active=True)
+        .annotate(product_count=Count("products", filter=Q(products__is_available=True)))
         .only("id", "name", "slug", "accent_key", "display_order")
         .order_by("display_order", "name")
     )

@@ -17,8 +17,8 @@
 
   .meter-progress-track {
     background-color: var(--world-rule);
-    height: 6px;
-    border-radius: 3px;
+    height: 4px;
+    border-radius: 2px;
     overflow: hidden;
   }
 
@@ -59,11 +59,11 @@
       align-items: flex-start;
     }
     .cart-item-thumbnail {
-      width: 64px;
-      height: 64px;
+      width: 72px;
+      height: 72px;
     }
     .cart-item-details {
-      flex: 1 1 calc(100% - 80px);
+      flex: 1 1 calc(100% - 90px);
       min-width: 0;
     }
     .cart-line-item > .text-right {
@@ -75,12 +75,13 @@
   }
 
   .cart-item-thumbnail {
-    width: 96px;
-    height: 96px;
+    width: 112px;
+    height: 112px;
     flex-shrink: 0;
     background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
     border-radius: var(--radius-1);
-    padding: var(--space-2);
+    padding: 8px;
     display: flex;
     align-items: center;
     justify-content: center;

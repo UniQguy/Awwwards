@@ -1,18 +1,19 @@
 @layer components {
-  /* Inline Headline Cutout (Technique A) */
+  /* Inline Headline Cutout */
   .cutout {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    vertical-align: middle;
-    height: 0.85em;
+    vertical-align: -0.12em;
+    height: 1.05em;
     width: auto;
+    max-width: 1.7em;
     aspect-ratio: 1 / 1;
-    background-color: var(--world-surface);
+    background-color: transparent;
     border: 1px solid var(--world-rule);
     border-radius: var(--radius-1);
-    padding: 2px;
-    margin: 0 0.15em;
+    padding: 1px;
+    margin: 0 0.18em;
     transform: skewX(-6deg);
     overflow: hidden;
     position: relative;
@@ -26,6 +27,13 @@
     object-fit: contain;
     mix-blend-mode: multiply;
     display: block;
+  }
+
+  @media (max-width: 767px) {
+    .cutout {
+      height: 0.9em;
+      margin: 0 0.12em;
+    }
   }
 
   /* Support fallback to crisp plinth when multiply is unavailable */

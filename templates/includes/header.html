@@ -1,30 +1,36 @@
 <header class="site-header" role="banner">
   <div class="container header-inner">
-    <div class="flex items-center gap-4">
+    <div class="header-brand-group">
       <a href="{% url 'home' %}" class="site-brand" aria-label="ELECTROCART Home">
         <svg class="brand-logo-mark" aria-hidden="true"><use href="#icon-brand-mark"></use></svg>
         <span class="brand-name">ELECTROCART</span>
       </a>
 
-      <details class="shop-menu-details">
+      <details class="shop-menu-details" id="shop-menu-details">
         <summary class="shop-menu-summary" aria-haspopup="true">
           <span>Shop</span>
           <svg class="icon icon-xs" aria-hidden="true"><use href="#icon-chevron"></use></svg>
         </summary>
         <div class="shop-dropdown-panel" role="region" aria-label="Shop categories">
-          <ul>
-            <li><a href="{% url 'category_list' %}">All Categories</a></li>
-            <li><a href="{% url 'brand_list' %}">Brands Directory</a></li>
+          <div class="shop-panel-header">
+            <a href="{% url 'category_list' %}" class="shop-panel-hub-link">All Categories &rarr;</a>
+            <a href="{% url 'brand_list' %}" class="shop-panel-hub-link">Brands Directory &rarr;</a>
+          </div>
+          <div class="shop-category-grid" role="list">
             {% for cat in nav_categories %}
-              <li><a href="{% url 'category_detail' slug=cat.slug %}">{{ cat.name }}</a></li>
+              <a href="{% url 'category_detail' slug=cat.slug %}" class="shop-category-item" role="listitem">
+                <span class="cat-accent-swatch swatch-{{ cat.accent_key }}" aria-hidden="true"></span>
+                <span class="shop-cat-name">{{ cat.name }}</span>
+                <span class="shop-cat-count">{{ cat.product_count|default:"0" }}</span>
+              </a>
             {% endfor %}
-          </ul>
+          </div>
         </div>
       </details>
     </div>
 
     <form class="header-search-form" action="{% url 'search_results' %}" method="get" role="search">
-      <label for="site-search-input" class="sr-only">Search products, brands, or categories</label>
+      <label for="site-search-input" class="sr-only">Search electronics catalogue</label>
       <svg class="header-search-icon icon icon-sm" aria-hidden="true"><use href="#icon-search"></use></svg>
       <input
         type="search"
@@ -32,7 +38,7 @@
         name="q"
         value="{{ request.GET.q|default:'' }}"
         class="header-search-input"
-        placeholder="Search electronics, audio, gear..."
+        placeholder="Search electronics catalogue..."
         required
         autocomplete="off"
         role="combobox"
@@ -41,6 +47,8 @@
         aria-controls="search-suggestions-list"
         aria-autocomplete="list"
       >
+      <kbd class="search-kbd-hint" aria-hidden="true" title="Press / to focus search">/</kbd>
+      <div id="search-progress-bar" class="search-progress-bar" hidden></div>
       <div id="search-suggestions-container" class="search-suggestions-container" hidden>
         <ul id="search-suggestions-list" class="search-suggestions-list" role="listbox" aria-label="Search suggestions"></ul>
       </div>
@@ -69,7 +77,7 @@
         </a>
       {% endif %}
 
-      <a href="{% url 'cart_detail' %}" class="header-nav-link" aria-label="Bag ({{ cart_count }} items)">
+      <a href="{% url 'cart_detail' %}" class="header-nav-link header-bag-link" aria-label="Bag ({{ cart_count }} items)">
         <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-bag"></use></svg>
         <span>Bag</span>
         <span class="bag-badge">({{ cart_count }})</span>
@@ -77,7 +85,7 @@
     </nav>
   </div>
 
-  <div class="free-delivery-hairline">
-    <div class="free-delivery-hairline-fill"></div>
-  </div>
+  <!-- Active world scroll progress thread & 1px hairline -->
+  <div class="header-progress-thread" id="header-progress-thread" aria-hidden="true"></div>
 </header>
+

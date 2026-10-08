@@ -1,56 +1,64 @@
 <footer class="site-footer" role="contentinfo">
   <div class="container">
     <div class="footer-colophon-grid">
-      <div class="footer-col">
-        <h2 class="footer-col-title">About Electrocart</h2>
-        <p>Electrocart is a demonstration store. Catalogue prices come from an older dataset and stock levels are sample data.</p>
-        <p class="caption">Prices in Indian Rupee (₹). Dispatched from {{ seller_mode.seller_state }}.</p>
+      <!-- Left 5 columns: Wordmark + Honest Statement (WP8) -->
+      <div class="footer-colophon-left">
+        <a href="{% url 'home' %}" class="footer-colophon-wordmark">ELECTROCART</a>
+        <p class="footer-colophon-text">
+          Electrocart is a demonstration store. Catalogue prices come from an older dataset and stock levels are sample data.
+        </p>
+        <p class="footer-colophon-meta">
+          Prices in Indian Rupee (₹). Dispatched from {{ seller_mode.seller_state|default:"Gujarat" }}.
+        </p>
       </div>
 
-      <div class="footer-col">
-        <h2 class="footer-col-title">Customer Care</h2>
-        <ul>
-          <li><a href="{% url 'order_track_lookup' %}">Track Your Order</a></li>
-          <li><a href="{% url 'legal_shipping' %}">Shipping &amp; Delivery</a></li>
-          <li><a href="{% url 'legal_refunds' %}">Returns &amp; Refunds</a></li>
-          <li><a href="{% url 'legal_terms' %}">Terms of Service</a></li>
-          <li><a href="{% url 'legal_privacy' %}">Privacy Policy</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h2 class="footer-col-title">Catalog &amp; Compliance</h2>
-        <ul>
-          <li><a href="{% url 'category_list' %}">All Categories</a></li>
-          <li><a href="{% url 'brand_list' %}">Brands Directory</a></li>
-          <li><a href="{% url 'cart_detail' %}">Shopping Bag</a></li>
-        </ul>
-        <div class="footer-meta-note">
-          <p><strong>{{ seller_mode.seller_legal_name }}</strong></p>
-          {% if seller_mode.seller_address %}
-            <p>{{ seller_mode.seller_address }}</p>
-          {% endif %}
-          <p>
-            {% if seller_mode == "bill_of_supply" %}
-              Bills of supply are issued. No GST is charged.
-            {% else %}
-              GSTIN: {{ seller_mode.seller_gstin }}
-            {% endif %}
-          </p>
+      <!-- Right 7 columns: Link groups in 3 columns (WP8) -->
+      <div class="footer-colophon-right">
+        <div class="footer-col">
+          <h2 class="footer-col-title">Shop</h2>
+          <ul class="footer-links footer-links-list dense-list">
+            <li><a href="{% url 'category_list' %}">All Categories</a></li>
+            <li><a href="{% url 'brand_list' %}">Brands Directory</a></li>
+            <li><a href="{% url 'cart_detail' %}">Shopping Bag</a></li>
+            <li><a href="{% url 'wishlist_detail' %}">Saved Items</a></li>
+          </ul>
         </div>
 
-        <div class="footer-motion-control" style="margin-top: var(--space-4);">
-          <button type="button" id="toggle-reduce-motion" class="btn btn-quiet btn-sm motion-toggle-btn" aria-pressed="false" title="Toggle reduced motion preference">
-            <span class="motion-toggle-indicator" aria-hidden="true"></span>
-            <span class="motion-toggle-label">Reduce motion: Off</span>
-          </button>
+        <div class="footer-col">
+          <h2 class="footer-col-title">Customer Care</h2>
+          <ul class="footer-links footer-links-list dense-list">
+            <li><a href="{% url 'order_track_lookup' %}">Track Your Order</a></li>
+            <li><a href="{% url 'legal_shipping' %}">Shipping &amp; Delivery</a></li>
+            <li><a href="{% url 'legal_refunds' %}">Returns &amp; Refunds</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h2 class="footer-col-title">Legal &amp; Compliance</h2>
+          <ul class="footer-links footer-links-list dense-list">
+            <li><a href="{% url 'legal_terms' %}">Terms of Service</a></li>
+            <li><a href="{% url 'legal_privacy' %}">Privacy Policy</a></li>
+          </ul>
+          <div class="footer-compliance-meta">
+            {% if seller_mode == "bill_of_supply" %}
+              <p>Bills of supply are issued. No GST is charged.</p>
+            {% else %}
+              <p>GSTIN: {{ seller_mode.seller_gstin }}</p>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="footer-bottom-brand">
-      <a href="{% url 'home' %}" class="footer-display-wordmark">ELECTROCART</a>
+    <!-- Bottom Row: Copyright left, Reduce Motion right on same baseline (WP8) -->
+    <div class="footer-bottom-row">
       <p class="footer-legal-copy">&copy; {% now "Y" %} Electrocart</p>
+      <div class="footer-motion-control">
+        <button type="button" id="toggle-reduce-motion" class="btn btn-quiet btn-sm motion-toggle-btn" aria-pressed="false" title="Toggle reduced motion preference">
+          <span class="motion-toggle-indicator" aria-hidden="true"></span>
+          <span class="motion-toggle-label">Reduce motion: Off</span>
+        </button>
+      </div>
     </div>
   </div>
 </footer>

@@ -1,9 +1,9 @@
+{% load core_tags %}
 <div class="product-card-container">
   <article class="product-card" aria-labelledby="product-title-{{ product.id }}">
+    <a href="{% url 'product_detail' slug=product.slug %}" class="stretched-link" aria-label="{{ product.display_name }}"></a>
     <div class="product-plate">
-      <a href="{% url 'product_detail' slug=product.slug %}" class="stretched-link" tabindex="-1" aria-hidden="true">
-        {% include "includes/product_image.html" %}
-      </a>
+      {% include "includes/product_image.html" %}
       <div class="card-floating-actions">
         {% include "includes/wishlist_form.html" %}
         {% include "includes/compare_form.html" %}
@@ -11,10 +11,19 @@
     </div>
 
     <div class="card-body">
-      <span class="card-brand">{{ product.parsed_brand }}</span>
+      {% if show_category %}
+        <span class="card-category-brand">{{ product.category.name }}{% if product.parsed_brand and product.parsed_brand != "Unknown" %} &middot; {{ product.parsed_brand }}{% endif %}</span>
+      {% elif product.parsed_brand and product.parsed_brand != "Unknown" %}
+        <span class="card-brand">{{ product.parsed_brand }}</span>
+      {% endif %}
+
       <h3 class="card-title" id="product-title-{{ product.id }}">
-        <a href="{% url 'product_detail' slug=product.slug %}">{{ product.display_name }}</a>
+        {{ product.display_name }}
       </h3>
+
+      {% if product.highlight_spec_summary %}
+        <p class="card-spec-caption">{{ product.highlight_spec_summary }}</p>
+      {% endif %}
 
       {% include "includes/price_block.html" %}
 
@@ -22,9 +31,7 @@
         {% include "includes/stock_badge.html" %}
       </div>
 
-      <div class="card-actions-row">
-        {% include "includes/add_to_cart_form.html" %}
-      </div>
+      <span class="card-arrow-glyph" aria-hidden="true">&rarr;</span>
     </div>
   </article>
 </div>

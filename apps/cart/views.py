@@ -88,13 +88,38 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
         payment_method="razorpay",
     )
 
+    cross_sell_products = []
+    cross_sell_category = None
+    cart_prods = [d["product"] for d in summary.get("line_details", [])]
+    if cart_prods:
+        first_prod = cart_prods[0]
+        if first_prod and first_prod.category:
+            cross_sell_category = first_prod.category
+            cart_product_ids = {p.id for p in cart_prods}
+            seen_families = {p.family_key for p in cart_prods}
+            qs = (
+                Product.objects.filter(category=cross_sell_category, is_available=True)
+                .exclude(id__in=cart_product_ids)
+                .select_related("category")
+                .prefetch_related("media", "specifications")
+                .order_by("-source_rating_count", "id")
+            )
+            for p in qs:
+                if p.family_key not in seen_families:
+                    seen_families.add(p.family_key)
+                    cross_sell_products.append(p)
+                    if len(cross_sell_products) >= 4:
+                        break
+
     context = {
         "cart": cart,
         "summary": summary,
         "applied_coupon_code": applied_code,
         "coupon": coupon_obj,
+        "cross_sell_products": cross_sell_products,
+        "cross_sell_category": cross_sell_category,
         "max_qty_per_line": getattr(settings, "CART_MAX_QTY_PER_LINE", 10),
-        "breadcrumbs": [{"title": "Shopping Cart", "url": "/cart/"}],
+        "breadcrumbs": [{"title": "Bag", "url": "/cart/"}],
     }
     response = render(request, "cart/cart_detail.html", context)
     return _ensure_guest_cookie(response, request)

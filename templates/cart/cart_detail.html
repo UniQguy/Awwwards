@@ -9,12 +9,12 @@
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <header class="mb-6">
-    <h1 class="display-l">Shopping Bag</h1>
+  <header class="page-shell-header">
+    <h1 class="page-shell-heading">Shopping bag</h1>
   </header>
 
-  {% if cart.items.exists %}
-    <!-- Free Shipping Progress Indicator -->
+  {% if summary.line_details %}
+    <!-- Free Delivery Progress Indicator (WP7: 4px progress rule) -->
     <div class="free-delivery-meter">
       <div class="meter-label-row">
         {% if summary.free_shipping_progress >= 100 %}
@@ -95,13 +95,28 @@
             <button type="submit" class="btn btn-secondary btn-sm">Clear Bag</button>
           </form>
         </div>
+
+        <!-- Cross-Sell Section (WP7: 4 standard cards from first item category) -->
+        {% if cross_sell_products %}
+          <div class="cart-cross-sell mt-8">
+            <div class="hairline-top pt-6 mb-4 flex justify-between items-baseline">
+              <h3 class="label">More from {{ cross_sell_category.name }}</h3>
+              <a href="{% url 'category_detail' slug=cross_sell_category.slug %}" class="caption text-accent">View all &rarr;</a>
+            </div>
+            <div class="grid-catalog">
+              {% for csprod in cross_sell_products %}
+                {% include "includes/product_card.html" with product=csprod %}
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
       </section>
 
-      <!-- Cart Financial Summary Card -->
+      <!-- Cart Financial Summary Card (Sticky) -->
       <aside aria-label="Bag order summary" class="cart-summary-card">
         <h2 class="summary-title">Order Summary</h2>
 
-        <!-- Coupon Apply Block -->
+        <!-- Coupon Apply Block (WP7: clean promo field) -->
         <div class="hairline-bottom pb-4 mb-4">
           {% if applied_coupon_code %}
             <div class="flex justify-between items-center">
@@ -188,13 +203,12 @@
       </aside>
     </div>
   {% else %}
-    <div class="empty-state-card text-center p-6">
-      <h2 class="heading mb-2">Your Shopping Bag is empty</h2>
-      <p class="sr-only">Your Shopping Cart is Empty</p>
-      <p class="subhead max-w-md mx-auto mb-4">
+    <div class="empty-state-card text-center p-8">
+      <h2 class="heading mb-2">Your Shopping Cart is Empty</h2>
+      <p class="body-sm text-muted max-w-md mx-auto mb-6">
         Browse our catalogue to discover audio, keyboards, cameras, and personal electronics.
       </p>
-      <a href="{% url 'category_list' %}" class="btn btn-primary">Browse Categories</a>
+      <a href="{% url 'category_list' %}" class="btn btn-primary">Browse all categories &rarr;</a>
     </div>
   {% endif %}
 </div>

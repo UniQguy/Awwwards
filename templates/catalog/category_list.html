@@ -7,80 +7,83 @@
 {% block editorial_script %}{% vite_asset 'frontend/js/editorial.js' %}{% endblock %}
 
 {% block content %}
-<div class="container section-sm">
-  <nav class="breadcrumbs mb-6" aria-label="Breadcrumb">
+<div class="container">
+  <nav class="breadcrumbs" aria-label="Breadcrumbs">
     <ol>
       <li><a href="{% url 'home' %}">Home</a></li>
       <li aria-current="page">Categories</li>
     </ol>
   </nav>
 
-  <header class="mb-10">
-    <h1 class="display-l">All categories</h1>
-    <p class="subhead max-w-md mt-2">
-      {{ total_listings }} listings, from {{ min_price|inr }} to {{ max_price|inr }}.
+  <header class="category-list-header">
+    <h1 class="category-list-heading">All categories</h1>
+    <p class="category-list-subhead">
+      {{ total_listings }} listings across {{ total_categories }} categories, priced from {{ min_price|inr }} to {{ max_price|inr }}.
     </p>
   </header>
 </div>
 
-<!-- Category Spreads: One tall spread per category alternating offsets -->
-<div class="monograph-category-index">
+<!-- Category Spreads: One tall spread per category alternating offsets (WP4) -->
+<div class="category-index-flow">
   {% for spread in category_spreads %}
-    <section class="spread" data-world="{{ spread.category.accent_key }}" aria-labelledby="cat-title-{{ spread.category.id }}">
-      <div class="container chapter-grid {% cycle '' 'reverse-chapter-grid' %}">
-        <!-- Text & Marginalia Column -->
-        <div class="flex flex-col justify-center">
-          <div class="chapter-label">
-            <span class="chapter-numeral">{{ forloop.counter|stringformat:"02d" }}</span>
-            <span class="chapter-hairline"></span>
-            <span>Category</span>
+    <section class="category-row-spread" data-world="{{ spread.category.accent_key }}" aria-labelledby="cat-title-{{ spread.category.id }}">
+      <div class="category-row-top-bar" aria-hidden="true"></div>
+      <div class="container">
+        <div class="category-row-grid {% if forloop.counter|divisibleby:2 %}category-row-grid-reverse{% endif %}">
+          <!-- Text Column (5 cols) -->
+          <div class="category-row-text">
+            <div class="chapter-label">
+              <span class="chapter-numeral">{{ forloop.counter|stringformat:"02d" }}</span>
+              <span class="chapter-hairline"></span>
+              <span>Category</span>
+            </div>
+
+            <h2 class="category-row-title" id="cat-title-{{ spread.category.id }}">
+              <a href="{% url 'category_detail' slug=spread.category.slug %}" class="category-row-link">
+                {{ spread.category.name }}
+              </a>
+            </h2>
+
+            <p class="category-row-line">{{ spread.editorial_line }}</p>
+
+            <dl class="category-stats-dl">
+              <div class="category-stat-row">
+                <dt class="category-stat-label">Curated listings</dt>
+                <dd class="category-stat-value">{{ spread.stats.listing_count }}</dd>
+              </div>
+              <div class="category-stat-row">
+                <dt class="category-stat-label">Distinct models</dt>
+                <dd class="category-stat-value">{{ spread.stats.distinct_raw_name_count }}</dd>
+              </div>
+              <div class="category-stat-row">
+                <dt class="category-stat-label">Allow-listed brands</dt>
+                <dd class="category-stat-value">{{ spread.stats.brand_count }}</dd>
+              </div>
+              <div class="category-stat-row">
+                <dt class="category-stat-label">Price range</dt>
+                <dd class="category-stat-value">{{ spread.stats.price_min|inr }} &ndash; {{ spread.stats.price_max|inr }}</dd>
+              </div>
+            </dl>
+
+            <div class="category-row-action">
+              <a href="{% url 'category_detail' slug=spread.category.slug %}" class="btn btn-secondary">
+                Enter {{ spread.category.name }} &rarr;
+              </a>
+            </div>
+
+            {% if spread.is_auto %}
+              <p class="caption mt-3 text-muted">Selected by number of ratings on Amazon</p>
+            {% endif %}
           </div>
 
-          <h2 class="display-l mb-3" id="cat-title-{{ spread.category.id }}">
-            <a href="{% url 'category_detail' slug=spread.category.slug %}" class="text-decoration-none color-inherit">
-              {{ spread.category.name }}
-            </a>
-          </h2>
-
-          <p class="pull">{{ spread.editorial_line }}</p>
-
-          <div class="marginalia">
-            <div class="marginalia-stat">
-              <span class="marginalia-label">Curated listings</span>
-              <span class="marginalia-value">{{ spread.stats.listing_count }}</span>
-            </div>
-            <div class="marginalia-stat">
-              <span class="marginalia-label">Distinct models</span>
-              <span class="marginalia-value">{{ spread.stats.distinct_raw_name_count }}</span>
-            </div>
-            <div class="marginalia-stat">
-              <span class="marginalia-label">Allow-listed brands</span>
-              <span class="marginalia-value">{{ spread.stats.brand_count }}</span>
-            </div>
-            <div class="marginalia-stat">
-              <span class="marginalia-label">Price range</span>
-              <span class="marginalia-value">{{ spread.stats.price_min|inr }} &ndash; {{ spread.stats.price_max|inr }}</span>
-            </div>
+          <!-- Plate Column (5 cols) -->
+          <div class="category-row-plate">
+            {% if spread.picks.0 %}
+              <div class="category-plate-frame">
+                {% include "includes/collectible_plate.html" with product=spread.picks.0 %}
+              </div>
+            {% endif %}
           </div>
-
-          <div class="mt-6">
-            <a href="{% url 'category_detail' slug=spread.category.slug %}" class="btn btn-secondary">
-              Enter {{ spread.category.name }} &rarr;
-            </a>
-          </div>
-
-          {% if spread.is_auto %}
-            <p class="caption mt-2 text-muted">Selected by number of ratings on Amazon</p>
-          {% endif %}
-        </div>
-
-        <!-- Plate Column: One pick on collectible plate -->
-        <div class="flex justify-center items-center">
-          {% if spread.picks.0 %}
-            <div class="w-full max-w-sm">
-              {% include "includes/collectible_plate.html" with product=spread.picks.0 %}
-            </div>
-          {% endif %}
         </div>
       </div>
     </section>

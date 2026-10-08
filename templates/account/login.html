@@ -6,35 +6,63 @@
 
 {% block content %}
 <div class="container section">
-  <div class="checkout-card max-w-md mx-auto">
-    <header class="text-center mb-6">
-      <h1 class="display-l">Sign In</h1>
-      <p class="subhead mt-1">Access your ELECTROCART member account.</p>
-    </header>
-
-    {% include "includes/form_errors.html" %}
-
-    <form method="post" action="{% url 'account_login' %}">
-      {% csrf_token %}
-      {% if redirect_field_value %}
-        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
-      {% endif %}
-
-      {% for field in form %}
-        {% include "includes/field.html" with field=field %}
-      {% endfor %}
-
-      <div class="flex justify-end mb-4">
-        <a href="{% url 'account_reset_password' %}" class="caption text-muted">Forgot Password?</a>
+  <div class="auth-layout-grid">
+    <!-- Left Column: Factual Info Panel (WP6) -->
+    <div class="auth-info-panel">
+      <h1 class="display-l mb-4">Sign in</h1>
+      <p class="body-lead mb-6 text-muted">
+        Sign in to see your orders, saved addresses and wishlist. You can also check out as a guest.
+      </p>
+      <div class="auth-guest-prompt">
+        <a href="{% url 'cart_detail' %}" class="btn btn-secondary">
+          Continue as guest &rarr;
+        </a>
       </div>
+    </div>
 
-      <button type="submit" class="btn btn-primary btn-block">
-        Sign In
-      </button>
-    </form>
+    <!-- Right Column: Surface Form Card max 440px (WP6) -->
+    <div class="auth-form-card">
+      <h2 class="auth-form-title">Member Sign In</h2>
 
-    <div class="hairline-top pt-4 mt-6 text-center body-sm">
-      Don't have an account? <a href="{% url 'account_signup' %}{% if redirect_field_value %}?next={{ redirect_field_value }}{% endif %}" class="text-accent">Sign Up</a>
+      {% include "includes/form_errors.html" %}
+
+      <form method="post" action="{% url 'account_login' %}" novalidate>
+        {% csrf_token %}
+        {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+        {% endif %}
+
+        {% for field in form %}
+          {% if field.name == "login" or field.name == "email" or field.name == "username" %}
+            {% include "includes/field.html" with field=field %}
+          {% elif field.name == "password" %}
+            {% include "includes/field.html" with field=field %}
+            <div class="form-forgot-row">
+              <a href="{% url 'account_reset_password' %}" class="caption text-muted form-forgot-link">Forgot your password?</a>
+            </div>
+          {% elif field.name == "remember" %}
+            <div class="form-remember-row">
+              <div class="form-check-row">
+                {{ field }}
+                <label for="{{ field.id_for_label }}" class="form-check-label">Remember me</label>
+              </div>
+            </div>
+          {% else %}
+            {% include "includes/field.html" with field=field %}
+          {% endif %}
+        {% endfor %}
+
+        <div class="mt-6">
+          <button type="submit" class="btn btn-primary btn-block">
+            Sign In
+          </button>
+        </div>
+      </form>
+
+      <div class="auth-card-footer">
+        <span>Don't have an account?</span>
+        <a href="{% url 'account_signup' %}{% if redirect_field_value %}?next={{ redirect_field_value }}{% endif %}" class="auth-footer-link">Sign up</a>
+      </div>
     </div>
   </div>
 </div>

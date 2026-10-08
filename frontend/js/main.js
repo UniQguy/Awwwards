@@ -16,6 +16,26 @@ import { initStickyPurchaseBar } from "./modules/sticky-purchase-bar.js";
 import { initSearchSuggest } from "./modules/search-suggest.js";
 import { initMotionTier, initMotionToggleButton } from "./modules/capability.js";
 
+function initPasswordToggle() {
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-password-toggle], .password-toggle-btn");
+    if (!btn) return;
+    const group = btn.closest(".password-input-group");
+    if (!group) return;
+    const input = group.querySelector("input");
+    if (!input) return;
+    if (input.type === "password") {
+      input.type = "text";
+      btn.setAttribute("aria-pressed", "true");
+      btn.textContent = "Hide";
+    } else {
+      input.type = "password";
+      btn.setAttribute("aria-pressed", "false");
+      btn.textContent = "Show";
+    }
+  });
+}
+
 function bootstrap() {
   initMotionTier();
   initMotionToggleButton();
@@ -30,6 +50,7 @@ function bootstrap() {
   initMessagesDismiss();
   initFetchForms();
   initStickyPurchaseBar();
+  initPasswordToggle();
 }
 
 if (document.readyState === "loading") {

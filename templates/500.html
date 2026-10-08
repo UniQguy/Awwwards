@@ -6,28 +6,30 @@
   <title>System Error — ELECTROCART</title>
   <link rel="stylesheet" href="{% static 'dist/css/styles.css' %}">
 </head>
-<body data-world="earphones-headphones">
+<body data-world="neutral">
   <header class="site-header">
-    <div class="container header-inner">
+    <div class="container header-inner flex items-center justify-between" style="min-height: 72px;">
       <a href="/" class="site-brand">
         <span class="brand-name">ELECTROCART</span>
       </a>
     </div>
   </header>
   <main id="main-content" class="container section">
-    <div class="empty-state-card text-center p-8">
-      <h1 class="display-m mb-3">Something broke on our side.</h1>
-      <p class="body text-muted max-w-md mx-auto mb-6">
-        Your bag is safe. Please try again shortly.
+    <div class="empty-state-card text-center">
+      <div class="caption text-muted uppercase tracking-widest mb-2">500 &middot; Server Error</div>
+      <h1 class="empty-state-title mb-3">Something went wrong on our side.</h1>
+      <p class="empty-state-desc mb-6">
+        Something went wrong on our side. Your cart is safe.
       </p>
-      <div class="flex gap-4 justify-center">
-        <a href="/" class="btn btn-primary">Return to Homepage</a>
+      <div class="empty-state-actions flex gap-4 justify-center">
+        <a href="/" class="btn btn-primary">Back to the shop</a>
+        <a href="mailto:support@electrocart.test" class="btn btn-secondary">Contact support</a>
       </div>
     </div>
   </main>
   <footer class="site-footer">
-    <div class="container text-center caption">
-      <p>&copy; ELECTROCART</p>
+    <div class="container text-center caption text-muted py-8">
+      <p>&copy; {% now "Y" %} ELECTROCART. Demonstrating honest Indian retail engineering.</p>
     </div>
   </footer>
 </body>
