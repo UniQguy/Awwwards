@@ -340,9 +340,9 @@ def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
     return chapters
 
 
-def category_spread(category: Category) -> CategorySpreadResult:
+def category_spread(category: Category, max_picks: int = 4) -> CategorySpreadResult:
     """
-    Generates real stats and up to 4 picks for a category marquee spread.
+    Generates real stats and up to max_picks for a category marquee spread.
     Curated collection takes precedence; otherwise auto-selects.
     """
     base_qs = Product.objects.filter(
@@ -408,7 +408,7 @@ def category_spread(category: Category) -> CategorySpreadResult:
             fp.product
             for fp in curated_col.featured_items.all()
             if fp.product.is_purchasable
-        ][:4]
+        ][:max_picks]
         is_auto = False
     else:
         picks = []
@@ -427,7 +427,7 @@ def category_spread(category: Category) -> CategorySpreadResult:
             if fam not in seen_families:
                 seen_families.add(fam)
                 deduped_picks.append(prod)
-                if len(deduped_picks) >= 4:
+                if len(deduped_picks) >= max_picks:
                     break
         picks = deduped_picks
         is_auto = True

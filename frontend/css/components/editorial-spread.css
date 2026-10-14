@@ -255,6 +255,141 @@
     font-size: var(--step-1);
     color: var(--world-accent);
     max-width: 60ch;
+    margin-bottom: var(--space-4);
+  }
+
+  /* Compact Category Header & Quick Filter Chips (WP5) */
+  .category-header-wrap {
     margin-bottom: var(--space-6);
+  }
+
+  .category-header-title {
+    font-family: var(--font-display);
+    font-size: clamp(var(--step-3), 4vw, var(--step-5));
+    line-height: 1.1;
+    color: var(--world-text);
+    margin-bottom: var(--space-2);
+  }
+
+  .category-quick-chips {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-top: var(--space-3);
+  }
+
+  .category-count-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    font-size: var(--step--1);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-1);
+    color: var(--world-text);
+    transition: background var(--dur-utility) var(--ease-utility);
+  }
+
+  .category-count-badge.is-loading {
+    background: linear-gradient(90deg, var(--world-surface) 25%, var(--world-bg) 50%, var(--world-surface) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    color: transparent;
+  }
+
+  @keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .chip-filter {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 4px 12px;
+    font-size: var(--step--1);
+    border-radius: 9999px;
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    color: var(--world-text);
+    text-decoration: none;
+    transition: all var(--dur-utility) var(--ease-utility);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chip-filter:hover,
+  .chip-filter.is-active {
+    background-color: var(--world-bg);
+    border-color: var(--world-accent);
+    color: var(--world-accent);
+    font-weight: 600;
+  }
+
+  .chip-clear {
+    background-color: transparent;
+    border-style: dashed;
+    color: var(--world-muted);
+  }
+
+  /* 6-Card Most Rated Shelf (WP5) */
+  .category-shelf-section {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-8);
+    border-bottom: 1px solid var(--world-rule);
+    margin-bottom: var(--space-8);
+  }
+
+  .shelf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-4);
+    border-bottom: 1px solid var(--world-rule);
+  }
+
+  .shelf-badge {
+    margin-left: var(--space-2);
+  }
+
+  .category-shelf-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--space-4);
+    align-items: stretch;
+  }
+
+  .category-shelf-grid .shelf-card-slot {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .category-shelf-grid .plate-mat {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    margin-bottom: var(--space-2);
+  }
+
+  @media (max-width: 1200px) {
+    .category-shelf-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .shelf-header {
+      flex-direction: column;
+      gap: var(--space-1);
+      align-items: flex-start;
+    }
+
+    .category-shelf-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
   }
 }

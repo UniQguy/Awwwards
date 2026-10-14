@@ -197,7 +197,7 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     )
     show_marquee = is_page_1 and not has_active_filters
 
-    spread = category_spread(category) if show_marquee else None
+    spread = category_spread(category, max_picks=6) if show_marquee else None
 
     search_result = execute_catalog_search(
         query="",

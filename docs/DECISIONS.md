@@ -239,3 +239,15 @@
   5. *Scroll Thread*: Pinned active world scroll progress thread along header bottom edge using GPU compositor `transform: scaleX(ratio)` with zero layout thrashing.
 - **Reason**: Converts the header into an informative, editorial discovery tool that previews category depths and price points immediately without blocking the viewport or causing horizontal overflow.
 - **Alternative Rejected**: Giant full-viewport mega-menus with heavy background imagery that overwhelm shoppers and gate content.
+
+### DEC-041: Category Page Utility Layout and 6-Card Most-Rated Shelf (WP5)
+- **Date**: 2026-10-14
+- **Decision**: Replaced the cramped marquee layout on category detail pages (`/c/<slug>/`) with a high-density, calm editorial utility architecture:
+  1. *Compact Editorial Header*: Clean chapter indicator (`Chapter NN · Catalogue Overview`), balanced display title (`category.name|balance_amp`), and italic editorial intro without awkward multi-line line wraps or orphaned ampersands.
+  2. *Interactive Quick Chips Bar*: Horizontal scannable chips directly below the header providing instant 1-click filtering by top 5 brands (`Brand (count)`), price brackets (`Under INR 500`, etc.), a live tabular count badge (`N listings`), and a reset link when filters are applied.
+  3. *6-Card "Most Rated" Shelf*: Dedicated horizontal shelf on page 1 (without active filters) showing up to 6 top-rated picks with honest attribution ("Selected by number of ratings on Amazon"). Uses 1:1 near-square plates (`aspect-ratio: 1/1`) with multiply blending and right-aligned INR prices with tabular numerals.
+  4. *Deterministic Multi-Column Grid*: Configured `.grid-catalog` with explicit responsive columns: 2 columns on mobile (<=640px), 3 columns on tablet (641px-1023px), 4 columns on desktop (1024px-1679px), and 5 columns on large displays (>=1680px), eliminating empty voids and ensuring >=70% image containment.
+  5. *Mobile Optimization*: Stacked shelf headers on screens <=640px to prevent pill badges from colliding with attribution captions.
+- **Reason**: Eliminates empty voids > 300x300, presents scannable navigation chips immediately upon landing, and keeps the full catalog accessible without forcing shoppers to scroll past an oversized decorative banner.
+- **Alternative Rejected**: Sticking with the legacy 170px stacked column marquee that left large rectangular voids on the right side of the screen.
+
