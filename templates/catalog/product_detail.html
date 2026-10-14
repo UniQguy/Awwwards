@@ -46,8 +46,33 @@
 <div class="container section-sm">
   {% include "includes/breadcrumbs.html" %}
 
+  <!-- Sticky Sub-Nav (WP6) -->
+  <nav class="pdp-sticky-subnav" id="pdp-sticky-subnav" aria-label="Product navigation">
+    <div class="pdp-subnav-inner">
+      <a href="#section-overview" class="pdp-subnav-tab is-active" data-section="section-overview">Overview</a>
+      {% if specifications %}
+        <a href="#section-specs" class="pdp-subnav-tab" data-section="section-specs">Specifications</a>
+      {% endif %}
+      <a href="#section-box" class="pdp-subnav-tab" data-section="section-box">In the Box</a>
+      {% if comparison_products %}
+        <a href="#section-compare" class="pdp-subnav-tab" data-section="section-compare">Compare Similar</a>
+      {% endif %}
+      <div class="pdp-subnav-quick-buy">
+        <span class="pdp-subnav-price">{{ product.selling_price|inr }}</span>
+        <form action="{% url 'cart_add' product.id %}" method="post" data-fetch-enhance class="m-0">
+          {% csrf_token %}
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit" class="btn btn-primary btn-sm" {% if not product.is_purchasable %}disabled{% endif %}>
+            {% if product.is_purchasable %}Add to Bag{% else %}Unavailable{% endif %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
   <div
     class="product-sheet-layout mt-4"
+    id="section-overview"
     data-product-track="true"
     data-product-id="{{ product.id }}"
     data-product-slug="{{ product.slug }}"
@@ -78,6 +103,13 @@
               </div>
             {% endif %}
           {% endwith %}
+
+          {% if product.primary_image_url %}
+            <button type="button" class="pdp-zoom-trigger-btn" id="open-lightbox-btn" aria-label="Open image zoom modal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+              <span>Zoom</span>
+            </button>
+          {% endif %}
         </div>
 
         <div class="product-frame-caption">
@@ -262,7 +294,7 @@
 
       <!-- Technical Specifications Table -->
       {% if specifications %}
-        <section class="mb-8" aria-labelledby="specs-heading">
+        <section class="mb-8" id="section-specs" aria-labelledby="specs-heading">
           <h2 id="specs-heading" class="label mb-3">Technical Specifications</h2>
           <div class="spec-table-wrapper">
             <table class="spec-table">
@@ -286,6 +318,31 @@
         </section>
       {% endif %}
 
+      <!-- In the Box (WP6) -->
+      <section class="mb-8" id="section-box" aria-labelledby="box-heading">
+        <h2 id="box-heading" class="label mb-3">In the Box</h2>
+        <div class="p-4 bg-surface border-rule rounded">
+          <ul class="body-sm space-y-2">
+            <li class="flex items-center gap-2">
+              <span class="text-accent font-bold">&bull;</span>
+              <span>1 &times; {{ product.display_name }}</span>
+            </li>
+            {% for spec in specifications %}
+              {% if "included" in spec.key|lower or "package" in spec.key|lower or "box" in spec.key|lower or "cable" in spec.key|lower or "accessories" in spec.key|lower %}
+                <li class="flex items-center gap-2">
+                  <span class="text-accent font-bold">&bull;</span>
+                  <span>{{ spec.key }}: {{ spec.value }}</span>
+                </li>
+              {% endif %}
+            {% endfor %}
+            <li class="flex items-center gap-2 text-muted">
+              <span class="text-muted font-bold">&bull;</span>
+              <span>Standard manufacturer documentation, warranty policy &amp; quick start guide</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
       <!-- Marketplace Rating Provenance -->
       {% if product.source_rating %}
         <div class="product-provenance-box mb-8">
@@ -302,6 +359,85 @@
       {% endif %}
     </div>
   </div>
+
+  <!-- Comparison Section (WP6) -->
+  {% if comparison_products %}
+    <section class="section pdp-comparison-section" id="section-compare" aria-labelledby="compare-heading">
+      <div class="hairline-bottom pb-2 mb-4">
+        <h2 id="compare-heading" class="label">Compare Similar in {{ product.category.name }}</h2>
+        <p class="caption text-muted mt-1">Nearest-priced selections with side-by-side technical attributes</p>
+      </div>
+      <div class="pdp-comparison-table-wrapper">
+        <table class="pdp-comparison-table">
+          <thead>
+            <tr>
+              <th scope="col" style="width: 25%;" class="bg-surface">Attribute</th>
+              <th scope="col" class="pdp-comp-header-cell is-current">
+                <div class="pdp-comp-thumb-plate">
+                  {% if product.primary_image_url %}
+                    <img src="{{ product.primary_image_url }}" alt="{{ product.display_name }}" class="pdp-comp-thumb-img" loading="lazy">
+                  {% endif %}
+                </div>
+                <span class="badge badge-accent mb-1 inline-block">This item</span>
+                <h3 class="pdp-comp-name">{{ product.display_name }}</h3>
+                <div class="pdp-comp-price">{{ product.selling_price|inr }}</div>
+              </th>
+              {% for cp in comparison_products %}
+                <th scope="col" class="pdp-comp-header-cell">
+                  <div class="pdp-comp-thumb-plate">
+                    {% if cp.primary_image_url %}
+                      <img src="{{ cp.primary_image_url }}" alt="{{ cp.display_name }}" class="pdp-comp-thumb-img" loading="lazy">
+                    {% endif %}
+                  </div>
+                  <h3 class="pdp-comp-name">
+                    <a href="{% url 'product_detail' slug=cp.slug %}" class="link-subtle">{{ cp.display_name }}</a>
+                  </h3>
+                  <div class="pdp-comp-price">{{ cp.selling_price|inr }}</div>
+                </th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" class="font-semibold bg-surface">Brand</th>
+              <td class="font-semibold">{{ product.parsed_brand }}</td>
+              {% for cp in comparison_products %}
+                <td>{{ cp.parsed_brand }}</td>
+              {% endfor %}
+            </tr>
+            <tr>
+              <th scope="row" class="font-semibold bg-surface">Rating</th>
+              <td>
+                {% if product.source_rating %}
+                  {{ product.source_rating }} / 5 ({{ product.source_rating_count|default:"0" }})
+                {% else %}
+                  &mdash;
+                {% endif %}
+              </td>
+              {% for cp in comparison_products %}
+                <td>
+                  {% if cp.source_rating %}
+                    {{ cp.source_rating }} / 5 ({{ cp.source_rating_count|default:"0" }})
+                  {% else %}
+                    &mdash;
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+            {% for row in comp_rows %}
+              <tr>
+                <th scope="row" class="font-semibold bg-surface">{{ row.key }}</th>
+                <td class="font-semibold">{{ row.product_val }}</td>
+                {% for cv in row.comp_vals %}
+                  <td>{{ cv }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
 
   <!-- Related Products in Category -->
   {% if related_products %}
@@ -341,4 +477,56 @@
     </button>
   </form>
 </div>
+
+<!-- Native <dialog> Lightbox (WP6) -->
+<dialog id="pdp-lightbox-dialog" class="pdp-lightbox-dialog" aria-labelledby="lightbox-title">
+  <div class="lightbox-content">
+    <div class="lightbox-header">
+      <h2 id="lightbox-title" class="lightbox-title">{{ product.display_name }}</h2>
+      <button type="button" class="btn btn-secondary btn-sm" id="close-lightbox-btn" aria-label="Close image zoom dialog">&times; Close</button>
+    </div>
+    <div class="lightbox-image-stage" id="lightbox-stage" title="Click to toggle zoom">
+      {% if product.primary_image_url %}
+        <img
+          id="lightbox-zoom-img"
+          class="lightbox-zoom-img"
+          src="{{ product.primary_image_url }}"
+          alt="{{ product.display_name }}"
+        >
+      {% endif %}
+    </div>
+    <div class="lightbox-controls">
+      <span class="caption text-muted">Click image to toggle 1.75&times; zoom &bull; Press Esc to close</span>
+    </div>
+  </div>
+</dialog>
+
+<!-- Native <dialog> Mini-Bag Modal (WP6) -->
+<dialog id="mini-bag-dialog" class="mini-bag-dialog" aria-labelledby="mini-bag-title">
+  <div class="mini-bag-content">
+    <div class="flex items-center justify-between pb-3 hairline-bottom mb-3">
+      <h3 id="mini-bag-title" class="label flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-success"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        Added to Bag
+      </h3>
+      <button type="button" class="btn btn-ghost btn-sm" id="close-mini-bag-btn" aria-label="Close dialog">&times;</button>
+    </div>
+    <div class="flex gap-3 items-center mb-4">
+      <div class="mini-bag-thumb">
+        {% if product.primary_image_url %}
+          <img src="{{ product.primary_image_url }}" alt="{{ product.display_name }}">
+        {% endif %}
+      </div>
+      <div class="flex-1">
+        <h4 class="font-semibold body-sm line-clamp-1">{{ product.display_name }}</h4>
+        <div class="caption text-muted">{{ product.category.name }}</div>
+        <div class="font-semibold text-accent mt-1">{{ product.selling_price|inr }}</div>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <a href="{% url 'cart_detail' %}" class="btn btn-primary flex-1 text-center">View Bag</a>
+      <a href="{% url 'checkout_start' %}" class="btn btn-secondary flex-1 text-center">Checkout</a>
+    </div>
+  </div>
+</dialog>
 {% endblock %}

@@ -327,12 +327,12 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
     media_items = list(product.media.all())
     specifications = list(product.specifications.all())
 
-    # Related items in category
-    related_products = (
+    # Related items in category (prefetches media & specifications for comparison table)
+    related_products = list(
         Product.objects.filter(category=product.category, is_available=True, selling_price__gt=0)
         .exclude(id=product.id)
         .select_related("category", "inventory")
-        .prefetch_related("media")[:4]
+        .prefetch_related("media", "specifications")[:4]
     )
 
     # Variant options: check for same raw_name first, then same brand in category
@@ -373,6 +373,30 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
         .distinct()[:3]
     )
 
+    # 3 Nearest-priced items in the same category for comparison table (WP6)
+    comparison_products = []
+    comp_rows = []
+    if product.selling_price and related_products:
+        candidates = list(related_products)
+        candidates.sort(key=lambda p: abs(p.selling_price - product.selling_price))
+        comparison_products = candidates[:3]
+
+        prod_spec_dict = {s.key: s.value for s in specifications}
+        comp_spec_dicts = [{s.key: s.value for s in cp.specifications.all()} for cp in comparison_products]
+
+        all_keys = list(prod_spec_dict.keys())
+        for cd in comp_spec_dicts:
+            for k in cd.keys():
+                if k not in all_keys:
+                    all_keys.append(k)
+
+        for k in all_keys[:6]:
+            comp_rows.append({
+                "key": k,
+                "product_val": prod_spec_dict.get(k, "\u2014"),
+                "comp_vals": [cd.get(k, "\u2014") for cd in comp_spec_dicts],
+            })
+
     context = {
         "product": product,
         "specifications": specifications,
@@ -380,6 +404,8 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
         "option_count": len(other_variants),
         "other_variants": other_variants,
         "related_products": related_products,
+        "comparison_products": comparison_products,
+        "comp_rows": comp_rows,
         "delivery_estimate": delivery_estimate,
         "remembered_pincode": remembered_pincode,
         "available_coupons": available_coupons,

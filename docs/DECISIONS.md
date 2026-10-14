@@ -251,3 +251,16 @@
 - **Reason**: Eliminates empty voids > 300x300, presents scannable navigation chips immediately upon landing, and keeps the full catalog accessible without forcing shoppers to scroll past an oversized decorative banner.
 - **Alternative Rejected**: Sticking with the legacy 170px stacked column marquee that left large rectangular voids on the right side of the screen.
 
+### DEC-042: Product Page Exhibition Architecture, Native Dialogs, and Comparative Matrix (WP6)
+- **Date**: 2026-10-14
+- **Decision**: Enhanced the product detail page (`/p/<slug>/`) into a calm, interactive exhibition format:
+  1. *1:1 Exhibition Plinth with Pan/Zoom Trigger*: Re-proportioned `.product-frame-mat` to near-square `aspect-ratio: 1/1` capped at 480px, maintaining >=70% image width coverage with multiply blending on warm paper (`#F5F3EF`), and added a subtle corner Zoom trigger pill button.
+  2. *Native `<dialog>` Lightbox*: Implemented a native HTML5 `<dialog id="pdp-lightbox-dialog">` with modal backdrop blur, ESC key dismiss, outside click dismiss, and 1.75x click-to-zoom inspection.
+  3. *Sticky Sub-Nav with Scrollspy*: Added a sticky tab strip (`#pdp-sticky-subnav`) directly beneath breadcrumbs linking to `#section-overview`, `#section-specs`, `#section-box`, and `#section-compare`, with smooth offset scrolling and an active IntersectionObserver scrollspy. Included quick price and Add to Bag CTA on desktop viewports.
+  4. *In the Box Manifest*: Added a structured `#section-box` listing verified packaged accessories and warranty documentation extracted from specifications.
+  5. *4-Column Comparative Matrix*: Added `#section-compare` displaying side-by-side technical attributes for the current product alongside the 3 nearest-priced alternatives in the same category. Bounded query count by reusing prefetched related products, preserving the strict 15-query test budget.
+  6. *Fly-to-Bag & Mini-Bag Confirmation*: Attached an accessible, motion-respecting flying thumbnail ghost transitioning into the header bag icon, followed by a native `<dialog id="mini-bag-dialog">` confirmation modal with direct links to Bag and Checkout.
+- **Reason**: Fulfills the PDP exhibition specification, allows close visual inspection of products, and provides shoppers with instant side-by-side feature comparisons without leaving the product page.
+- **Alternative Rejected**: Bulky third-party modal plugins or multi-page comparative flows that disrupt the reading flow.
+
+
