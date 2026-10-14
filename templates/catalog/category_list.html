@@ -40,15 +40,17 @@
 
             <h2 class="category-row-title" id="cat-title-{{ spread.category.id }}">
               <a href="{% url 'category_detail' slug=spread.category.slug %}" class="category-row-link">
-                {{ spread.category.name }}
+                {{ spread.category.name|balance_amp }}
               </a>
             </h2>
 
-            <p class="category-row-line">{{ spread.editorial_line }}</p>
+            {% if spread.category.chapter_intro %}
+              <p class="category-row-line">{{ spread.category.chapter_intro }}</p>
+            {% endif %}
 
             <dl class="category-stats-dl">
               <div class="category-stat-row">
-                <dt class="category-stat-label">Curated listings</dt>
+                <dt class="category-stat-label">{% if not spread.is_auto %}Curated listings{% else %}Listings{% endif %}</dt>
                 <dd class="category-stat-value">{{ spread.stats.listing_count }}</dd>
               </div>
               <div class="category-stat-row">
@@ -67,7 +69,7 @@
 
             <div class="category-row-action">
               <a href="{% url 'category_detail' slug=spread.category.slug %}" class="btn btn-secondary">
-                Enter {{ spread.category.name }} &rarr;
+                Enter {{ spread.category.name|balance_amp }} &rarr;
               </a>
             </div>
 

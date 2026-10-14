@@ -13,21 +13,23 @@
 
   {% if show_marquee and spread %}
     <!-- Editorial Marquee (Page 1 without active filters) -->
-    <section class="category-marquee" aria-labelledby="marquee-heading">
+    <section class="category-marquee mb-8" aria-labelledby="marquee-heading">
       <div class="chapter-label">
-        <span class="chapter-numeral">{{ category.display_order|stringformat:"02d" }}</span>
+        <span class="chapter-numeral">Chapter {{ category.display_order|stringformat:"02d" }}</span>
         <span class="chapter-hairline"></span>
-        <span>Category Overview</span>
+        <span>Catalogue Overview</span>
       </div>
 
-      <div class="chapter-grid mb-8">
-        <div>
-          <h1 class="category-marquee-headline" id="marquee-heading">{{ category.name }}</h1>
-          <p class="category-editorial-line">{{ spread.editorial_line }}</p>
+      <div class="chapter-grid">
+        <div class="chapter-text-col">
+          <h1 class="category-marquee-headline" id="marquee-heading">{{ category.name|balance_amp }}</h1>
+          {% if category.chapter_intro %}
+            <p class="category-editorial-line">{{ category.chapter_intro }}</p>
+          {% endif %}
 
           <div class="marginalia">
             <div class="marginalia-stat">
-              <span class="marginalia-label">Curated listings</span>
+              <span class="marginalia-label">{% if not spread.is_auto %}Curated listings{% else %}Listings{% endif %}</span>
               <span class="marginalia-value">{{ spread.stats.listing_count }}</span>
             </div>
             <div class="marginalia-stat">
@@ -45,31 +47,58 @@
           </div>
 
           {% if spread.is_auto %}
-            <p class="caption mt-2 text-muted">Selected by number of ratings on Amazon</p>
+            <p class="caption mt-3 text-muted">Selected by number of ratings on Amazon</p>
           {% endif %}
         </div>
 
-        <div>
+        <div class="chapter-plates-unit">
           {% if spread.picks %}
             <h2 class="sr-only">Curated Selections</h2>
-            <div class="chapter-plates-mosaic">
+            <div class="marquee-composed-grid">
               {% for pick in spread.picks %}
-                {% include "includes/collectible_plate.html" with product=pick %}
+                {% if forloop.first %}
+                  <div class="marquee-lead-slot">
+                    {% include "includes/collectible_plate.html" with product=pick %}
+                  </div>
+                  {% if spread.picks|length > 1 %}
+                    <div class="marquee-stack-slot">
+                  {% endif %}
+                {% else %}
+                  <div class="marquee-stack-item">
+                    {% include "includes/collectible_plate.html" with product=pick is_compact=True %}
+                  </div>
+                  {% if forloop.last %}
+                    </div>
+                  {% endif %}
+                {% endif %}
               {% endfor %}
+            </div>
+
+            <!-- Mobile Snap (Under 1024px) -->
+            <div class="chapter-mobile-snap" tabindex="0" role="region" aria-label="{{ category.name }} picks">
+              {% for pick in spread.picks %}
+                <div class="chapter-mobile-snap-item">
+                  {% include "includes/collectible_plate.html" with product=pick %}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="chapter-mobile-counter" aria-hidden="true">
+              <span class="mobile-snap-index">1</span> / {{ spread.picks|length }}
             </div>
           {% endif %}
         </div>
       </div>
-
-      <div class="hairline-bottom mb-8 pb-2 flex justify-between items-baseline">
-        <h2 class="label">All {{ page_obj.paginator.count }} Listings</h2>
-        <span class="caption">Explore the full category index</span>
-      </div>
     </section>
+
+    <!-- Listings Section Header -->
+    <div class="hairline-bottom mb-6 pb-2 flex justify-between items-baseline">
+      <h2 class="label">All {{ page_obj.paginator.count }} Listings</h2>
+      <span class="caption">Explore the full category index</span>
+    </div>
   {% else %}
     <!-- Compact Header (When filtering or paginating) -->
     <header class="mb-6">
-      <h1 class="display-l">{{ category.name }}</h1>
+      <h1 class="display-l">{{ category.name|balance_amp }}</h1>
       <p class="caption mt-1">{{ page_obj.paginator.count }} listing{{ page_obj.paginator.count|pluralize }} found</p>
     </header>
   {% endif %}

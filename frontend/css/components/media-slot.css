@@ -1,0 +1,37 @@
+@layer components {
+  .media-slot-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--world-surface);
+    border-radius: var(--radius-2);
+    border: 1px solid var(--world-rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .media-slot-video,
+  .media-slot-poster,
+  .media-slot-poster-fallback {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .media-placeholder-badge {
+    position: absolute;
+    bottom: var(--space-2);
+    right: var(--space-2);
+    background-color: rgba(28, 25, 23, 0.75);
+    color: #FFFFFF;
+    padding: 2px 8px;
+    border-radius: var(--radius-1);
+    font-size: 11px;
+    font-family: var(--font-mono, monospace);
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    z-index: 2;
+  }
+}

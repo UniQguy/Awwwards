@@ -75,7 +75,7 @@ class CategorySpreadAndProductSheetTest(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(resp.context["show_marquee"])
-        self.assertContains(resp, "Category Overview")
+        self.assertContains(resp, "Chapter 01")
         self.assertContains(resp, "category-marquee")
 
     def test_marquee_hidden_when_filtering(self):
@@ -84,7 +84,6 @@ class CategorySpreadAndProductSheetTest(TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(resp.context["show_marquee"])
-        self.assertNotContains(resp, "Category Overview")
         self.assertNotContains(resp, "category-marquee")
 
     def test_marquee_hidden_on_page_2(self):
@@ -99,8 +98,8 @@ class CategorySpreadAndProductSheetTest(TestCase):
         resp = self.client.get(reverse("category_list"))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "All categories")
-        self.assertContains(resp, "Audio &amp; Monitors")
-        self.assertContains(resp, "Curated listings")
+        self.assertContains(resp, "Audio &amp;&nbsp;Monitors")
+        self.assertContains(resp, "Listings")
 
     def test_product_detail_single_image_composition(self):
         """Product page renders single image in exhibition frame without fake carousel thumbnails."""

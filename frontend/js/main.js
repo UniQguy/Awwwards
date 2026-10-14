@@ -15,6 +15,7 @@ import { initFetchForms } from "./modules/fetch-forms.js";
 import { initStickyPurchaseBar } from "./modules/sticky-purchase-bar.js";
 import { initSearchSuggest } from "./modules/search-suggest.js";
 import { initMotionTier, initMotionToggleButton } from "./modules/capability.js";
+import { initMediaSlots } from "./modules/media_slot.js";
 
 function initPasswordToggle() {
   document.addEventListener("click", (e) => {
@@ -110,6 +111,7 @@ function bootstrap() {
   initPasswordToggle();
   initImageEntryFadeAndLift();
   initCardViewTransitions();
+  initMediaSlots();
 }
 
 if (document.readyState === "loading") {

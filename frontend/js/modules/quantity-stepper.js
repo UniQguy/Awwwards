@@ -112,12 +112,12 @@ async function triggerLiveUpdate(form, quantity) {
               if (data.summary.free_shipping_progress >= 100) {
                 meterLabel.innerHTML = `
                   <strong class="text-success">&check; You have qualified for free delivery.</strong>
-                  <span class="caption">Threshold: ₹499.00</span>
+                  <span class="caption">Threshold: ₹499</span>
                 `;
               } else {
                 meterLabel.innerHTML = `
                   <span>Add <strong>${data.summary.formatted_free_shipping_remaining}</strong> more to qualify for <strong>FREE delivery</strong></span>
-                  <span class="caption">Threshold: ₹499.00</span>
+                  <span class="caption">Threshold: ₹499</span>
                 `;
               }
             }

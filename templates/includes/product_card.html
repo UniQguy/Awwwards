@@ -5,8 +5,8 @@
     <div class="product-plate">
       {% include "includes/product_image.html" %}
       <div class="card-floating-actions">
-        {% include "includes/wishlist_form.html" %}
-        {% include "includes/compare_form.html" %}
+        {% include "includes/wishlist_form.html" with is_card_action=True %}
+        {% include "includes/compare_form.html" with is_card_action=True %}
       </div>
     </div>
 
@@ -18,7 +18,7 @@
       {% endif %}
 
       <h3 class="card-title" id="product-title-{{ product.id }}">
-        {{ product.display_name }}
+        {{ product.display_name|strip_brand:product.parsed_brand }}
       </h3>
 
       {% if product.highlight_spec_summary %}

@@ -94,7 +94,7 @@
 
   /* How buying works here: asymmetric typographic block (WP5) */
   .how-buying-section {
-    padding-block: clamp(72px, 9vw, 128px);
+    padding-block: clamp(40px, 4vw, 56px);
     border-top: 1px solid var(--world-rule);
   }
 
@@ -167,7 +167,7 @@
 
   /* Brand chips wrapping list (WP5) */
   .brands-flow-section {
-    padding-block: clamp(48px, 6vw, 80px);
+    padding-block: clamp(32px, 4vw, 48px);
     border-top: 1px solid var(--world-rule);
   }
 
@@ -214,14 +214,13 @@
 
   /* Closing callout section (WP5) */
   .closing-callout-section {
-    padding-top: var(--space-8);
-    padding-bottom: var(--space-12);
+    padding-block: clamp(32px, 4vw, 48px);
   }
 
   .closing-callout-hairline {
     height: 1px;
     background-color: var(--world-rule);
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
   }
 
   .closing-callout-inner {

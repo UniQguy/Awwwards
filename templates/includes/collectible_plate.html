@@ -45,7 +45,7 @@
     {% endif %}
 
     <h3 class="plate-title card-title">
-      {{ product.display_name }}
+      {{ product.display_name|strip_brand:product.parsed_brand }}
     </h3>
 
     {% if product.highlight_spec_summary %}

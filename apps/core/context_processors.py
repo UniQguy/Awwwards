@@ -119,4 +119,5 @@ def storefront_context(request):
         "has_sample_stock": has_sample_stock,
         "site_url": getattr(settings, "SITE_URL", "http://localhost:8000"),
         "motion_debug": getattr(settings, "MOTION_DEBUG", False),
+        "show_placeholder_labels": getattr(settings, "SHOW_PLACEHOLDER_LABELS", False),
     }

@@ -105,13 +105,15 @@
               <span>Chapter</span>
             </div>
 
-            <h2 class="display-l mb-3" id="chapter-{{ chapter.category.id }}">{{ chapter.category.name }}</h2>
+            <h2 class="display-l mb-3" id="chapter-{{ chapter.category.id }}">{{ chapter.category.name|balance_amp }}</h2>
 
-            <p class="pull mb-4">{{ chapter.editorial_line }}</p>
+            {% if chapter.category.chapter_intro %}
+              <p class="pull mb-4">{{ chapter.category.chapter_intro }}</p>
+            {% endif %}
 
             <dl class="chapter-stats-list">
               <div class="chapter-stat-item">
-                <dt class="chapter-stat-label">Curated listings</dt>
+                <dt class="chapter-stat-label">{% if not chapter.is_auto %}Curated listings{% else %}Listings{% endif %}</dt>
                 <dd class="chapter-stat-val">{{ chapter.product_count }}</dd>
               </div>
               <div class="chapter-stat-item">
@@ -122,7 +124,7 @@
 
             <div class="chapter-enter-action">
               <a href="{% url 'category_detail' slug=chapter.category.slug %}" class="chapter-enter-link">
-                Enter {{ chapter.category.name }} &rarr;
+                Enter {{ chapter.category.name|balance_amp }} &rarr;
               </a>
             </div>
           </div>

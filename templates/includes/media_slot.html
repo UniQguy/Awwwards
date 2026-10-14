@@ -1,0 +1,58 @@
+{% load core_tags %}
+{% static_file_exists poster_src as has_poster %}
+{% static_file_exists video_src as has_video %}
+
+{# Rule: If both video and poster are missing, collapse to nothing #}
+{# Rule: In production (show_placeholder_labels=False), never show unsupplied slots as real #}
+{% if not has_video and not has_poster and not is_real_file %}
+  {# Collapses completely #}
+{% elif not show_placeholder_labels and not has_video and not is_real_file %}
+  {# Production hides slots with no real file #}
+{% else %}
+  <div
+    class="media-slot-container{% if extra_class %} {{ extra_class }}{% endif %}"
+    id="media-slot-{{ slot_id }}"
+    data-media-slot="{{ slot_id }}"
+    style="aspect-ratio: {{ aspect_ratio|default:'16/9' }};"
+  >
+    {% if has_video %}
+      <video
+        class="media-slot-video"
+        data-src="{{ video_src }}"
+        poster="{{ poster_src }}"
+        width="{{ width|default:'1920' }}"
+        height="{{ height|default:'1080' }}"
+        muted
+        playsinline
+        {% if loop|default:True %}loop{% endif %}
+        preload="none"
+        aria-hidden="true"
+      ></video>
+      <img
+        class="media-slot-poster-fallback"
+        src="{{ poster_src }}"
+        alt=""
+        width="{{ width|default:'1920' }}"
+        height="{{ height|default:'1080' }}"
+        loading="lazy"
+        aria-hidden="true"
+      >
+    {% elif has_poster %}
+      <img
+        class="media-slot-poster"
+        src="{{ poster_src }}"
+        alt=""
+        width="{{ width|default:'1920' }}"
+        height="{{ height|default:'1080' }}"
+        loading="lazy"
+        aria-hidden="true"
+      >
+    {% endif %}
+
+    {% if show_placeholder_labels and is_placeholder|default:True %}
+      <span class="media-placeholder-badge caption" aria-hidden="true">
+        Placeholder &middot; {{ label|default:slot_id }} ({{ aspect_ratio|default:'16/9' }})
+      </span>
+    {% endif %}
+  </div>
+{% endif %}

@@ -1,4 +1,14 @@
 @layer base {
+  html {
+    scroll-padding-top: calc(72px + var(--space-4));
+  }
+
+  @media (max-width: 640px) {
+    html {
+      scroll-padding-top: calc(60px + var(--space-2));
+    }
+  }
+
   html, body {
     overflow-x: clip;
   }

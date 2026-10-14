@@ -360,7 +360,7 @@ def checkout_place(request: HttpRequest) -> HttpResponse:
     if payment_method == "cod":
         send_order_confirmation(order, guest_token=token if not user else None)
         send_cod_placed(order, guest_token=token if not user else None)
-        messages.success(request, f"Order #{order.order_number} confirmed! We will dispatch your gear promptly.")
+        messages.success(request, f"Order #{order.order_number} confirmed. We will dispatch your gear promptly.")
         return redirect(f"/orders/{order.order_number}/success/?token={token}")
     else:
         return redirect(f"/payments/razorpay/checkout/{order.order_number}/?token={token}")

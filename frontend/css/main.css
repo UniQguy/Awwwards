@@ -27,4 +27,5 @@
 @import "./components/editorial-spread.css";
 @import "./components/chapter-wipe.css";
 @import "./components/price-histogram.css";
+@import "./components/media-slot.css";
 @import "./print.css";

@@ -39,6 +39,12 @@ class Category(TimeStampedModel):
     )
     display_order = models.PositiveIntegerField(_("display order"), default=0)
     description = models.TextField(_("editorial description"), blank=True)
+    chapter_intro = models.TextField(
+        _("chapter intro"),
+        blank=True,
+        max_length=280,
+        help_text=_("Write one or two plain sentences. Do not claim quality, awards or rankings."),
+    )
     is_active = models.BooleanField(_("is active"), default=True)
 
     class Meta:
@@ -179,7 +185,7 @@ class Product(TimeStampedModel):
         """
         from apps.catalog.services.spec_extractor import CATEGORY_CAPTION_SPEC_ORDER
 
-        specs = list(self.specifications.all())
+        specs = [s for s in self.specifications.all() if s.key.lower() not in ("color", "colour")]
         if not specs:
             return ""
 

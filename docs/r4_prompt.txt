@@ -1,0 +1,81 @@
+<USER_REQUEST>
+FINAL PASS R4: THE GALLERY. FIX, STORYTELL, VERIFY. Read docs/STANDING_ORDERS.md (all sections), docs/DESIGN_SYSTEM.md, docs/MOTION.md, docs/UI_FINDINGS.md, ASSETS.md, docs/phase-8b-report.md, docs/phase-8c-report.md. Do not ask me anything. Real browser for every claim.
+
+TRUTH RULE FOR THIS PASS
+My own screenshots contradict the previous "0 defects" reports. Prior audits did not measure emptiness, composition or reveal failures. For this pass, a claim is valid only with a named screenshot path (1456x820 and 390x844, at stated scroll positions) that you have actually viewed and described in one sentence. Never write PASS from a script alone for anything visual. If something cannot be verified, write NOT VERIFIED.
+
+GOAL
+Keep the current look and the hero line "Everything you plug in, put on, or listen with." Turn the site into a gallery of storytelling commerce: a printed catalogue that is walked through, with motion that explains structure, rewards attention and never gates content. Every effect needs a stated reason. Everything is real data or labelled placeholder. Honesty rules stand: no invented claims, no hype, no fake reviews.
+
+WP0. VISUAL TRUTH RESET (do this before building)
+1. Screenshot, view and list every defect on: home (top, each chapter, index, buying, brands, footer), /categories/, three /c/<slug>/ pages (marquee, filtered, page 2), three product pages (in stock, low, unpriced), search, cart (empty, filled), login, signup, checkout steps, success, 403, 404. At 1456 and 390 px. Write docs/ui-review/r4_defects.md: page, defect, severity, fixed or open.
+2. Known defects to fix (from owner screenshots):
+ a. Category marquee: four picks stack in one ~170px column with a huge void on the right. Compose per spec: title/stats column (cols 1-4), plates as one composed unit (cols 6-12): lead plate plus smaller plates, bottoms aligned, no void; fewer than 4 picks composes without a hole.
+ b. The grid under "All {n} listings" renders blank. Find the true cause (hidden reveal state, container query collapse, lazy images, CSS) and fix it. Prove the grid is visible with a screenshot at scroll position after the divider.
+ c. Titles: no orphaned "&" or single-word lines; use text-wrap: balance, size the display-xl so "Earphones & Headphones" and "Acoustics & Speakers" break at the ampersand intentionally (ampersand stays with the following word via a non-breaking space) or fit on two lines.
+ d. Copy/number: every rupee figure everywhere uses the inr filter (₹31,997 not ₹31997); remove the duplicate range line (keep one); rename "Curated listings" to "Listings" (curated only when a curated collection is the source); replace "01 Category Overview" with the plain "Chapter 01"; grep all templates and JS for raw rupee formatting.
+ e. F-13: the photo must dissolve into the plate. Diagnose why the lighter window persists (an intermediate element, background on <img>, isolation, a stacking context breaking multiply, blend on the wrong layer). Fix at the root, then verify by pixel sampling the plate corner vs plate colour on 12 cards across 4 categories, and print the sampled values. Photos with genuinely non-white backgrounds stay framed by padding.
+ f. Card: brand shown once in natural casing (not uppercase duplicating the name; strip the brand from the start of the name when it repeats it); caption shows validated specs only, never a bare colour word (colour belongs in swatches/option label); name two-line clamp.
+ g. Header: redraw the heart (not clipped at any zoom), replace the Shop chevron with a clean 24px chevron icon, check all header icons at 100%, 200% zoom and on a 2x display capture.
+3. Add scripts/void_audit.py: for each key page and width, compute for every section the fraction of the container width occupied by content in its tallest band, flag any empty rectangle larger than 600x300 px inside a section, and assert marquee picks occupy at least 60 percent of container width on desktop. Add a reveal audit: after load plus 3 s, no element with opacity 0 or visibility hidden that carries text or an image (except aria-hidden decorative layers and closed dialogs). Both run in full_qa.py. Show before/after counts.
+
+WP1. THE STORY STRUCTURE (design before code: write docs/STORYBOARD.md first)
+Frame: the home page is a walk through a printed catalogue in acts. Write the storyboard with, per act, the data shown, the motion, its purpose, and tier 2/3 and reduced-motion behaviour. Acts:
+ Act 1 Cover: hero (existing entrance), plus depth: headline lines, cutouts and plate move at three slightly different rates on scroll (tier 1, transform only, max 40 px total), so the cover feels layered.
+ Act 2 Contents: the typographic category index. Rows rule-draw on entry; live counts and "from ₹X" count up once from 0 to the real value (final real value is in the DOM from the start and for no-JS); hover or focus slides in the category's pick cutout (existing).
+ Act 3 Chapters (the centrepiece): on tier 1 desktop each chapter becomes a pinned stage (ScrollTrigger pin, about 2.2 viewport heights): the category name and stats stay put on the left while the three picks enter one at a time on the right (translate and fade, 60-90 ms stagger within a pick, plate mat and photo only), a thin progress hairline and the "02 / 06" counter advance, then the diagonal wipe hands over to the next chapter. Tier 2, tier 3, mobile and reduced motion: the unpinned composed layout from R2 (no pin, no scrub). Pinning must never trap keyboard focus: all content is in DOM order and focusable at all times, and Tab into an unrevealed plate scrolls it into view and reveals it.
+ Act 4 How buying works: the three passages reveal as the italic lead sentence stays sticky; hairlines draw; nothing else moves.
+ Act 5 The brands: words fade up in a short stagger once, no looping marquee.
+ Act 6 Colophon: the footer wordmark reveals by a line mask; nothing else.
+Category index page (/categories/): on tier 1 desktop only, a horizontal gallery walk (vertical scroll mapped to horizontal travel of the category spreads, pinned, with a visible progress hairline and "03 / 10"); the flat vertical R2 layout is the default and the fallback for tier 2/3, touch, mobile, reduced motion and no-JS. Keyboard and find-in-page must work; Tab to an off-screen spread scrolls to it. If you cannot make this pass keyboard and no-JS checks, do not ship it: keep the vertical layout and record why.
+Category page marquee: title lines mask-reveal; the four plates enter in sequence with the same vocabulary as the chapters (one vocabulary: mask-line reveal, plate lift-and-fade, hairline draw, diagonal wipe, specular sweep on featured plates). Do not invent new effect types. Rejected on purpose, do not build: custom cursors, magnetic buttons, looping marquee text, parallax on utility pages, scroll-jacking beyond the two pinned cases above, particle or noise effects, auto-playing sound.
+Product page: exhibition-frame reveal (plate mat opens with a clip-path from the centre, 450 ms), photo scales 1.04 to 1 as it settles, spec rows rule-draw in sequence once, price numerals fade in last; the plate has a gentle pointer parallax (max 6 px) on tier 1; the sticky frame never shifts layout. Video and 3D slots per WP2 sit under the frame.
+Everything animates only transform, opacity and clip-path. No layout thrash. Every hidden-until-revealed state is applied by JS only when the tier allows, removed on any failure, and force-cleared after 2.5 s.
+
+WP2. MEDIA SLOTS (placeholders now, real files later)
+Build a reusable <video> slot component (templates/includes/media_slot.html + frontend module): muted, playsinline, loop where specified, preload="none", poster, width/height/aspect reserved, IntersectionObserver play/pause, plays only on tier 1 and desktop width; mobile, tier 2/3, save-data and reduced motion show the poster only; pauses when tab hidden; no audio track required. If the mp4 file is missing the slot renders the poster; if the poster is missing the slot collapses to nothing. A small "Placeholder" label appears ONLY when settings.SHOW_PLACEHOLDER_LABELS is true (default true in local.py, false in production.py); production never labels or shows a placeholder as if real, and hides slots with no real file (add a test).
+Slots (extend scripts/generate_placeholders.py and ASSETS.md; generate webp posters with Pillow in each world's colour with slot name and size; mp4/glb are OWNER-PROVIDED, list them):
+ - home-hero-loop.mp4 (+ .webm), 16:9 1920x1080, 6-10 s seamless loop, target 2.5 MB; mobile variant home-hero-loop-m.mp4 9:16 720x1280, 1 MB; poster home-hero-poster.webp
+ - category-{slug}-film.mp4 for each of the 10 categories, 16:9 1920x1080, 6-8 s loop, 2 MB; poster category-{slug}-marquee-poster.webp; used in the category marquee background band only, behind no text that needs contrast (put text on solid world colour; the film sits in its own framed slot)
+ - home-chapter-{n}-poster.webp x6 (stage backdrop plate in chapters, optional)
+ - product-secondary-video.mp4, 1:1 or 4:5, 6 s, 1.5 MB, per product when supplied via ProductMedia video rows (already modelled), poster product-secondary-poster.webp
+ - hero-model-1.glb (OWNER-PROVIDED, existing contract)
+ - og-default.webp 1200x630, favicon set (svg + 32 + 180 px png), brand mark svg
+Write the layout contract (aspect ratio and reserved space) for each so real files drop in with zero shift. Document exact encoding commands (ffmpeg lines) in ASSETS.md for the owner.
+
+WP3. OWNER-WRITTEN STORY TEXT (honest narrative hooks)
+Add optional admin fields: Category.chapter_intro (TextField, blank, max 280 chars) and Collection.intro already exists. Render a chapter intro in the chapter text block and marquee ONLY when the owner has written one; otherwise render nothing (the factual stats line stays). Admin help text: "Write one or two plain sentences. Do not claim quality, awards or rankings." Add a test that nothing is rendered when blank.
+
+WP4. BUG SWEEP (everything, then re-verify)
+ - Console: zero errors and zero warnings on all key pages in tiers 1, 2, 3 and reduced motion; zero CSP violations; zero failed requests except the hotlinked Amazon images that legitimately fail (list them).
+ - Images: any broken-image fallback renders the designed block, never a broken icon; image count and eager/lazy rules intact.
+ - Focus: visible ring on every interactive element; focus never hidden behind the sticky header (scroll-padding-top equals header height); skip link works; dialogs trap and restore focus.
+ - Forms: every error state, empty state, 403/404/429/500 pages.
+ - Cart/checkout/order flows re-run end to end in the browser for guest and member; stock restore on cancel; coupon states; totals foot.
+ - Responsive: 360, 390, 768, 1024, 1280, 1456, 1920, 2560. No horizontal overflow, no clipped type, no void (void_audit), no overlapping elements.
+ - Back/forward navigation and bfcache: pinned and revealed states restore correctly (use pageshow persisted handling), no stuck hidden elements after Back.
+ - Resize and orientation change: ScrollTrigger refresh without jumps; destroy and rebuild on tier change.
+ - Smooth scroll: Lenis only on editorial pages, tier 1, fine pointer; anchor links, Home/End/Space/PageDown, find-in-page, text selection, and Tab-into-view all work. Capture the evidence by script.
+ - No-JS: every page readable and fully usable; no content hidden by CSS waiting for JS (grep for opacity:0 and visibility:hidden defaults; they must be set only under html.js-motion or an equivalent class added by script).
+ - Print: invoice print stylesheet unaffected by motion layers.
+
+WP5. PERFORMANCE GATES
+Initial JS on tier 3 under 45 KB gzipped; editorial bundle loaded only on editorial pages; GSAP/ScrollTrigger/Lenis not loaded on utility pages; three chunk only when tier 1 and the hero is near; videos never download on tier 2/3 or mobile or save-data (verify in the network panel by script); CLS under 0.05 on key pages with real measurement; LCP element preloaded; long tasks counted with 4x CPU throttle on the home page. Run Lighthouse mobile on category, product, cart if Chrome allows; otherwise NOT MEASURED plus exact commands in docs/PERFORMANCE.md. Report real numbers only.
+
+WP6. EVIDENCE PACK
+ - docs/ui-review/r4/ : before and after screenshots for every defect in WP0, named by finding.
+ - Frame strips (100 ms, 1.6 s) for: hero entrance, a chapter pin sequence (6 frames across the pin), the diagonal wipe, product exhibition reveal, bag dialog. View each strip and describe it.
+ - docs/STORYBOARD.md (acts, with purpose and fallbacks), docs/MOTION.md updated (every effect: trigger, duration, purpose, tier, reduced-motion, mobile).
+ - docs/ui-review/contact_sheet.html regenerated with the new captures.
+ - docs/PLACEHOLDERS_TO_REPLACE.md: every placeholder (file, where it appears, size/format spec, what breaks if absent), plus every non-media owner item (SELLER_* values, Razorpay keys, SMTP, delivery fee confirmation, legal text, category chapter intros, curated collections, real product photography replacing hotlinked images).
+ - docs/phase-r4-report.md with: defects closed (with screenshot paths), effects shipped, effects tried and rejected (with reasons), NOT VERIFIED list, and a "Remaining weaknesses" section (top three, honest).
+
+VERIFICATION (real output only)
+check; makemigrations --check (new field needs a migration via makemigrations only); full Python tests; vitest; build with chunk sizes; verify_contrast; css_audit; layout_audit; void_audit; full_qa summary counts; copy and honesty audits; launch_audit. Show the last 20 lines of each.
+
+DEFINITION OF DONE
+Every WP0 defect closed with a viewed screenshot; marquee, grid and plates composed with no void; the five-act story works on tier 1 with clean fallbacks on tier 2/3, mobile, reduced motion and no-JS; media slots work with and without files; no console errors; evidence pack complete; commits in logical units, never pushed. ACTION REQUIRED FROM OWNER: only the replacement list.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-10-09T15:49:23+05:30.
+</ADDITIONAL_METADATA>

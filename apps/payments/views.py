@@ -141,7 +141,7 @@ def razorpay_verify_view(request: HttpRequest) -> HttpResponse:
                 "message": "Payment verified and order confirmed.",
             })
         token = request.session.get(f"order_token_{order.order_number}", "")
-        messages.success(request, "Payment verified successfully!")
+        messages.success(request, "Payment verified successfully.")
         return redirect(f"/orders/{order.order_number}/success/?token={token}")
     else:
         if is_json:

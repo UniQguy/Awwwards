@@ -75,6 +75,7 @@
     height: auto;
     object-fit: contain;
     mix-blend-mode: multiply;
+    filter: contrast(1.02) brightness(1.04);
     transition: transform var(--transition-slow);
   }
 
@@ -92,8 +93,8 @@
   .plate-meta-line {
     font-size: var(--step--2);
     color: var(--world-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    text-transform: none;
+    letter-spacing: normal;
     margin-bottom: var(--space-1);
     font-weight: 600;
   }

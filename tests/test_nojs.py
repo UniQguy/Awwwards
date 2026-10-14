@@ -83,7 +83,7 @@ class NoJavaScriptCommerceFlowTests(TestCase):
         resp = self.client.post("/cart/coupon/apply/", {"code": "TACTILE100"}, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "TACTILE100")
-        self.assertContains(resp, "applied!")
+        self.assertContains(resp, "applied.")
 
         # 6. Proceed to Checkout: Guest Contact Form
         resp = self.client.post("/checkout/guest/", {

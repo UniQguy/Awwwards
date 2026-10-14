@@ -375,3 +375,7 @@ LOGGING = {
     },
 }
 
+# Media slot placeholder labels (True in local, False in production)
+SHOW_PLACEHOLDER_LABELS = False
+
+

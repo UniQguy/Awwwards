@@ -170,6 +170,88 @@
 
     .chapter-stack-slot .plate-collectible {
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Marquee Composed Grid (Up to 4 picks: 1 hero plate + 3 compact stack plates) */
+    .marquee-composed-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      column-gap: var(--space-6);
+      align-items: stretch;
+      min-height: 480px;
+    }
+
+    .marquee-lead-slot {
+      grid-column: 1 / 5;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .marquee-lead-slot .plate-collectible {
+      height: 100%;
+    }
+
+    .marquee-lead-slot .plate-mat {
+      aspect-ratio: 4 / 5;
+    }
+
+    .marquee-stack-slot {
+      grid-column: 5 / 8;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .marquee-stack-item {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+
+    .marquee-stack-item .plate-collectible {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-2) var(--space-3);
+    }
+
+    .marquee-stack-item .plate-mat {
+      width: 76px;
+      height: 76px;
+      flex-shrink: 0;
+      aspect-ratio: 1 / 1;
+      padding: 4px;
+      border-radius: var(--radius-1);
+    }
+
+    .marquee-stack-item .plate-body {
+      padding-top: 0;
+      flex: 1;
+      min-width: 0;
+      justify-content: center;
+    }
+
+    .marquee-stack-item .plate-title {
+      font-size: var(--step--1);
+      -webkit-line-clamp: 1;
+      margin-bottom: 2px;
+    }
+
+    .marquee-stack-item .plate-caption {
+      display: none;
+    }
+
+    .marquee-stack-item .plate-footer {
+      padding-top: 0;
+      margin-top: 2px;
     }
 
     .chapter-mobile-snap,
@@ -179,7 +261,8 @@
   }
 
   @media (max-width: 1023px) {
-    .chapter-composed-grid {
+    .chapter-composed-grid,
+    .marquee-composed-grid {
       display: none;
     }
 
@@ -335,6 +418,7 @@
     height: auto;
     object-fit: contain;
     mix-blend-mode: multiply;
+    filter: contrast(1.02) brightness(1.04);
     view-transition-name: product-plate;
   }
 
@@ -591,4 +675,91 @@
   .category-row-action {
     margin-top: var(--space-4);
   }
+
+  /* Category Gallery Walk (WP1) */
+  .category-index-flow.is-horizontal-gallery {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .category-index-flow.is-horizontal-gallery .category-row-spread {
+    flex: 0 0 100vw;
+    width: 100vw;
+    height: 100vh;
+    min-width: 100vw;
+    padding-block: 0;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  .category-gallery-progress {
+    display: none;
+  }
+
+  .is-horizontal-gallery-active .category-gallery-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    position: fixed;
+    top: calc(72px + var(--space-3));
+    right: var(--space-6);
+    z-index: 50;
+    background-color: var(--world-surface);
+    padding: 6px 14px;
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-2);
+    box-shadow: var(--lift-1);
+    cursor: pointer;
+  }
+
+  .category-gallery-progress-bar {
+    width: 120px;
+    height: 3px;
+    background-color: var(--world-rule);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .category-gallery-progress-fill {
+    width: 0%;
+    height: 100%;
+    background-color: var(--world-accent);
+    transition: width 0.1s linear;
+  }
+
+  .category-gallery-progress-num {
+    font-family: var(--font-mono, monospace);
+    font-size: 12px;
+    color: var(--world-text);
+    letter-spacing: 0.05em;
+  }
+
+  /* PDP Exhibition Reveal (WP1) */
+  .plate-reveal-prep {
+    clip-path: inset(8%);
+    opacity: 0.85;
+    transition: clip-path 500ms var(--ease-editorial, cubic-bezier(0.2, 0.8, 0.2, 1)),
+                opacity 400ms ease;
+  }
+
+  .plate-reveal-run {
+    clip-path: inset(0%);
+    opacity: 1;
+  }
+
+  .spec-table-wrapper {
+    position: relative;
+    border-top: 1px solid transparent;
+    transition: border-color 600ms ease;
+  }
+
+  .spec-table-wrapper.spec-rule-drawn {
+    border-top-color: var(--world-rule);
+  }
 }
+

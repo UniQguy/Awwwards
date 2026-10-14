@@ -2,9 +2,10 @@
   {% csrf_token %}
   <button
     type="submit"
-    class="btn btn-secondary btn-sm"
+    class="btn btn-secondary btn-sm{% if is_card_action %} card-action-btn{% endif %}"
     aria-label="Compare {{ product.display_name }}"
   >
-    Compare
+    <svg class="icon icon-xs" aria-hidden="true"><use href="#icon-compare"></use></svg>
+    <span class="{% if is_card_action %}sr-only{% endif %}">Compare</span>
   </button>
 </form>

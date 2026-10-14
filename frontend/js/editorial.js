@@ -17,6 +17,10 @@ import { initCollectibleCards } from "./modules/collectible_cards.js";
 import { initHeadlineCutouts } from "./modules/headline_cutouts.js";
 import { initSmallMotions } from "./modules/small_motions.js";
 import { initPriceHistogram } from "./modules/price_histogram.js";
+import { initChapterPinnedStage } from "./modules/chapter_pinned.js";
+import { initCategoryGallery } from "./modules/category_gallery.js";
+import { initPdpExhibition } from "./modules/pdp_exhibition.js";
+import { initMediaSlots } from "./modules/media_slot.js";
 
 function bootstrapEditorial() {
   // 1. Initialize hero entrance choreography (Tier 1 & 2 only, once per session)
@@ -25,20 +29,30 @@ function bootstrapEditorial() {
   // 2. Initialize editorial scroll and chapter wipes
   initScroller();
   initChapterTransitions();
+  initChapterPinnedStage();
 
-  // 3. Initialize collectible card 3D tilt
+  // 3. Initialize Category Index Horizontal Gallery Walk
+  initCategoryGallery();
+
+  // 4. Initialize PDP Exhibition Frame Reveal
+  initPdpExhibition();
+
+  // 5. Initialize collectible card 3D tilt
   initCollectibleCards();
 
-  // 4. Initialize cycling inline cutouts in hero headline
+  // 6. Initialize cycling inline cutouts in hero headline
   initHeadlineCutouts();
 
-  // 5. Initialize section hairline draw & heading reveals
+  // 7. Initialize section hairline draw & heading reveals
   initSmallMotions();
 
-  // 6. Initialize dual-thumb price histogram (utility enhancement on category detail)
+  // 8. Initialize media slots observer (Tier 1 Desktop video autoplay)
+  initMediaSlots();
+
+  // 9. Initialize dual-thumb price histogram (utility enhancement on category detail)
   initPriceHistogram();
 
-  // 7. Initialize WebGL dynamic loader for homepage hero plate
+  // 10. Initialize WebGL dynamic loader for homepage hero plate
   setupHeroWebGLLoader();
 }
 

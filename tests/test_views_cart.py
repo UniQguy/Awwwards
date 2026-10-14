@@ -104,7 +104,7 @@ class CartViewsTests(TestCase):
         resp_coupon = self.client.post(reverse("coupon_apply"), {"code": "SAVE50"}, follow=True)
         self.assertEqual(resp_coupon.status_code, 200)
         self.assertContains(resp_coupon, "SAVE50")
-        self.assertContains(resp_coupon, "applied!")
+        self.assertContains(resp_coupon, "applied.")
         self.assertContains(resp_coupon, "-₹50")
 
         # Remove coupon

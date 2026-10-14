@@ -285,7 +285,7 @@ def coupon_apply(request: HttpRequest) -> HttpResponse:
     if result.is_valid and result.coupon:
         request.session["applied_coupon_code"] = result.coupon.code
         request.session.modified = True
-        messages.success(request, f"Coupon '{result.coupon.code}' applied! Saved ₹{result.discount_amount}.")
+        messages.success(request, f"Coupon '{result.coupon.code}' applied. Saved ₹{result.discount_amount}.")
     else:
         messages.error(request, result.message)
 

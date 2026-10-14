@@ -2,9 +2,10 @@
   {% csrf_token %}
   <button
     type="submit"
-    class="btn btn-secondary btn-sm"
+    class="btn btn-secondary btn-sm{% if is_card_action %} card-action-btn{% endif %}"
     aria-label="Save {{ product.display_name }} to wishlist"
   >
-    Wishlist
+    <svg class="icon icon-xs" aria-hidden="true"><use href="#icon-heart"></use></svg>
+    <span class="{% if is_card_action %}sr-only{% endif %}">Wishlist</span>
   </button>
 </form>

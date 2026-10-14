@@ -22,7 +22,7 @@
         {% else %}
           <span>Add <strong>{{ summary.free_shipping_remaining|inr }}</strong> more to qualify for <strong>FREE delivery</strong></span>
         {% endif %}
-        <span class="caption">Threshold: ₹499.00</span>
+        <span class="caption">Threshold: ₹499</span>
       </div>
       <div class="meter-progress-track" role="progressbar" aria-valuenow="{{ summary.free_shipping_progress }}" aria-valuemin="0" aria-valuemax="100">
         <div class="meter-progress-fill" style="width: {{ summary.free_shipping_progress }}%;"></div>

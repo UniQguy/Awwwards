@@ -116,3 +116,58 @@ def colour_hex(name: Any) -> str:
     from apps.catalog.data.colour_map import get_colour_hex
     return get_colour_hex(str(name)) or ""
 
+
+@register.filter(name="balance_amp")
+def balance_amp(value: Any) -> str:
+    """
+    Ensures that ampersands in titles never leave an orphaned '&' on a line alone.
+    Replaces ' & ' with ' &amp;&nbsp;' so the ampersand stays glued to the following word.
+    """
+    if not value:
+        return ""
+    import re
+    from django.utils.safestring import mark_safe
+    s = str(value)
+    s = re.sub(r"\s+&\s+", " &amp;&nbsp;", s)
+    s = re.sub(r"\s+&amp;\s+", " &amp;&nbsp;", s)
+    return mark_safe(s)
+
+
+@register.filter(name="strip_brand")
+def strip_brand(title: Any, brand: Any) -> str:
+    """
+    Strips brand name from the beginning of the product title if it repeats the brand
+    already shown above the card title.
+    """
+    if not title:
+        return ""
+    import re
+    t = str(title).strip()
+    if not brand:
+        return t
+    b = str(brand).strip()
+    if not b or b.lower() in ("unknown", "generic"):
+        return t
+    pattern = rf"^{re.escape(b)}\s*[-:|,]?\s*"
+    stripped = re.sub(pattern, "", t, flags=re.IGNORECASE).strip()
+    return stripped if stripped else t
+
+
+@register.simple_tag
+def static_file_exists(path: Any) -> bool:
+    """Check if static file exists on filesystem."""
+    if not path:
+        return False
+    from pathlib import Path
+    from django.conf import settings
+    clean_path = str(path).lstrip("/")
+    if clean_path.startswith("static/"):
+        clean_path = clean_path[7:]
+    direct_path = Path(settings.BASE_DIR) / "static" / clean_path
+    if direct_path.is_file():
+        return True
+    from django.contrib.staticfiles import finders
+    return bool(finders.find(clean_path))
+
+
+

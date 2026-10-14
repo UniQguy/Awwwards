@@ -17,6 +17,9 @@ CSRF_TRUSTED_ORIGINS = list(CSRF_TRUSTED_ORIGINS) + [
 # Development motion debugging: allows ?motion=1|2|3 to force motion tiers
 MOTION_DEBUG = True
 
+# Display small "Placeholder" badge on media slots in local dev
+SHOW_PLACEHOLDER_LABELS = True
+
 # Warn loudly on local startup if SELLER_STATE is missing
 if not SELLER_STATE:
     warnings.warn(

@@ -318,11 +318,12 @@ def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
             picks = deduped_picks[:3]
             is_auto = True
 
-        editorial_line = (
-            cat.description.strip()
-            if cat.description and cat.description.strip()
-            else f"{p_count} listings from ₹{p_min} to ₹{p_max}."
-        )
+        if getattr(cat, "chapter_intro", None) and cat.chapter_intro.strip():
+            editorial_line = cat.chapter_intro.strip()
+        elif cat.description and cat.description.strip():
+            editorial_line = cat.description.strip()
+        else:
+            editorial_line = f"{p_count} listings from \u20b9{p_min:.2f} to \u20b9{p_max:.2f}."
 
         chapters.append(
             HomeChapter(
@@ -431,11 +432,14 @@ def category_spread(category: Category) -> CategorySpreadResult:
         picks = deduped_picks
         is_auto = True
 
-    editorial_line = (
-        category.description.strip()
-        if category.description and category.description.strip()
-        else f"{listing_count} listings from ₹{price_min} to ₹{price_max}."
-    )
+    if getattr(category, "chapter_intro", None) and category.chapter_intro.strip():
+        editorial_line = category.chapter_intro.strip()
+    elif category.description and category.description.strip():
+        editorial_line = category.description.strip()
+    else:
+        editorial_line = (
+            f"{stats.listing_count} listings from \u20b9{stats.price_min:.2f} to \u20b9{stats.price_max:.2f}."
+        )
 
     return CategorySpreadResult(
         category=category,
