@@ -114,8 +114,9 @@ def clean_display_name(raw_name: str, brand: Optional[str] = None) -> str:
     if not raw_name:
         return "Untitled Product"
 
-    # Remove replacement/unprintable characters
+    # Remove replacement/unprintable characters and leading symbols
     title = raw_name.replace("\ufffd", "").strip()
+    title = re.sub(r"^[\s®™©•\-\"\'`\(\)\[\]]+", "", title).strip()
 
     # 1. Split on natural segment boundaries: |, ;, •, em dash, en dash, hyphen with spaces
     for delim in [" | ", " ; ", " • ", " — ", " – ", " - ", "|", ";", "•", "—", "–"]:

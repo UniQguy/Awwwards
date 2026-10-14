@@ -106,7 +106,7 @@
   <div class="catalog-layout">
     <!-- Facet Filter Sidebar -->
     <aside class="filter-panel-aside" aria-label="Filters and sorting">
-      <form method="get" action="{% url 'category_detail' slug=category.slug %}">
+      <form method="get" action="{% url 'category_detail' slug=category.slug %}" autocomplete="off">
         <fieldset class="filter-fieldset">
           <legend class="filter-legend">Filter &amp; Sort</legend>
 
@@ -115,7 +115,7 @@
             <label for="filter-sort" class="form-label">
               <span>Sort By</span>
             </label>
-            <select name="sort" id="filter-sort" class="form-control">
+            <select name="sort" id="filter-sort" class="form-control" autocomplete="off">
               <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Most Popular</option>
               <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
               <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
@@ -130,7 +130,7 @@
               <label for="filter-brand" class="form-label">
                 <span>Brand</span>
               </label>
-              <select name="brand" id="filter-brand" class="form-control">
+              <select name="brand" id="filter-brand" class="form-control" autocomplete="off">
                 <option value="">All Brands</option>
                 {% for b in facets.brands %}
                   <option value="{{ b.parsed_brand }}" {% if selected_filters.brand == b.parsed_brand %}selected{% endif %}>
@@ -146,7 +146,7 @@
             <label for="filter-bracket" class="form-label">
               <span>Price Range</span>
             </label>
-            <select name="bracket" id="filter-bracket" class="form-control">
+            <select name="bracket" id="filter-bracket" class="form-control" autocomplete="off">
               <option value="">Any Price</option>
               {% for bar in price_bars %}
                 {% if bar.count > 0 %}
@@ -166,19 +166,19 @@
             <label for="filter-min-price" class="form-label">
               <span>Min Price (₹)</span>
             </label>
-            <input type="number" step="1" name="min_price" id="filter-min-price" class="form-control" value="{{ selected_filters.min_price|default:'' }}">
+            <input type="number" step="1" name="min_price" id="filter-min-price" class="form-control" value="{{ selected_filters.min_price|default:'' }}" autocomplete="off">
           </div>
 
           <div class="form-group">
             <label for="filter-max-price" class="form-label">
               <span>Max Price (₹)</span>
             </label>
-            <input type="number" step="1" name="max_price" id="filter-max-price" class="form-control" value="{{ selected_filters.max_price|default:'' }}">
+            <input type="number" step="1" name="max_price" id="filter-max-price" class="form-control" value="{{ selected_filters.max_price|default:'' }}" autocomplete="off">
           </div>
 
           <!-- Variant Grid Collapse Toggle -->
           <div class="form-checkbox-group mt-2">
-            <input type="checkbox" name="collapsed" value="1" id="filter-collapsed" class="form-checkbox" {% if collapsed %}checked{% endif %}>
+            <input type="checkbox" name="collapsed" value="1" id="filter-collapsed" class="form-checkbox" {% if collapsed %}checked{% endif %} autocomplete="off">
             <label for="filter-collapsed" class="form-checkbox-label">
               <span>Collapse duplicate models</span>
             </label>

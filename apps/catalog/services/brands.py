@@ -53,7 +53,11 @@ def detect_brand(title: str) -> str:
     if not title:
         return "Unknown"
 
-    cleaned_title = title.strip()
+    # Strip leading symbols (registered marks, trademarks, bullets, quotes, dashes)
+    cleaned_title = re.sub(r"^[\s®™©•\-\"\'`\(\)\[\]]+", "", str(title)).strip()
+    if not cleaned_title:
+        return "Unknown"
+
     brands = get_known_brands()
 
     # 1. Check if title starts with brand name (case-insensitive)
@@ -73,6 +77,9 @@ def detect_brand(title: str) -> str:
     if first_word_match:
         candidate = first_word_match.group(1)
         if len(candidate) > 1 and candidate.lower() not in ["the", "new", "all", "pro", "best"]:
+            # If acronym (all caps 2-3 letters like HP, LG), keep uppercase
+            if candidate.isupper() and len(candidate) <= 3:
+                return candidate
             return candidate.capitalize()
 
     return "Unknown"

@@ -76,6 +76,21 @@ class BrandDetectionTests(TestCase):
         self.assertEqual(detect_brand("Leather Sleeve for Dell XPS 13"), "Dell")
         self.assertEqual(detect_brand("Silicone Case for OnePlus 11"), "OnePlus")
 
+    def test_multi_token_and_symbol_brand_detection(self):
+        self.assertEqual(detect_brand("CP PLUS 1080P Full HD Smart Wi-Fi Camera"), "CP PLUS")
+        self.assertEqual(detect_brand("Amazon Basics High-Speed HDMI Cable"), "Amazon Basics")
+        self.assertEqual(detect_brand("®Apple iPad Pro 11-inch"), "Apple")
+        self.assertEqual(detect_brand("• boAt BassHeads 100"), "boAt")
+        self.assertEqual(detect_brand('"Sony" WH-1000XM5'), "Sony")
+
+    def test_strip_brand_preserves_model_identifiers(self):
+        from apps.core.templatetags.core_tags import strip_brand
+        self.assertEqual(strip_brand("Redmi 9 (Sporty Orange)", "Redmi"), "Redmi 9 (Sporty Orange)")
+        self.assertEqual(strip_brand("Echo Dot (4th Gen)", "Echo"), "Echo Dot (4th Gen)")
+        self.assertEqual(strip_brand("JBL Go 3 Portable Speaker", "JBL"), "JBL Go 3 Portable Speaker")
+        self.assertEqual(strip_brand("boAt BassHeads 100", "boAt"), "boAt BassHeads 100")
+        self.assertEqual(strip_brand("Apple Wireless Earbuds Case", "Apple"), "Wireless Earbuds Case")
+
     def test_fallback_brand(self):
         self.assertEqual(detect_brand("Widgetmaster 5000 Multi Tool"), "Widgetmaster")
         self.assertEqual(detect_brand(""), "Unknown")

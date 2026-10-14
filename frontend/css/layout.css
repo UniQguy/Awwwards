@@ -1,4 +1,8 @@
 @layer layout {
+  html {
+    scroll-padding-top: var(--header-height, 72px);
+  }
+
   .container {
     width: 100%;
     max-width: var(--container-max);
@@ -86,15 +90,23 @@
     }
   }
 
-  /* 4-Column Product Catalog Grid */
+  /* Product Catalog Grid (4-5 Columns on Desktop) */
   .grid-catalog {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: var(--space-5);
   }
 
   @media (min-width: 1024px) {
     .grid-catalog {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+  }
+
+  @media (min-width: 1680px) {
+    .grid-catalog {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: var(--space-6);
     }
   }

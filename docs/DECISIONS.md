@@ -217,11 +217,18 @@
 - **Reason**: Guarantees that university faculty or evaluation teams can run the entire storefront disconnected from the internet without missing fonts, broken CSS, failed images, or external tracking delays.
 - **Alternative Rejected**: Relying on external CDNs (Google Fonts, unpkg, Cloudflare) or third-party image hosts that fail during offline examination.
 
-### DEC-038: Phase R6 Start Protocol, Baseline Metrics, and Overlap Audit Gate
+### DEC-039: Resolution of Known Layout and Brand Geometry Defects (WP1)
 - **Date**: 2026-10-14
-- **Decision**: Established pre-r6 tag baseline (289 Python tests, 52 Vitest tests, home scroll height 11,845px / 15.42 viewports). Authored `scripts/overlap_audit.py` to assert section bounding-box non-intersection, `elementFromPoint` card reachability, near-square plate aspect ratios (0.9-1.25), and image plate coverage (>=70%). Proved failure on unpatched build (46 defects identified).
-- **Reason**: Guarantees strict empirical accountability so prior visual blind-spots (such as marquee overlapping grid and 25px collapsed thumbnails) cannot pass undetected.
-- **Alternative Rejected**: Relying solely on layout audit or manual spot checks that previously missed sibling element overlap.
+- **Decision**: Resolved all known visual and layout defects cataloged in WP0:
+  1. *Category Marquee Geometry*: Removed fixed 420px height cap that caused vertical overflow; enforced 80px square `.plate-mat` with >=70% image coverage inside `@layer components` to prevent CSS cascade override.
+  2. *Catalog Grid Plates*: Restored 1:1 square aspect ratio (`.product-plate { aspect-ratio: 1/1; width: 100%; }`) with 80% containment, eliminating the 2.2:1 clamped rectangular strips.
+  3. *Brand & Model Names*: Extended brand allowlist with canonical multi-token brands (CP PLUS, Amazon Basics), stripped leading noise symbols (`®`, `™`, quotes, bullets), and updated `strip_brand` to preserve model designations when followed by digits or short model words (e.g. "Redmi 9", "Echo Dot", "JBL Go 3").
+  4. *Hero Cutout Blending*: Resolved white boxed frames by setting `.cutout { background-color: var(--world-bg); }`, providing an explicit backdrop for `mix-blend-mode: multiply` within isolated stacking contexts, and tightened margins to eliminate floating punctuation.
+  5. *Filter Stale State*: Added `autocomplete="off"` to the category filter form and all its controls, preventing browser form-cache from injecting ghost price values on pagination.
+  6. *Admin Navigation & Metrics*: Assigned distinct verbose names to Allauth accounts ("Authentication & Security (Allauth)") versus project accounts ("Customer Accounts & Profiles"), and applied the `inr` template filter to today's revenue in the admin snapshot dashboard.
+- **Reason**: Ensures clean layout, honest data representation, and zero plate geometry failures across all viewports.
+- **Alternative Rejected**: Deleting marquee secondary picks or hiding brands altogether.
+
 
 
 

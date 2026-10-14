@@ -138,6 +138,7 @@ def strip_brand(title: Any, brand: Any) -> str:
     """
     Strips brand name from the beginning of the product title if it repeats the brand
     already shown above the card title.
+    Preserves model identifiers when the stripped portion begins with numbers or short model names (e.g., 'Redmi 9', 'Echo Dot', 'JBL Go 3').
     """
     if not title:
         return ""
@@ -149,8 +150,16 @@ def strip_brand(title: Any, brand: Any) -> str:
     if not b or b.lower() in ("unknown", "generic"):
         return t
     pattern = rf"^{re.escape(b)}\s*[-:|,]?\s*"
-    stripped = re.sub(pattern, "", t, flags=re.IGNORECASE).strip()
-    return stripped if stripped else t
+    match = re.match(pattern, t, flags=re.IGNORECASE)
+    if not match:
+        return t
+    remainder = t[match.end():].strip()
+    if not remainder:
+        return t
+    # If remainder starts with a digit or short model keyword, do NOT strip brand
+    if re.match(r"^(?:\d|[A-Za-z]?\d|Go\b|Dot\b|Mini\b|Air\b|Pro\b|Plus\b|Max\b|SE\b|Lite\b|Wave\b|Airdopes\b|BassHeads\b|Ninja\b|ColorFit\b|XPS\b)", remainder, re.IGNORECASE):
+        return t
+    return remainder
 
 
 @register.simple_tag

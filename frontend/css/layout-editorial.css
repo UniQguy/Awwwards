@@ -182,7 +182,6 @@
       column-gap: var(--space-6);
       align-items: stretch;
       min-height: 360px;
-      max-height: 420px;
     }
 
     .marquee-lead-slot {
@@ -226,11 +225,12 @@
     }
 
     .marquee-stack-item .plate-mat {
-      width: 76px;
-      height: 76px;
+      width: 80px;
+      height: 80px;
+      min-width: 80px;
       flex-shrink: 0;
       aspect-ratio: 1 / 1;
-      padding: 4px;
+      padding: 6px;
       border-radius: var(--radius-1);
     }
 

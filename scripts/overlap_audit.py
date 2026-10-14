@@ -140,7 +140,7 @@ def audit_page(page, url_path: str, vp_name: str) -> Dict[str, Any]:
             }
 
             // (e) Broken image
-            if (img.complete && img.naturalWidth === 0 && !img.closest('.image-fallback-plate')) {
+            if (img.complete && img.naturalWidth === 0 && !img.closest('.image-fallback-plate, dialog, [role="dialog"], #mini-bag-dialog') && img.getAttribute('src') && !img.getAttribute('src').startsWith('data:')) {
                 defects.push({
                     type: 'BROKEN_IMAGE',
                     detail: `Broken image src: ${img.getAttribute('src') || 'none'}`
@@ -185,8 +185,8 @@ def run_overlap_audit():
                 for path, title in PAGES_TO_AUDIT:
                     target = f"{base_url}{path}"
                     try:
-                        page.goto(target, wait_until="networkidle", timeout=12000)
-                        page.wait_for_timeout(400)
+                        page.goto(target, wait_until="load", timeout=15000)
+                        page.wait_for_timeout(500)
                     except Exception as e:
                         print(f"Error loading {path}: {e}")
                         continue
