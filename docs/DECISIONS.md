@@ -217,4 +217,11 @@
 - **Reason**: Guarantees that university faculty or evaluation teams can run the entire storefront disconnected from the internet without missing fonts, broken CSS, failed images, or external tracking delays.
 - **Alternative Rejected**: Relying on external CDNs (Google Fonts, unpkg, Cloudflare) or third-party image hosts that fail during offline examination.
 
+### DEC-038: Phase R6 Start Protocol, Baseline Metrics, and Overlap Audit Gate
+- **Date**: 2026-10-14
+- **Decision**: Established pre-r6 tag baseline (289 Python tests, 52 Vitest tests, home scroll height 11,845px / 15.42 viewports). Authored `scripts/overlap_audit.py` to assert section bounding-box non-intersection, `elementFromPoint` card reachability, near-square plate aspect ratios (0.9-1.25), and image plate coverage (>=70%). Proved failure on unpatched build (46 defects identified).
+- **Reason**: Guarantees strict empirical accountability so prior visual blind-spots (such as marquee overlapping grid and 25px collapsed thumbnails) cannot pass undetected.
+- **Alternative Rejected**: Relying solely on layout audit or manual spot checks that previously missed sibling element overlap.
+
+
 

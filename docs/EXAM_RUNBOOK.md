@@ -50,7 +50,7 @@ Before inviting the evaluation committee:
 
 ### Q2: How does the system handle high-concurrency race conditions during flash sales or stock depletion?
 > **Answer**:  
-> We implemented database-level pessimistic locking using `select_for_update()` inside `apps/inventory/services/reservation_service.py`. When a customer initiates checkout, the inventory row is locked, available quantity is re-checked against unexpired reservations, and a time-bound reservation record is created atomically. If two users purchase the last unit simultaneously, the second transaction is safely rejected with an `OutOfStockError` rather than overselling.
+> We implemented atomic conditional `UPDATE` statements combined with time-bound inventory reservations inside `apps/inventory/services/reservation_service.py`. When a customer initiates checkout within a database transaction, available physical stock is queried against active, unexpired reservations. If available stock satisfies the cart quantity, a reservation record is created atomically. If two users attempt to purchase the last unit simultaneously, the conditional update and reservation check ensure the second transaction safely rejects with an `OutOfStockError` rather than overselling. On PostgreSQL deployments, this is additionally backed by `select_for_update()`.
 
 ### Q3: How is Goods and Services Tax (GST) calculated across state lines?
 > **Answer**:  

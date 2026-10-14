@@ -128,7 +128,7 @@
 
 | Requirement | Implementation Architecture | Primary Source Files | Verification & Automated Tests | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Pessimistic Stock Locking** | `select_for_update()` inventory locking preventing oversell race conditions | `apps/inventory/services/reservation_service.py` | `tests/test_flow_review.py` | **VERIFIED** |
+| **Atomic Stock Locking & Reservations** | Atomic conditional `UPDATE` and inventory reservations preventing oversell race conditions | `apps/inventory/services/reservation_service.py` | `tests/test_flow_review.py` | **VERIFIED** |
 | **CSRF Defense** | Strict CSRF token validation on all state-modifying POST requests; 403 on missing token | `django.middleware.csrf.CsrfViewMiddleware` | `tests/test_flow_review.py` | **VERIFIED** |
 | **Rate Limiting** | IP-based rate limiting on sensitive checkout, search, and coupon endpoints | `django_ratelimit.decorators.ratelimit` | `tests/test_flow_review.py` | **VERIFIED** |
 | **Zero External CDN Dependencies** | Fully offline-operable frontend with local fonts, local media caching, and SVG fallbacks | `scripts/offline_check.py`<br>`frontend/css/fonts.css` | `scripts/offline_check.py` | **VERIFIED** |

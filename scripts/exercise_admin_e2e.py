@@ -42,13 +42,19 @@ def run():
         context = browser.new_context(viewport={"width": 1456, "height": 900})
         page = context.new_page()
 
+        admin_email = os.environ.get("DEMO_ADMIN_EMAIL")
+        admin_password = os.environ.get("DEMO_ADMIN_PASSWORD")
+        if not admin_email or not admin_password:
+            print("FATAL: DEMO_ADMIN_EMAIL and DEMO_ADMIN_PASSWORD environment variables are required.")
+            sys.exit(1)
+
         print("1. Navigating to admin login...")
         page.goto(f"{BASE_URL}/admin/login/?next=/admin/")
         page.screenshot(path=str(SCREENSHOT_DIR / "01_admin_login.png"))
 
         print("2. Submitting login credentials...")
-        page.fill("input[name='username']", "admin@gmail.com")
-        page.fill("input[name='password']", "AdminPass123!")
+        page.fill("input[name='username']", admin_email)
+        page.fill("input[name='password']", admin_password)
         page.click("input[type='submit']")
         page.wait_for_load_state("networkidle")
 
@@ -182,7 +188,14 @@ def run():
             print("-> Demo product deleted cleanly.")
 
         browser.close()
-        print("Admin E2E exercise completed successfully!")
+
+    # Clean up test data and log entries
+    from django.contrib.admin.models import LogEntry
+    LogEntry.objects.filter(object_repr__contains="DEMO-PRD-R5").delete()
+    LogEntry.objects.filter(object_repr__contains="faculty").delete()
+    Product.objects.filter(sku__startswith="DEMO-PRD-R5").delete()
+    Collection.objects.filter(slug__contains="faculty").delete()
+    print("Admin E2E exercise completed and cleaned up successfully!")
 
 
 if __name__ == "__main__":

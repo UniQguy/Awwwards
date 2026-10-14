@@ -13,6 +13,7 @@ End-to-end browser authentication and email lifecycle verification (WP3):
 import os
 import re
 import sys
+import time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -20,9 +21,9 @@ BASE_URL = "http://127.0.0.1:8000"
 SCREENSHOT_DIR = Path("docs/ui-review/auth_e2e")
 SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
 
-TEST_EMAIL = "faculty.inspector@university.edu"
-TEST_PASS = "FacultyPass2026!"
-NEW_PASS = "FacultyPass2026New!"
+TEST_EMAIL = os.environ.get("DEMO_TEST_EMAIL", f"auth_e2e_{int(time.time())}@electrocart.test")
+TEST_PASS = os.environ.get("DEMO_TEST_PASSWORD", f"Pass_{int(time.time())}!Aa9")
+NEW_PASS = f"New{TEST_PASS}"
 
 
 def run():
@@ -34,7 +35,7 @@ def run():
     from django.contrib.auth import get_user_model
     User = get_user_model()
     User.objects.filter(email=TEST_EMAIL).delete()
-    for eml in Path(".emails").glob("*faculty.inspector*"):
+    for eml in Path(".emails").glob("*auth_e2e*"):
         try:
             eml.unlink()
         except OSError:
@@ -169,7 +170,15 @@ def run():
         print("-> Successfully authenticated with new password.")
 
         browser.close()
-        print("Authentication and Email E2E verification complete!")
+
+    # Clean up test user and generated emails
+    User.objects.filter(email=TEST_EMAIL).delete()
+    for eml in Path(".emails").glob("*auth_e2e*"):
+        try:
+            eml.unlink()
+        except OSError:
+            pass
+    print("Authentication and Email E2E verification complete and cleaned up!")
 
 
 if __name__ == "__main__":
