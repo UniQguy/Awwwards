@@ -24,7 +24,7 @@
     {% endif %}
 
     <!-- Quick Filter Chips & Live Count Badge -->
-    <div class="category-quick-chips" role="region" aria-label="Quick category filters">
+    <div class="category-quick-chips tag-list dense-list" role="region" aria-label="Quick category filters">
       <span class="category-count-badge" id="category-live-count">{{ page_obj.paginator.count }} listing{{ page_obj.paginator.count|pluralize }}</span>
 
       {% for b in facets.brands|slice:":5" %}

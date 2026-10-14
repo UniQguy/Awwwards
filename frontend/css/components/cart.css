@@ -260,7 +260,7 @@
   }
 
   .mini-bag-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--world-overlay);
     backdrop-filter: blur(2px);
     opacity: 0;
     transition: opacity 250ms ease-out;
@@ -275,7 +275,7 @@
     height: 100vh;
     background: var(--world-surface);
     border-left: 1px solid var(--world-rule);
-    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--lift-2);
     display: flex;
     flex-direction: column;
     padding: var(--space-6);
@@ -300,7 +300,7 @@
       border-top: 1px solid var(--world-rule);
       border-radius: var(--radius-2) var(--radius-2) 0 0;
       transform: translateY(100%);
-      box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12);
+      box-shadow: var(--lift-2);
     }
     .mini-bag-dialog[open] .mini-bag-panel {
       transform: translateY(0);

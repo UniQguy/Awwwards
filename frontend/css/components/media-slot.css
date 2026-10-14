@@ -24,8 +24,8 @@
     position: absolute;
     bottom: var(--space-2);
     right: var(--space-2);
-    background-color: rgba(28, 25, 23, 0.75);
-    color: #FFFFFF;
+    background-color: color-mix(in srgb, var(--world-text) 75%, transparent);
+    color: var(--world-white);
     padding: 2px 8px;
     border-radius: var(--radius-1);
     font-size: 11px;

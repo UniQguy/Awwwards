@@ -113,13 +113,19 @@ def audit_page(page: Page, url: str, vp_name: str, width: int, height: int, page
                     errs.push(`Marquee grid top (${r.top.toFixed(0)}px) starts below fold (${vpH}px)`);
                 }
             }
-            // Check card heights if grid is present
+            // Check card widths and heights if grid is present (WP1.2 / DEC-045)
             const cards = Array.from(document.querySelectorAll('.grid-catalog .product-card'));
             if (cards.length > 0) {
+                const widths = cards.slice(0, 4).map(c => c.getBoundingClientRect().width);
+                const avgW = widths.reduce((a, b) => a + b, 0) / widths.length;
+                const minW = window.innerWidth >= 1200 ? 170 : 140;
+                if (window.innerWidth >= 1024 && (avgW < minW || avgW > 265)) {
+                    errs.push(`Product cards average width ${avgW.toFixed(0)}px outside target (${minW}-260px)`);
+                }
                 const heights = cards.slice(0, 4).map(c => c.getBoundingClientRect().height);
                 const avgH = heights.reduce((a, b) => a + b, 0) / heights.length;
-                if (avgH > 320) {
-                    errs.push(`Product cards average height ${avgH.toFixed(0)}px exceeds dense target (200-260px)`);
+                if (avgH > 425) {
+                    errs.push(`Product cards average height ${avgH.toFixed(0)}px exceeds bounded target (425px)`);
                 }
             }
             return errs;

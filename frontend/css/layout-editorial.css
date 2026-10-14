@@ -69,14 +69,14 @@
     font-size: var(--step--2, 0.75rem);
     font-weight: 500;
     letter-spacing: 0.04em;
-    color: var(--world-muted, #666);
+    color: var(--world-muted);
     max-width: 130px;
     line-height: 1.25;
   }
 
   @media (max-width: 1023px) {
     .chapter-nav-indicator {
-      display: none !important;
+      display: none;
     }
   }
 
@@ -87,9 +87,9 @@
     font-variant-numeric: tabular-nums;
     padding: 2px 6px;
     border-radius: var(--radius-sm, 2px);
-    background-color: var(--world-surface, rgba(0,0,0,0.04));
+    background-color: var(--world-surface);
     color: var(--world-accent);
-    border: 1px solid var(--world-rule, transparent);
+    border: 1px solid var(--world-rule);
     display: inline-flex;
     align-items: center;
     margin-left: 0.5rem;
@@ -97,7 +97,7 @@
 
   @media (min-width: 1024px) {
     .header-chapter-badge {
-      display: none !important;
+      display: none;
     }
   }
 
@@ -444,9 +444,12 @@
     right: var(--space-3);
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    font-size: var(--step--2);
+    justify-content: center;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    font-size: var(--step--1);
     font-weight: 600;
     color: var(--world-text);
     background-color: var(--world-bg);
@@ -462,6 +465,38 @@
     background-color: var(--world-surface);
     color: var(--world-accent);
     border-color: var(--world-accent);
+  }
+
+  @media (max-width: 640px) {
+    .pdp-sticky-subnav {
+      margin-bottom: var(--space-2);
+    }
+    .product-sheet-layout {
+      margin-top: var(--space-1);
+      gap: var(--space-2);
+    }
+    .product-frame-plate {
+      max-width: 200px;
+      margin: 0 auto;
+      padding: var(--space-1);
+    }
+    .product-frame-mat {
+      padding: var(--space-1);
+    }
+    .product-sheet-commerce-col h1.display-m {
+      font-size: var(--step-1);
+      line-height: 1.2;
+      margin-bottom: var(--space-1);
+    }
+    .product-sheet-commerce-col .chapter-link-band {
+      margin-bottom: var(--space-1);
+    }
+    .product-sheet-commerce-col .product-rating-line {
+      margin-bottom: var(--space-1);
+    }
+    .product-sheet-commerce-col .caption.text-muted.mb-3 {
+      margin-bottom: var(--space-1);
+    }
   }
 
   /* Sticky Sub-Nav Tab Bar (WP6) */
@@ -537,7 +572,7 @@
   }
 
   .pdp-lightbox-dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--world-overlay);
     backdrop-filter: blur(2px);
   }
 
@@ -695,7 +730,7 @@
   }
 
   .mini-bag-dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: var(--world-overlay);
     backdrop-filter: blur(2px);
   }
 
@@ -1106,6 +1141,25 @@
     .snap-rail-arrows {
       display: flex;
     }
+  }
+
+  .snap-rail-btn {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--step-0);
+  }
+
+  .link-subtle {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .category-snap-rail {

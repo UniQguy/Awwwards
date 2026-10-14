@@ -218,6 +218,18 @@
     --color-info: #1A4363;
     --color-info-tint: #EBF1F6;
 
+    /* Category Palette Accent Tokens for Swatches & Multi-World Components */
+    --color-accent-earphones-headphones: #9E3D24;
+    --color-accent-speakers: #7C4A2D;
+    --color-accent-smartphones: #8A3D52;
+    --color-accent-smartwatches-bands: #5C4A6F;
+    --color-accent-cameras: #6E4F32;
+    --color-accent-tvs: #1E3F5A;
+    --color-accent-keyboards-mice: #3F5C38;
+    --color-accent-cables-chargers-powerbanks: #73482F;
+    --color-accent-cases-protectors: #824C59;
+    --color-accent-other: #3E4A52;
+
     /* Default World Tokens (Earphones & Headphones — Warm Clay) */
     --world-bg: #F5F2EB;
     --world-surface: #EDE8DE;

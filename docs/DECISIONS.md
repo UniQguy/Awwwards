@@ -288,5 +288,11 @@
   6. *Flying Thumbnail & Bag Pulse*: On PDP Add to Bag, creates a 48x48 ghost thumbnail at button coordinates, animates transform directly to `#header-bag-count` over 0.5s with `cubic-bezier(0.2, 0.8, 0.2, 1)`, and executes a subtle 1.1x badge pulse.
   7. *Rule D (Slop Elimination) & Rule J (Idle Stability)*: Removed Three.js WebGL canvas loop and recurring cutout `setInterval` cycle. Configured ScrollTrigger `syncInterval: 99999999` to eliminate internal 250ms polling timers. Verified complete idle silence via `scripts/idle_check.py` (0 running animations, 0 mutations, 0 timers during 5-10s window across Home, Category, and PDP).
 - **Reason**: CDN gives caching and zero build weight; the cost is a network dependency, mitigated by SRI plus the vendored fallback. Motion is narrative and purposeful without decorative slop or idle CPU drain.
-- **Alternative Rejected**: Bundling 620kB Three.js engine or relying on unpinned CDNs without local fallbacks.
-
+### DEC-045: Alignment of Catalog Card Dimension Check in fold_audit.py (WP8)
+- **Date**: 2026-10-14
+- **Decision**: Aligned the catalog card dimension check in `scripts/fold_audit.py` with WP1.2's mandate:
+  1. *Context*: In Phase R5, `fold_audit.py` asserted `avgH <= 320` with the message `exceeds dense target (200-260px)`. The 200-260px figure was the WP1.2 specification for desktop card *width* (`card width 200-260 px; 4 columns at 1366, 5 at 1920`), not card height. In R5, cards had "wide strip" plates (aspect-ratio ~16/9), making the card height artificially short (~240px). When WP1.2 mandated: "Restore square plates (aspect-ratio 1/1), image object-fit contain at 80% of plate; card width 200-260 px; 4 columns at 1366, 5 at 1920", a 200-260px wide card mathematically results in a 200-260px tall plate. Adding the card body (brand, 2-line title, specs, tabular INR price, stock status badge: ~130-170px) produces a total card height of 350-410px.
+  2. *Check Adjustment*: Updated `fold_audit.py` to assert that card width falls within the mandated 200-260px range on desktop (with responsive boundary tolerance 170-265px across 1024px to 1920px viewports) and that card height remains bounded (<=425px) to prevent vertical bloating.
+  3. *Rule I Compliance*: In accordance with Rule I ("If a threshold must change, justify it in DECISIONS.md with evidence"), this change is documented with geometric proof.
+- **Reason**: Mathematical correctness given the restoration of near-square 1:1 plates and desktop 4/5-column grid layout.
+- **Alternative Rejected**: Reverting to deformed wide-strip plates or hiding critical typography (title, price, stock badge) to artificially compress card height under 320px.

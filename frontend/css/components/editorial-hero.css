@@ -133,7 +133,7 @@
     background: linear-gradient(
       105deg,
       transparent 20%,
-      rgba(255, 255, 255, 0.35) 50%,
+      color-mix(in srgb, var(--world-white) 35%, transparent) 50%,
       transparent 80%
     );
     transform: rotate(25deg);
@@ -257,7 +257,7 @@
       transition: none !important;
     }
     .hero-specular-sweep {
-      display: none !important;
+      display: none;
     }
   }
 

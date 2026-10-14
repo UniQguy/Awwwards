@@ -337,16 +337,16 @@
     flex-shrink: 0;
   }
 
-  .swatch-earphones-headphones { background-color: #8C531B; }
-  .swatch-speakers { background-color: #2D5A4C; }
-  .swatch-smartphones { background-color: #8A3D52; }
-  .swatch-smartwatches-bands { background-color: #5C4A6F; }
-  .swatch-cameras { background-color: #6E4F32; }
-  .swatch-tvs { background-color: #1E3F5A; }
-  .swatch-keyboards-mice { background-color: #3F5C38; }
-  .swatch-cables-chargers-powerbanks { background-color: #73482F; }
-  .swatch-cases-protectors { background-color: #6A4D59; }
-  .swatch-other { background-color: #4F5960; }
+  .swatch-earphones-headphones { background-color: var(--color-accent-earphones-headphones); }
+  .swatch-speakers { background-color: var(--color-accent-speakers); }
+  .swatch-smartphones { background-color: var(--color-accent-smartphones); }
+  .swatch-smartwatches-bands { background-color: var(--color-accent-smartwatches-bands); }
+  .swatch-cameras { background-color: var(--color-accent-cameras); }
+  .swatch-tvs { background-color: var(--color-accent-tvs); }
+  .swatch-keyboards-mice { background-color: var(--color-accent-keyboards-mice); }
+  .swatch-cables-chargers-powerbanks { background-color: var(--color-accent-cables-chargers-powerbanks); }
+  .swatch-cases-protectors { background-color: var(--color-accent-cases-protectors); }
+  .swatch-other { background-color: var(--color-accent-other); }
 
   .shop-cat-name {
     flex: 1 1 auto;
@@ -491,7 +491,7 @@
   .suggestion-item:hover,
   .suggestion-item[aria-selected="true"],
   .suggestion-item.is-selected {
-    background-color: var(--world-plate, var(--color-warm-paper-2, #ebe9e1));
+    background-color: var(--world-surface);
     border-left-color: var(--world-accent);
     color: var(--world-text);
   }
@@ -512,7 +512,7 @@
   .suggestion-thumb-plate {
     width: 48px;
     height: 48px;
-    background-color: var(--world-plate, #f5f3ee);
+    background-color: var(--world-surface);
     border: 1px solid var(--world-rule);
     border-radius: var(--radius-1);
     display: flex;

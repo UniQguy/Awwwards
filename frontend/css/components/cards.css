@@ -186,7 +186,7 @@
 
   .price-savings-note {
     font-size: var(--step--2);
-    color: var(--color-success, #2D6A4F);
+    color: var(--color-success);
     font-weight: 500;
     white-space: nowrap;
   }

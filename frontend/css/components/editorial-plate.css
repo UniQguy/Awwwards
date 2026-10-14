@@ -53,7 +53,7 @@
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
-    background: radial-gradient(circle at var(--tilt-glare-x, 50%) var(--tilt-glare-y, 50%), rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+    background: radial-gradient(circle at var(--tilt-glare-x, 50%) var(--tilt-glare-y, 50%), color-mix(in srgb, var(--world-white) 25%, transparent) 0%, transparent 60%);
     opacity: var(--tilt-glare-opacity, 0);
     transition: opacity 160ms var(--ease-utility);
   }
@@ -63,14 +63,14 @@
     .plate-collectible:focus-within,
     .plate-collectible .plate-mat-img,
     .plate-collectible .card-arrow-glyph {
-      transform: none !important;
+      transform: none;
     }
   }
 
   html[data-motion-tier="3"] .plate-collectible,
   html[data-motion-tier="3"] .plate-collectible .plate-mat-img,
   html[data-motion-tier="3"] .plate-collectible .card-arrow-glyph {
-    transform: none !important;
+    transform: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -215,7 +215,7 @@
 
   .price-savings-note {
     font-size: var(--step--2);
-    color: var(--color-success, #2D6A4F);
+    color: var(--color-success);
     font-weight: 500;
     white-space: nowrap;
   }
