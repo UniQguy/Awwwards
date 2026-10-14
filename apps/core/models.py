@@ -32,3 +32,24 @@ class UUIDModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class ContactMessage(TimeStampedModel):
+    """
+    Customer inquiry or support message submitted via contact form (WP7).
+    """
+
+    name = models.CharField(max_length=120)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    resolved = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Contact Message"
+        verbose_name_plural = "Contact Messages"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.subject} ({self.email})"
+

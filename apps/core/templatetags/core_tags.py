@@ -170,4 +170,21 @@ def static_file_exists(path: Any) -> bool:
     return bool(finders.find(clean_path))
 
 
+@register.filter(name="star_glyphs")
+def star_glyphs(rating: Any) -> str:
+    """
+    Render honest star glyphs (1-5) for a numeric rating:
+    e.g. 4.2 -> '★★★★☆'
+    """
+    if rating is None or rating == "":
+        return ""
+    try:
+        r = float(rating)
+        full = min(5, max(0, int(round(r))))
+        empty = 5 - full
+        return ("★" * full) + ("☆" * empty)
+    except Exception:
+        return ""
+
+
 

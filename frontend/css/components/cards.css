@@ -16,16 +16,17 @@
   /* The Plinth / Plate */
   .product-plate {
     position: relative;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 3;
+    max-height: 100px;
     width: 100%;
     background-color: var(--world-surface);
     border-radius: var(--radius-1);
-    padding: 10%;
+    padding: var(--space-2);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-1);
   }
 
   .product-plate img {
@@ -147,10 +148,10 @@
 
   .card-title {
     font-family: var(--font-text);
-    font-size: 16px;
+    font-size: var(--step--1);
     font-weight: 500;
     color: var(--world-text);
-    line-height: 1.35;
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;

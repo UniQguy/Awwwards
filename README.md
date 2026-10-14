@@ -152,20 +152,23 @@ Run all automated test suites and audits with a single command:
 # Run the complete Launch Audit
 python scripts/launch_audit.py
 
-# Run the full Python test suite (218 tests)
+# Run the full Python test suite (289 tests)
 python manage.py test
 
-# Run front-end unit tests
-npm run test:js
+# Run front-end unit tests (52 tests across 7 test files)
+npm test
 
-# Verify WCAG AA color contrast across all 10 category palettes
-python scripts/verify_contrast.py
+# Run 100% offline verification audit
+python scripts/offline_check.py
 
-# Run CSS layer architecture and specificity audit
-python scripts/css_audit.py
+# Run zero-defect layout audit across 8 viewports
+python scripts/layout_audit.py
 
-# Run internal site crawler
-python scripts/crawl_site.py
+# Run void and reveal defect audit
+python scripts/void_audit.py
+
+# Run full QA matrix and keyboard walkthrough
+python scripts/full_qa.py
 ```
 
 ---
@@ -174,6 +177,14 @@ python scripts/crawl_site.py
 
 Comprehensive documentation is organized in `docs/`:
 - [`docs/README.md`](docs/README.md): Master documentation table of contents.
+- [`docs/EXAM_RUNBOOK.md`](docs/EXAM_RUNBOOK.md): 6-minute live demonstration script and faculty Q&A defense.
+- [`docs/FEATURE_MATRIX.md`](docs/FEATURE_MATRIX.md): Traceability matrix mapping requirements to source files and tests.
+- [`docs/DEPLOY_READINESS.md`](docs/DEPLOY_READINESS.md): Production hardening, Nginx, Systemd, and deployment runbook.
+- [`docs/DATABASE_GUIDE.md`](docs/DATABASE_GUIDE.md): Non-developer database guide, ERD diagram, and inspection tools.
+- [`docs/EMAIL_SETUP.md`](docs/EMAIL_SETUP.md): Transactional email modes and developer outbox inspector.
+- [`docs/FLOW_REVIEW.md`](docs/FLOW_REVIEW.md): Commerce loophole review, concurrency locking, and security defenses.
+- [`docs/MARKET_AUDIT.md`](docs/MARKET_AUDIT.md): Competitive commerce UX benchmark against top Indian platforms.
+- [`docs/PLACEHOLDERS_TO_REPLACE.md`](docs/PLACEHOLDERS_TO_REPLACE.md): Production cutover checklist and credentials audit.
 - [`docs/STANDING_ORDERS.md`](docs/STANDING_ORDERS.md): Architectural rules and honesty principles.
 - [`docs/LEDGER.md`](docs/LEDGER.md): Canonical registry of models, fields, and services.
 - [`docs/URLS.md`](docs/URLS.md): Full route map with views, permissions, and context.
@@ -182,4 +193,3 @@ Comprehensive documentation is organized in `docs/`:
 - [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md): Query optimization, caching headers, and database pragmas.
 - [`docs/SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.md): Threat models, rate limits, and audit findings.
 - [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md): Production deployment reference and environment variables.
-- [`docs/FINAL_REPORT.md`](docs/FINAL_REPORT.md): Final delivery report and owner action items.

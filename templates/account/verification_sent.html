@@ -7,6 +7,11 @@
   <div class="checkout-card max-w-md mx-auto text-center">
     <h1 class="display-l mb-2">Verification Email Sent</h1>
     <p class="body-sm mb-6">We have sent a verification link to your email address. Please click the link inside to activate your account.</p>
+    {% if debug %}
+    <div class="alert alert-info mb-6">
+      Local inspection: <a href="{% url 'dev_outbox' %}" class="text-accent">Open Developer Outbox &rarr;</a> to view the message and click the confirmation link immediately.
+    </div>
+    {% endif %}
     <a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a>
   </div>
 </div>

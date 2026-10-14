@@ -117,3 +117,24 @@ class CartViewsTests(TestCase):
         resp = self.client.post(reverse("coupon_apply"), {"code": "NONEXISTENT"}, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "was not recognized")
+
+    def test_cart_save_for_later_and_move_to_bag(self):
+        """WP5: Items can be saved for later and moved back to bag without losing quantities."""
+        # 1. Add item with qty 2
+        self.client.post(reverse("cart_add", kwargs={"product_id": self.product.id}), {"quantity": 2})
+
+        # 2. Save for later
+        resp_save = self.client.post(reverse("cart_save_for_later", kwargs={"product_id": self.product.id}), follow=True)
+        self.assertEqual(resp_save.status_code, 200)
+        self.assertContains(resp_save, "Saved")
+        self.assertContains(resp_save, "Saved for Later (1)")
+        self.assertContains(resp_save, "Move to Bag")
+
+        # 3. Move back to bag
+        resp_move = self.client.post(reverse("cart_move_to_bag", kwargs={"product_id": self.product.id}), follow=True)
+        self.assertEqual(resp_move.status_code, 200)
+        self.assertContains(resp_move, "Moved")
+        self.assertContains(resp_move, "to your bag")
+        # Line subtotal should reflect 2 * 400 = 800
+        self.assertContains(resp_move, "₹800")
+

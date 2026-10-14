@@ -22,9 +22,10 @@ export function initChapterPinnedStage() {
   const isFine = window.matchMedia("(pointer: fine)").matches;
   const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const isDesktop = window.innerWidth >= 1024;
+  const isTall = window.innerHeight >= 800;
 
-  // Strict guard: Tier 1, desktop >= 1024px, fine pointer, not reduced motion
-  if (tier !== "1" || !isFine || isReduced || !isDesktop) {
+  // Strict guard: Tier 1, desktop >= 1024px, viewport height >= 800px, fine pointer, not reduced motion
+  if (tier !== "1" || !isFine || isReduced || !isDesktop || !isTall) {
     return;
   }
 
@@ -39,13 +40,13 @@ export function initChapterPinnedStage() {
       const stackSlot = chapter.querySelector(".chapter-stack-slot");
       const textCol = chapter.querySelector(".chapter-text-col");
 
-      // Timeline scrubbed over 120% scroll distance (pins for 2.2 viewport heights total)
+      // Timeline scrubbed over 60% scroll distance (pins for 1.6 viewport heights total)
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: chapter,
           pin: true,
           start: "top top",
-          end: "+=120%",
+          end: "+=60%",
           scrub: 0.5,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -99,9 +100,10 @@ export function initChapterPinnedStage() {
 }
 
 function handleResize() {
-  if (window.innerWidth < 1024 && pinnedTriggers.length > 0) {
+  const shouldPin = window.innerWidth >= 1024 && window.innerHeight >= 800;
+  if (!shouldPin && pinnedTriggers.length > 0) {
     teardownChapterPinnedStage();
-  } else if (window.innerWidth >= 1024 && pinnedTriggers.length === 0) {
+  } else if (shouldPin && pinnedTriggers.length === 0) {
     initChapterPinnedStage();
   }
 }

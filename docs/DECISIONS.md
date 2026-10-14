@@ -187,3 +187,34 @@
 - **Reason**: Eliminates horizontal scroll overflow entirely on 390px mobile screens without breaking table layout or causing horizontal page jitter.
 - **Alternative Rejected**: Forcing `overflow-x: hidden` globally on `<body>` which masks layout bugs and disables sticky positioning.
 
+### DEC-032: RFC 5322 Outbox Inspector and Configurable Email Modes
+- **Date**: 2026-10-14
+- **Decision**: Implemented `EMAIL_MODE` setting supporting `file`, `console`, and `smtp`, with `InspectableFileEmailBackend` storing standard `.eml` files in `.emails/` and `/dev/outbox/` web inspector active in `DEBUG=True`.
+- **Reason**: Allows seamless, zero-dependency offline review and verification of transactional emails (order confirmations, shipping notices, refunds) without needing live SMTP servers.
+- **Alternative Rejected**: Forcing an external mail server or leaving developers without visual email inspection tools.
+
+### DEC-033: Clamped Fluid Typography and Viewport Fold Scale Safeguards
+- **Date**: 2026-10-14
+- **Decision**: Clamped body typography to 15-16px, captions to 12-13px, display-2xl to max 48px, capped PDP hero plates to 440px desktop / 260px mobile with sticky commerce column, clamped category marquee height to 360-420px, and guarded GSAP pinned horizontal walks with `window.innerHeight >= 800`.
+- **Reason**: Guarantees key commerce CTAs, primary headlines, and purchase buttons remain above the fold across all standard laptop displays (1366x768, 1440x900, 1536x864, 1093x614) while preventing layout voids or scroll traps.
+- **Alternative Rejected**: Unbounded viewport-relative sizing (`vw`/`vh`) that forced crucial purchase buttons below the fold on compact laptop screens.
+
+### DEC-034: Star Glyphs with Honest Source Attribution
+- **Date**: 2026-10-14
+- **Decision**: Converted raw numerical ratings to semantic Unicode star glyphs (`★★★★☆`) via `star_glyphs` template filter, strictly accompanied by the source name and rating volume count (e.g. `(437651 Amazon India ratings)`). Zero aggregate or store-authored ratings are invented.
+- **Reason**: Delivers familiar, scannable commerce visual ratings while strictly adhering to Standing Orders honesty rules (no fabricated reviews, zero invented testimonials).
+- **Alternative Rejected**: Fabricating store-level user reviews or omitting source attribution.
+
+### DEC-036: Academic Demonstration Labeling and Compliance Policy Banners
+- **Date**: 2026-10-14
+- **Decision**: Added explicit academic demonstration notices to all legal documents (`/legal/terms/`, `/legal/privacy/`, `/legal/shipping/`, `/legal/refunds/`), checkout review, and invoice templates. Established statutory 14-day hardware inspection windows, serial-number verification on returns, and Section 34 CGST Act credit note generation while clearly distinguishing educational demonstration data from commercial obligations.
+- **Reason**: Ensures complete academic integrity and legal clarity during university faculty inspection, ensuring no viewer confuses project demonstration content with live commercial warranties.
+- **Alternative Rejected**: Leaving policies as generic unlabelled boilerplate or omitting statutory Indian GST compliance mechanisms.
+
+### DEC-037: 100% Offline Storefront Capability and Local Media Fallbacks
+- **Date**: 2026-10-14
+- **Decision**: Implemented zero-dependency offline resilience with `scripts/offline_check.py`, local asset caching in `media/products/`, inline SVG geometric fallback plates, and strict local CSP rules with zero CDN reliance.
+- **Reason**: Guarantees that university faculty or evaluation teams can run the entire storefront disconnected from the internet without missing fonts, broken CSS, failed images, or external tracking delays.
+- **Alternative Rejected**: Relying on external CDNs (Google Fonts, unpkg, Cloudflare) or third-party image hosts that fail during offline examination.
+
+

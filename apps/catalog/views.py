@@ -15,7 +15,10 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonRes
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 
+from django.utils import timezone
+
 from apps.catalog.models import Category, Collection, Product
+from apps.promotions.models import Coupon
 from apps.catalog.services.editorial import (
     brand_list as get_editorial_brands,
     category_spread,
@@ -360,6 +363,16 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
     if remembered_pincode:
         delivery_estimate = estimate_delivery(remembered_pincode)
 
+    # Active available coupons applicable to this product category
+    now = timezone.now()
+    available_coupons = list(
+        Coupon.objects.filter(is_active=True)
+        .filter(Q(valid_from__isnull=True) | Q(valid_from__lte=now))
+        .filter(Q(valid_until__isnull=True) | Q(valid_until__gte=now))
+        .filter(Q(applicable_categories=product.category) | Q(applicable_categories__isnull=True))
+        .distinct()[:3]
+    )
+
     context = {
         "product": product,
         "specifications": specifications,
@@ -369,6 +382,7 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
         "related_products": related_products,
         "delivery_estimate": delivery_estimate,
         "remembered_pincode": remembered_pincode,
+        "available_coupons": available_coupons,
         "max_cart_qty": getattr(settings, "CART_MAX_QTY_PER_LINE", 10),
         "breadcrumbs": [
             {"title": "Categories", "url": "/categories/"},

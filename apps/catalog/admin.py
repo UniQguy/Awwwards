@@ -48,15 +48,25 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ["sku", "display_name", "category", "parsed_brand", "selling_price", "mrp", "is_available", "source_rating"]
     list_filter = ["category", "parsed_brand", "is_available"]
     search_fields = ["sku", "source_asin", "display_name", "raw_name", "parsed_brand"]
-    readonly_fields = ["source_asin", "source_url", "effective_hsn", "effective_gst_rate", "effective_gst_verified", "created_at", "updated_at"]
     inlines = [ProductSpecificationInline, ProductMediaInline]
     ordering = ["-source_rating_count", "display_name"]
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj is None:
+            return ["effective_hsn", "effective_gst_rate", "effective_gst_verified", "created_at", "updated_at"]
+        return ["source_asin", "source_url", "effective_hsn", "effective_gst_rate", "effective_gst_verified", "created_at", "updated_at"]
+
+    def save_model(self, request, obj, form, change):
+        if not obj.source_asin:
+            import uuid
+            obj.source_asin = f"LOC{uuid.uuid4().hex[:7].upper()}"
+        super().save_model(request, obj, form, change)
 
 
 class FeaturedProductInline(admin.TabularInline):
     model = FeaturedProduct
     extra = 1
-    autocomplete_fields = ["product"]
+    raw_id_fields = ["product"]
     fields = ["product", "is_hero", "callout", "display_order"]
 
 
@@ -66,7 +76,7 @@ class CollectionAdmin(admin.ModelAdmin):
     list_filter = ["placement", "category", "is_active", "is_sample_data"]
     search_fields = ["title", "slug", "intro"]
     prepopulated_fields = {"slug": ("title",)}
-    autocomplete_fields = ["category"]
+    raw_id_fields = ["category"]
     inlines = [FeaturedProductInline]
     ordering = ["display_order", "title"]
 

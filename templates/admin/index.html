@@ -1,0 +1,54 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div id="content-main">
+  {% if dashboard %}
+  <div class="module" id="store-operations-dashboard" style="margin-bottom: 24px; padding: 20px 24px; background: #ffffff; border: 1px solid var(--hairline-color, #cbd5e1); border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+      <h2 style="margin: 0; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #0f172a;">
+        {% translate "Store Operations Snapshot" %}
+      </h2>
+      <span style="font-size: 11px; color: #64748b; font-family: monospace;">{% translate "Live Metrics" %}</span>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 18px;">
+      <div style="padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
+        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Orders Today</div>
+        <div style="font-size: 26px; font-weight: 700; color: #0f172a; margin-top: 6px;">{{ dashboard.orders_today }}</div>
+      </div>
+      <div style="padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
+        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Today's Revenue</div>
+        <div style="font-size: 26px; font-weight: 700; color: #0f172a; margin-top: 6px;">₹{{ dashboard.revenue_today }}</div>
+      </div>
+      <div style="padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
+        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Low Stock Alert</div>
+        <div style="font-size: 26px; font-weight: 700; color: {% if dashboard.low_stock_count %}#b91c1c{% else %}#0f172a{% endif %}; margin-top: 6px;">
+          {{ dashboard.low_stock_count }}
+        </div>
+      </div>
+      <div style="padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
+        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Unpriced Products</div>
+        <div style="font-size: 26px; font-weight: 700; color: {% if dashboard.products_without_price %}#b91c1c{% else %}#0f172a{% endif %}; margin-top: 6px;">
+          {{ dashboard.products_without_price }}
+        </div>
+      </div>
+    </div>
+
+    {% if dashboard.orders_by_status %}
+    <div style="border-top: 1px solid #f1f5f9; padding-top: 14px; font-size: 13px; color: #334155;">
+      <strong style="margin-right: 8px;">{% translate "Orders by Status:" %}</strong>
+      <span style="display: inline-flex; flex-wrap: wrap; gap: 8px;">
+        {% for st in dashboard.orders_by_status %}
+          <span style="background: #e2e8f0; color: #1e293b; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;">
+            {{ st.status }}: <strong>{{ st.count }}</strong>
+          </span>
+        {% endfor %}
+      </span>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  {{ block.super }}
+</div>
+{% endblock %}

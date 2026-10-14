@@ -29,9 +29,10 @@ export function initCategoryGallery() {
   const isFine = window.matchMedia("(pointer: fine)").matches;
   const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const isDesktop = window.innerWidth >= 1024;
+  const isTall = window.innerHeight >= 800;
 
-  // Tier 1 Desktop fine-pointer path only
-  if (tier !== "1" || !isFine || isReduced || !isDesktop) {
+  // Tier 1 Desktop fine-pointer path with sufficient vertical height only
+  if (tier !== "1" || !isFine || isReduced || !isDesktop || !isTall) {
     return;
   }
 
@@ -133,9 +134,10 @@ function handleProgressBarClick(e) {
 }
 
 function handleResize() {
-  if (window.innerWidth < 1024 && galleryTrigger) {
+  const shouldRun = window.innerWidth >= 1024 && window.innerHeight >= 800;
+  if (!shouldRun && galleryTrigger) {
     teardownCategoryGallery();
-  } else if (window.innerWidth >= 1024 && !galleryTrigger) {
+  } else if (shouldRun && !galleryTrigger) {
     initCategoryGallery();
   }
 }

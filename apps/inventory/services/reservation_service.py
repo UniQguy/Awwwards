@@ -24,11 +24,10 @@ def get_available_stock(product: Product) -> int:
     Computes available unreserved stock for a product:
     on-hand physical inventory minus all active unexpired reservations.
     """
-    try:
-        inv = product.inventory
-        physical_qty = inv.quantity
-    except (Inventory.DoesNotExist, AttributeError):
+    inv = Inventory.objects.filter(product=product).first()
+    if not inv:
         return 0
+    physical_qty = inv.quantity
 
     now = timezone.now()
     reserved_qty = (

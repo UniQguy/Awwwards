@@ -1,34 +1,57 @@
 {% extends "base.html" %}
 
 {% block title %}Terms of Service — ELECTROCART{% endblock %}
-{% block meta_description %}Commercial terms, pricing rules, and conditions governing orders on ELECTROCART.{% endblock %}
+{% block meta_description %}Commercial terms, pricing rules, and conditions governing demonstration orders on ELECTROCART.{% endblock %}
 
 {% block content %}
-<div class="container section">
-  <h1 class="display-l mb-1">Terms of Service</h1>
-  <p class="caption mb-6">Last updated: {% now "F j, Y" %}</p>
+<div class="container section max-w-3xl">
+  <header class="page-shell-header mb-6">
+    <h1 class="page-shell-heading">Terms of Service</h1>
+    <p class="caption text-muted">Last updated: {% now "F j, Y" %}</p>
+  </header>
+
+  <div class="alert alert-info mb-6" role="note">
+    <p class="body-sm">
+      <strong>Demonstration store policy.</strong> This is an academic project; no actual sales occur and no legal liability is assumed.
+    </p>
+  </div>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">1. Introduction &amp; Overview</h2>
-    <p class="body">Welcome to ELECTROCART, operated by {{ seller_mode.seller_legal_name }}. By browsing, accessing, or purchasing from our platform, you agree to comply with and be bound by the following terms and conditions.</p>
+    <h2 class="heading mb-2">1. Educational Project Scope</h2>
+    <p class="body">
+      ELECTROCART is an educational e-commerce demonstration platform developed for academic evaluation. All product listings, pricing figures, and technical specifications originate from an archival marketplace dataset and are presented solely for illustrative purposes. No commercial contracts of sale are concluded.
+    </p>
   </section>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">2. Commerce &amp; Pricing</h2>
-    <p class="body">All prices listed on ELECTROCART are in Indian Rupees (INR ₹) under applicable Indian regulations. We reserve the right to revise catalogue pricing, specifications, and availability without prior notice.</p>
+    <h2 class="heading mb-2">2. Pricing &amp; Currency</h2>
+    <p class="body mb-3">
+      All prices displayed on ELECTROCART are denominated in Indian Rupees (INR ₹) inclusive of applicable Goods and Services Tax (GST) as prescribed by Indian tax authorities.
+    </p>
+    <p class="body">
+      Product availability, price discounts, and promotional coupon codes reflect demonstration data and do not represent binding commercial commitments.
+    </p>
   </section>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">3. Orders, Dispatch &amp; Invoicing</h2>
-    <p class="body">Placement of an order constitutes an offer to purchase. Contracts are concluded upon order confirmation and dispatch. A valid GST Tax Invoice or Bill of Supply will be generated and issued with every completed order.</p>
+    <h2 class="heading mb-2">3. Orders, Invoicing &amp; Official Tax Bills</h2>
+    <p class="body">
+      Placement of an order initiates a demonstration transaction. Orders placed via Cash on Delivery or simulated Razorpay test gateway generate official GST Tax Invoices or Bills of Supply adhering strictly to Section 31 of the CGST Act, 2017 with sequential, gap-free financial numbering.
+    </p>
   </section>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">4. Editorial &amp; Legal Review Notice</h2>
-    <div class="alert alert-info" role="note">
-      <p class="body-sm"><strong>[PLACEHOLDER - SUBJECT TO OWNER LEGAL REVIEW]</strong></p>
-      <p class="caption mt-1">The operational clauses, dispute resolution venue (jurisdiction), and indemnity provisions herein reflect baseline provisions and are subject to final vetting by the platform owner's legal counsel.</p>
-    </div>
+    <h2 class="heading mb-2">4. Trademarks &amp; Intellectual Property</h2>
+    <p class="body">
+      All manufacturer brand names, logos, model designations, and product photography referenced on this site (including Apple, Sony, boAt, Samsung, Amazon Basics, and others) remain the exclusive property of their respective trademark holders. Their presence serves exclusively as descriptive metadata for academic study.
+    </p>
+  </section>
+
+  <section class="mb-6">
+    <h2 class="heading mb-2">5. Limitation of Liability</h2>
+    <p class="body">
+      Under no circumstances shall the authors, maintainers, or hosting contributors be liable for any direct, indirect, incidental, or consequential damages resulting from the use or inability to use this demonstration software.
+    </p>
   </section>
 </div>
 {% endblock %}

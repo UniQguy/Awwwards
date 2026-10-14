@@ -74,7 +74,12 @@
                     <button type="submit" class="btn btn-secondary btn-sm" aria-label="Update quantity">Update</button>
                   </form>
 
-                  <form action="{% url 'cart_remove' line.product.id %}" method="post" data-fetch-enhance>
+                  <form action="{% url 'cart_save_for_later' line.product.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary btn-sm" aria-label="Save {{ line.product.display_name }} for later">Save for Later</button>
+                  </form>
+
+                  <form action="{% url 'cart_remove' line.product.id %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-quiet btn-sm" aria-label="Remove {{ line.product.display_name }} from bag">Remove</button>
                   </form>
@@ -95,6 +100,42 @@
             <button type="submit" class="btn btn-secondary btn-sm">Clear Bag</button>
           </form>
         </div>
+
+        <!-- Saved for Later (WP5: two-way item preservation) -->
+        {% if saved_for_later_items %}
+          <div class="saved-for-later-section mt-8 pt-6 hairline-top">
+            <h3 class="label mb-4">Saved for Later ({{ saved_for_later_items|length }})</h3>
+            <div class="cart-items-list">
+              {% for s_item in saved_for_later_items %}
+                <article class="cart-line-item mb-4 p-4 border-rule bg-surface">
+                  <div class="cart-item-thumbnail">
+                    {% include "includes/product_image.html" with product=s_item.product %}
+                  </div>
+                  <div class="cart-item-details flex-1">
+                    <a href="{% url 'product_detail' slug=s_item.product.slug %}" class="cart-item-name">
+                      {{ s_item.product.display_name }}
+                    </a>
+                    <span class="caption">SKU: {{ s_item.product.sku }}</span>
+                    <div class="price-row mt-1">
+                      <span class="price-current">{{ s_item.product.selling_price|inr }}</span>
+                      <span class="caption text-muted ml-2">Qty: {{ s_item.quantity }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 mt-3">
+                      <form action="{% url 'cart_move_to_bag' s_item.product.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-sm">Move to Bag</button>
+                      </form>
+                      <form action="{% url 'cart_remove' s_item.product.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-quiet btn-sm">Remove</button>
+                      </form>
+                    </div>
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
 
         <!-- Cross-Sell Section (WP7: 4 standard cards from first item category) -->
         {% if cross_sell_products %}
@@ -203,13 +244,60 @@
       </aside>
     </div>
   {% else %}
-    <div class="empty-state-card text-center p-8">
-      <h2 class="heading mb-2">Your Shopping Cart is Empty</h2>
+    <div class="empty-state-card text-center p-8 mb-8">
+      <h2 class="heading mb-2">{% if saved_for_later_items %}Your Active Bag is Empty{% else %}Your Shopping Cart is Empty{% endif %}</h2>
       <p class="body-sm text-muted max-w-md mx-auto mb-6">
-        Browse our catalogue to discover audio, keyboards, cameras, and personal electronics.
+        {% if saved_for_later_items %}
+          You have {{ saved_for_later_items|length }} item{{ saved_for_later_items|length|pluralize }} saved for later below.
+        {% else %}
+          Browse our catalogue to discover audio, keyboards, cameras, and personal electronics.
+        {% endif %}
       </p>
       <a href="{% url 'category_list' %}" class="btn btn-primary">Browse all categories &rarr;</a>
     </div>
+
+    {% if saved_for_later_items %}
+      <div class="saved-for-later-section mb-8 max-w-2xl mx-auto">
+        <h3 class="label mb-4">Saved for Later ({{ saved_for_later_items|length }})</h3>
+        <div class="cart-items-list">
+          {% for s_item in saved_for_later_items %}
+            <article class="cart-line-item mb-4 p-4 border-rule bg-surface">
+              <div class="cart-item-thumbnail">
+                {% include "includes/product_image.html" with product=s_item.product %}
+              </div>
+              <div class="cart-item-details flex-1">
+                <a href="{% url 'product_detail' slug=s_item.product.slug %}" class="cart-item-name">
+                  {{ s_item.product.display_name }}
+                </a>
+                <span class="caption">SKU: {{ s_item.product.sku }}</span>
+                <div class="price-row mt-1">
+                  <span class="price-current">{{ s_item.product.selling_price|inr }}</span>
+                  <span class="caption text-muted ml-2">Qty: {{ s_item.quantity }}</span>
+                </div>
+                <div class="flex items-center gap-3 mt-3">
+                  <form action="{% url 'cart_move_to_bag' s_item.product.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-sm">Move to Bag</button>
+                  </form>
+                  <form action="{% url 'cart_remove' s_item.product.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-quiet btn-sm">Remove</button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
   {% endif %}
+
+  <!-- Recently Viewed Products (Privacy-first client-side localStorage) -->
+  <section class="section pt-6" id="recently-viewed-section" style="display: none;" aria-labelledby="recent-cart-heading">
+    <div class="hairline-bottom pb-2 mb-5">
+      <h2 id="recent-cart-heading" class="label">Recently Viewed</h2>
+    </div>
+    <div class="grid-catalog" id="recently-viewed-grid"></div>
+  </section>
 </div>
 {% endblock %}

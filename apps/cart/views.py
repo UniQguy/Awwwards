@@ -111,6 +111,12 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
                     if len(cross_sell_products) >= 4:
                         break
 
+    saved_for_later_items = list(
+        cart.items.filter(is_saved_for_later=True)
+        .select_related("product", "product__category")
+        .prefetch_related("product__media")
+    )
+
     context = {
         "cart": cart,
         "summary": summary,
@@ -118,6 +124,7 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
         "coupon": coupon_obj,
         "cross_sell_products": cross_sell_products,
         "cross_sell_category": cross_sell_category,
+        "saved_for_later_items": saved_for_later_items,
         "max_qty_per_line": getattr(settings, "CART_MAX_QTY_PER_LINE", 10),
         "breadcrumbs": [{"title": "Bag", "url": "/cart/"}],
     }
@@ -301,5 +308,41 @@ def coupon_remove(request: HttpRequest) -> HttpResponse:
         del request.session["applied_coupon_code"]
         request.session.modified = True
         messages.info(request, "Coupon removed.")
+
+    return redirect("cart_detail")
+
+
+@require_POST
+def cart_save_for_later(request: HttpRequest, product_id: int) -> HttpResponse:
+    """
+    Moves an item from active cart to Saved for Later without losing quantity.
+    """
+    cart = _get_cart_for_request(request)
+    item = cart.items.filter(product_id=product_id, is_saved_for_later=False).first()
+    if item:
+        item.is_saved_for_later = True
+        item.save(update_fields=["is_saved_for_later", "updated_at"])
+        messages.success(request, f"Saved {item.product.display_name} for later.")
+
+    if is_json_request(request):
+        return JsonResponse({"status": "saved", "product_id": product_id})
+
+    return redirect("cart_detail")
+
+
+@require_POST
+def cart_move_to_bag(request: HttpRequest, product_id: int) -> HttpResponse:
+    """
+    Moves a saved item back to active shopping bag preserving quantity.
+    """
+    cart = _get_cart_for_request(request)
+    item = cart.items.filter(product_id=product_id, is_saved_for_later=True).first()
+    if item:
+        item.is_saved_for_later = False
+        item.save(update_fields=["is_saved_for_later", "updated_at"])
+        messages.success(request, f"Moved {item.product.display_name} to your bag.")
+
+    if is_json_request(request):
+        return JsonResponse({"status": "moved", "product_id": product_id})
 
     return redirect("cart_detail")

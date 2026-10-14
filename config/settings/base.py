@@ -218,20 +218,30 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ==============================================================================
-# EMAIL INFRASTRUCTURE
+# EMAIL INFRASTRUCTURE (WP3.2)
+# Controlled by EMAIL_MODE: 'file' (default for grading), 'console', or 'smtp'.
 # ==============================================================================
 
-EMAIL_BACKEND = os.environ.get(
-    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
-)
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() == "true"
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_MODE = os.environ.get("EMAIL_MODE", "file").strip().lower()
+EMAIL_FILE_PATH = BASE_DIR / ".emails"
+
+if EMAIL_MODE == "console":
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+elif EMAIL_MODE == "smtp":
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
+    EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+    EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() == "true"
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+else:
+    # Default 'file' mode for faculty grading and offline inspection
+    EMAIL_BACKEND = "apps.core.email_backends.InspectableFileEmailBackend"
+
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "Electrocart <noreply@electrocart.local>"
 )
+
 
 # ==============================================================================
 # COOKIE & SESSION SECURITY

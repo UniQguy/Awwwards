@@ -24,7 +24,8 @@ def calculate_cart_summary(
     Computes complete financial breakdown of a shopping cart.
     """
     items = list(
-        cart.items.select_related("product", "product__category", "product__inventory")
+        cart.items.filter(is_saved_for_later=False)
+        .select_related("product", "product__category", "product__inventory")
         .prefetch_related("product__media")
         .all()
     )

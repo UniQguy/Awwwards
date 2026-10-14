@@ -1,34 +1,66 @@
 {% extends "base.html" %}
 
 {% block title %}Shipping &amp; Delivery Policy — ELECTROCART{% endblock %}
-{% block meta_description %}Delivery timelines, courier dispatch procedures, and Indian postal code serviceability.{% endblock %}
+{% block meta_description %}Fulfillment locations, transit timelines, PIN code serviceability, and free shipping thresholds.{% endblock %}
 
 {% block content %}
-<div class="container section">
-  <h1 class="display-l mb-1">Shipping &amp; Delivery Policy</h1>
-  <p class="caption mb-6">Last updated: {% now "F j, Y" %}</p>
+<div class="container section max-w-3xl">
+  <header class="page-shell-header mb-6">
+    <h1 class="page-shell-heading">Shipping &amp; Delivery Policy</h1>
+    <p class="caption text-muted">Last updated: {% now "F j, Y" %}</p>
+  </header>
+
+  <div class="alert alert-info mb-6" role="note">
+    <p class="body-sm">
+      <strong>Demonstration store policy.</strong> This is an academic project; no actual sales occur and no legal liability is assumed.
+    </p>
+  </div>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">1. Dispatch Origin &amp; Coverage</h2>
-    <p class="body">All shipments are fulfilled directly from our central warehouse facility located in {{ seller_mode.seller_state }}, India. We service serviceable PIN codes across all 28 states and 8 union territories through vetted courier logistics partners.</p>
+    <h2 class="heading mb-2">1. Fulfillment Origin &amp; Coverage</h2>
+    <p class="body mb-3">
+      All customer orders are dispatched from our central electronics fulfillment hub in <strong>Bengaluru, Karnataka</strong>. We ship across India through certified courier logistics networks covering Tier 1 metropolitan centers, state capitals, and regional postal sectors.
+    </p>
+    <p class="body">
+      Customers can verify real-time PIN code delivery serviceability directly on any product page or in the shopping cart prior to checkout.
+    </p>
   </section>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">2. Shipping Rates &amp; Free Delivery</h2>
-    <p class="body">Orders totaling ₹499 or above qualify for complimentary standard delivery. For orders below ₹499, a nominal delivery fee (typically ₹40) is calculated and presented during checkout prior to payment.</p>
+    <h2 class="heading mb-2">2. Delivery Rates &amp; Free Shipping Threshold</h2>
+    <p class="body mb-3">
+      We believe in straightforward, transparent commerce without unexpected cart surcharges:
+    </p>
+    <ul class="body pl-4 mb-3 list-disc">
+      <li><strong>Orders ₹499 and above:</strong> Complimentary standard delivery to all serviceable Indian PIN codes.</li>
+      <li><strong>Orders below ₹499:</strong> A flat, nominal shipping charge of ₹40 is applied to cover courier line-haul and packaging.</li>
+    </ul>
   </section>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">3. Delivery Timelines</h2>
-    <p class="body">Standard delivery timelines typically range between 2 to 5 business days for major metropolitan hubs and 4 to 8 business days for regional and non-metro destinations.</p>
+    <h2 class="heading mb-2">3. Transit Timelines</h2>
+    <p class="body mb-3">
+      Standard transit durations from warehouse dispatch:
+    </p>
+    <ul class="body pl-4 mb-3 list-disc">
+      <li><strong>Tier 1 Metros (Bengaluru, Mumbai, Delhi NCR, Chennai, Hyderabad, Kolkata):</strong> 2 to 4 business days.</li>
+      <li><strong>Tier 2 &amp; Tier 3 Cities:</strong> 3 to 6 business days.</li>
+      <li><strong>Regional &amp; Island Territories (J&amp;K, North-East, Andaman &amp; Nicobar):</strong> 5 to 8 business days.</li>
+    </ul>
   </section>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">4. Logistics Partner SLA Notice</h2>
-    <div class="alert alert-info" role="note">
-      <p class="body-sm"><strong>[PLACEHOLDER - SUBJECT TO OWNER LEGAL REVIEW]</strong></p>
-      <p class="caption mt-1">Courier Service Level Agreements (SLAs), remote-area surcharges, and transit loss liability clauses are subject to commercial agreement with the logistics provider and legal review by the platform owner.</p>
-    </div>
+    <h2 class="heading mb-2">4. Cash on Delivery (COD) Guidelines</h2>
+    <p class="body mb-3">
+      Cash on Delivery is available for eligible order amounts up to <strong>₹50,000</strong> at serviceable courier locations. Orders exceeding ₹50,000 require secure digital prepayment via card, UPI, or net banking in accordance with RBI cash handling risk safeguards.
+    </p>
+  </section>
+
+  <section class="mb-6">
+    <h2 class="heading mb-2">5. Transit Insurance &amp; Fragile Packaging</h2>
+    <p class="body">
+      Sensitive electronics (cameras, glass-backed phones, high-performance headphones) are packed with multi-layer anti-static cushioning and tamper-evident security tape. All packages are insured against loss or severe courier transit damage until signature confirmation at the delivery address.
+    </p>
   </section>
 </div>
 {% endblock %}

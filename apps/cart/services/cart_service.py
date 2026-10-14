@@ -47,7 +47,8 @@ def add_to_cart(cart: Cart, product: Product, quantity: int = 1) -> CartItem:
 
         if item:
             item.quantity = target_qty
-            item.save(update_fields=["quantity", "updated_at"])
+            item.is_saved_for_later = False
+            item.save(update_fields=["quantity", "is_saved_for_later", "updated_at"])
         else:
             item = CartItem.objects.create(cart=cart, product=product, quantity=target_qty)
 

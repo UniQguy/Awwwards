@@ -68,6 +68,46 @@ def about(request):
     return render(request, "pages/about.html")
 
 
+def contact_us(request):
+    """
+    Customer inquiry and feedback submission form (WP7).
+    Saves message to database as ContactMessage and alerts staff in admin.
+    """
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    from django_ratelimit.decorators import ratelimit
+    from .models import ContactMessage
+
+    if getattr(request, "limited", False):
+        return error_429(request)
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        email = request.POST.get("email", "").strip()
+        subject = request.POST.get("subject", "").strip()
+        message = request.POST.get("message", "").strip()
+
+        if not name or not email or not message:
+            messages.error(request, "Please provide your name, a valid email address, and message.")
+            return render(
+                request,
+                "pages/contact.html",
+                {"name": name, "email": email, "subject": subject, "message": message},
+            )
+
+        ContactMessage.objects.create(
+            name=name,
+            email=email,
+            subject=subject or "General Inquiry",
+            message=message,
+        )
+        messages.success(request, "Thank you for reaching out. Your message has been recorded.")
+        return redirect("contact")
+
+    return render(request, "pages/contact.html")
+
+
+
 def robots_txt(request):
     site_url = getattr(settings, "SITE_URL", "http://localhost:8000").rstrip("/")
     admin_slug = getattr(settings, "ADMIN_URL", "admin/").strip("/")

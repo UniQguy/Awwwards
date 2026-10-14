@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Customer Care — ELECTROCART{% endblock %}
+{% block meta_description %}Contact our customer care team for questions regarding orders, technical specifications, or delivery.{% endblock %}
+
+{% block content %}
+<div class="container section max-w-4xl">
+  <header class="page-shell-header mb-6">
+    <h1 class="page-shell-heading">Contact Customer Care</h1>
+    <p class="caption text-muted">Direct assistance for inquiries, order status, and warranty verification</p>
+  </header>
+
+  <div class="grid-2 gap-8">
+    <!-- Contact Form -->
+    <section aria-labelledby="contact-form-heading">
+      <h2 id="contact-form-heading" class="heading mb-4">Send a Message</h2>
+
+      <form method="post" action="{% url 'contact' %}" class="flex flex-col gap-4">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="id-contact-name" class="form-label">
+            <span>Your Name</span>
+            <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            id="id-contact-name"
+            name="name"
+            class="form-control"
+            value="{{ name|default:'' }}"
+            placeholder="e.g. Priyanshu Sharma"
+            required
+            autocomplete="name"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="id-contact-email" class="form-label">
+            <span>Email Address</span>
+            <span class="text-danger">*</span>
+          </label>
+          <input
+            type="email"
+            id="id-contact-email"
+            name="email"
+            class="form-control"
+            value="{{ email|default:'' }}"
+            placeholder="you@example.com"
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="id-contact-subject" class="form-label">Subject</label>
+          <input
+            type="text"
+            id="id-contact-subject"
+            name="subject"
+            class="form-control"
+            value="{{ subject|default:'' }}"
+            placeholder="e.g. Question about order tracking or item specs"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="id-contact-message" class="form-label">
+            <span>Message</span>
+            <span class="text-danger">*</span>
+          </label>
+          <textarea
+            id="id-contact-message"
+            name="message"
+            rows="6"
+            class="form-control"
+            placeholder="Please detail your question, including order number if applicable."
+            required
+          >{{ message|default:'' }}</textarea>
+        </div>
+
+        <div>
+          <button type="submit" class="btn btn-primary">Send Message &rarr;</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Support Details Card -->
+    <aside aria-label="Customer Care Information" class="p-6 bg-surface border-rule flex flex-col gap-5 self-start">
+      <div>
+        <h3 class="label text-accent mb-2">Customer Care Channels</h3>
+        <p class="body-sm mb-3">
+          Our team inspects and resolves customer inquiries promptly during regular operations.
+        </p>
+        <dl class="body-sm flex flex-col gap-3">
+          <div>
+            <dt class="label text-muted">Email Inquiries</dt>
+            <dd><a href="mailto:care@electrocart.local" class="text-accent">care@electrocart.local</a></dd>
+          </div>
+          <div>
+            <dt class="label text-muted">Fulfillment Hub</dt>
+            <dd>Electronic City, Bengaluru, Karnataka 560100</dd>
+          </div>
+          <div>
+            <dt class="label text-muted">Hours of Operation</dt>
+            <dd>Monday &ndash; Saturday, 09:30 &ndash; 18:30 IST</dd>
+          </div>
+          <div>
+            <dt class="label text-muted">Expected Response</dt>
+            <dd>Within 1 business day</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="hairline-top pt-4">
+        <h4 class="label mb-2">Order Tracking</h4>
+        <p class="caption text-muted mb-3">
+          Have an existing order number? Check delivery milestones and carrier scans immediately.
+        </p>
+        <a href="{% url 'order_track_lookup' %}" class="btn btn-secondary btn-sm">Track Your Order &rarr;</a>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

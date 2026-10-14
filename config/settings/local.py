@@ -17,8 +17,8 @@ CSRF_TRUSTED_ORIGINS = list(CSRF_TRUSTED_ORIGINS) + [
 # Development motion debugging: allows ?motion=1|2|3 to force motion tiers
 MOTION_DEBUG = True
 
-# Display small "Placeholder" badge on media slots in local dev
-SHOW_PLACEHOLDER_LABELS = True
+# Display small "Placeholder" badge on media slots in local dev (defaults to True for honesty, can be set False for clean demo)
+SHOW_PLACEHOLDER_LABELS = os.environ.get("SHOW_PLACEHOLDER_LABELS", "true").lower() in ("true", "1", "yes")
 
 # Warn loudly on local startup if SELLER_STATE is missing
 if not SELLER_STATE:

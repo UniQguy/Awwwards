@@ -16,6 +16,7 @@ import { initStickyPurchaseBar } from "./modules/sticky-purchase-bar.js";
 import { initSearchSuggest } from "./modules/search-suggest.js";
 import { initMotionTier, initMotionToggleButton } from "./modules/capability.js";
 import { initMediaSlots } from "./modules/media_slot.js";
+import { initRecentlyViewed } from "./modules/recently-viewed.js";
 
 function initPasswordToggle() {
   document.addEventListener("click", (e) => {
@@ -112,6 +113,7 @@ function bootstrap() {
   initImageEntryFadeAndLift();
   initCardViewTransitions();
   initMediaSlots();
+  initRecentlyViewed();
 }
 
 if (document.readyState === "loading") {

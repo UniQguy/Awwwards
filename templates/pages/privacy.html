@@ -1,34 +1,69 @@
 {% extends "base.html" %}
 
 {% block title %}Privacy Policy — ELECTROCART{% endblock %}
-{% block meta_description %}Learn how ELECTROCART protects your personal information, session tokens, and order data.{% endblock %}
+{% block meta_description %}Learn how ELECTROCART handles customer data, session privacy, and data retention.{% endblock %}
 
 {% block content %}
-<div class="container section">
-  <h1 class="display-l mb-1">Privacy Policy</h1>
-  <p class="caption mb-6">Last updated: {% now "F j, Y" %}</p>
+<div class="container section max-w-3xl">
+  <header class="page-shell-header mb-6">
+    <h1 class="page-shell-heading">Privacy Policy</h1>
+    <p class="caption text-muted">Last updated: {% now "F j, Y" %}</p>
+  </header>
+
+  <div class="alert alert-info mb-6" role="note">
+    <p class="body-sm">
+      <strong>Demonstration store policy.</strong> This is an academic project; no actual sales occur and no legal liability is assumed.
+    </p>
+  </div>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">1. Data Collection &amp; Usage</h2>
-    <p class="body">{{ seller_mode.seller_legal_name }} values your privacy. We collect minimal customer information strictly necessary for order processing, logistics dispatch, and mandatory tax compliance under the Indian GST regime.</p>
+    <h2 class="heading mb-2">1. Data Minimization &amp; Collection</h2>
+    <p class="body mb-3">
+      ELECTROCART operates on strict data minimization principles. We collect only the contact information, shipping address, and phone number required to generate delivery manifests, calculate PIN-code serviceability, and issue official GST invoices.
+    </p>
+    <p class="body">
+      We do not sell, rent, or lease personal customer information to third-party data brokers or marketing networks.
+    </p>
   </section>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">2. Payments Security</h2>
-    <p class="body">ELECTROCART does not store, process, or transmit raw credit card or debit card numbers on our servers. All digital payments are processed through RBI-authorized payment aggregators (such as Razorpay) complying with PCI-DSS standards.</p>
+    <h2 class="heading mb-2">2. Digital Personal Data Protection (DPDP) Alignment</h2>
+    <p class="body mb-3">
+      In alignment with India's Digital Personal Data Protection Act (DPDP) 2023:
+    </p>
+    <ul class="body pl-4 mb-3 list-disc">
+      <li><strong>Purpose Limitation:</strong> Customer data is utilized exclusively for order fulfillment, shipment tracking, and transactional email notifications.</li>
+      <li><strong>Right to Erasure:</strong> Registered users may request account deactivation and anonymization of personal identifiers by contacting customer support.</li>
+      <li><strong>Consent:</strong> Guest checkout requires explicit affirmative submission of shipping details without background device finger-printing.</li>
+    </ul>
   </section>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">3. Cookies &amp; Session Management</h2>
-    <p class="body">We use essential HTTP cookies strictly to maintain user shopping sessions, guest bag contents, and CSRF protection. No third-party behavioral advertising trackers are utilized.</p>
+    <h2 class="heading mb-2">3. Payments &amp; Financial Security</h2>
+    <p class="body">
+      ELECTROCART does not store, process, or transmit raw credit card or debit card numbers on our infrastructure. All online payment transactions are processed through RBI-authorized payment aggregators (complying with PCI-DSS Level 1 specifications) using cryptographically signed webhooks and HMAC-SHA256 signature verification.
+    </p>
   </section>
 
   <section class="mb-6">
-    <h2 class="heading mb-2">4. Regulatory Disclosure</h2>
-    <div class="alert alert-info" role="note">
-      <p class="body-sm"><strong>[PLACEHOLDER - SUBJECT TO OWNER LEGAL REVIEW]</strong></p>
-      <p class="caption mt-1">This privacy declaration represents the initial engineering baseline. Specific compliance clauses under the Digital Personal Data Protection Act (DPDP) 2023 must be vetted and finalized by the platform owner's legal counsel.</p>
-    </div>
+    <h2 class="heading mb-2">4. Client Storage &amp; Cookies</h2>
+    <p class="body mb-3">
+      We employ essential HTTP cookies strictly for:
+    </p>
+    <ul class="body pl-4 mb-3 list-disc">
+      <li>Session persistence and shopping bag item preservation.</li>
+      <li>Cross-Site Request Forgery (CSRF) protection on state mutations.</li>
+    </ul>
+    <p class="body">
+      Browsing history features such as "Recently Viewed" items operate entirely within client-side browser <code>localStorage</code> and are never transmitted to our servers or third-party analytical endpoints.
+    </p>
+  </section>
+
+  <section class="mb-6">
+    <h2 class="heading mb-2">5. Data Retention &amp; Tax Compliance</h2>
+    <p class="body">
+      Order history, invoices, and credit notes are retained strictly for the mandatory duration required under Section 36 of the Central Goods and Services Tax (CGST) Act, 2017 (72 months from the due date of filing annual returns) to satisfy tax audit obligations, after which transactional records are purged.
+    </p>
   </section>
 </div>
 {% endblock %}

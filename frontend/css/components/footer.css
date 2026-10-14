@@ -44,6 +44,9 @@
   }
 
   .footer-colophon-wordmark {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     font-family: var(--font-display);
     font-size: var(--step-5);
     font-weight: 600;

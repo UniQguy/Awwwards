@@ -38,7 +38,7 @@ class Cart(TimeStampedModel):
 
     @property
     def total_quantity(self) -> int:
-        return sum(item.quantity for item in self.items.all())
+        return sum(item.quantity for item in self.items.filter(is_saved_for_later=False))
 
     @property
     def total_items(self) -> int:
@@ -63,6 +63,7 @@ class CartItem(TimeStampedModel):
         verbose_name=_("product"),
     )
     quantity = models.PositiveIntegerField(_("quantity"), default=1)
+    is_saved_for_later = models.BooleanField(_("is saved for later"), default=False, db_index=True)
 
     class Meta:
         verbose_name = _("cart item")

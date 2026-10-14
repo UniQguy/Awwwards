@@ -46,7 +46,16 @@
 <div class="container section-sm">
   {% include "includes/breadcrumbs.html" %}
 
-  <div class="product-sheet-layout mt-4">
+  <div
+    class="product-sheet-layout mt-4"
+    data-product-track="true"
+    data-product-id="{{ product.id }}"
+    data-product-slug="{{ product.slug }}"
+    data-product-name="{{ product.display_name }}"
+    data-product-price="{{ product.selling_price|inr }}"
+    data-product-image="{{ product.primary_image_url }}"
+    data-product-category="{{ product.category.name }}"
+  >
     <!-- Left Sticky Column: Large Exhibition Frame -->
     <div class="product-sheet-sticky-frame">
       <div class="product-frame-plate">
@@ -90,7 +99,7 @@
     </div>
 
     <!-- Right Column: Editorial Details & Commerce Panel -->
-    <div>
+    <div class="product-sheet-commerce-col">
       <a href="{% url 'category_detail' slug=product.category.slug %}" class="chapter-link-band">
         &larr; {{ product.category.name }} Chapter
       </a>
@@ -99,9 +108,21 @@
         <div class="label text-accent mb-1">{{ product.parsed_brand }}</div>
       {% endif %}
 
-      <h1 class="display-m mb-2">{{ product.display_name }}</h1>
+      <h1 class="display-m mb-1">{{ product.display_name }}</h1>
 
-      <p class="caption text-muted mb-4">
+      {% if product.source_rating %}
+        <div class="product-rating-line mb-3 flex items-center gap-2">
+          <span class="text-accent" aria-hidden="true">{{ product.source_rating|star_glyphs }}</span>
+          <span class="body-sm font-semibold">{{ product.source_rating|floatformat:1 }}</span>
+          {% if product.source_rating_count %}
+            <span class="caption text-muted">({{ product.source_rating_count }} Amazon India ratings)</span>
+          {% else %}
+            <span class="caption text-muted">(Amazon India source rating)</span>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <p class="caption text-muted mb-3">
         Listed as: {{ product.raw_name }}
       </p>
 
@@ -117,13 +138,77 @@
           {% endif %}
         </div>
 
-        <p class="caption text-muted mb-4">
+        <p class="caption text-muted mb-3">
           Prices are inclusive of applicable GST under Indian tax regulations.
         </p>
 
-        <div class="mb-4">
+        <div class="mb-3">
           {% include "includes/stock_badge.html" %}
         </div>
+
+        <!-- Inline PIN Code Delivery Estimator -->
+        <div class="product-pincode-inline mb-4 p-3 bg-surface border-rule">
+          <form action="{% url 'shipping_check' %}" method="post" class="flex gap-2 items-center" data-fetch-enhance>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <label for="shipping-pincode-input" class="caption text-muted flex-shrink-0">Deliver to:</label>
+            <input
+              type="text"
+              id="shipping-pincode-input"
+              name="pincode"
+              class="form-control"
+              placeholder="PIN code (e.g. 560001)"
+              pattern="[1-9][0-9]{5}"
+              maxlength="6"
+              value="{{ remembered_pincode }}"
+              required
+            >
+            <button type="submit" class="btn btn-secondary">Check</button>
+          </form>
+          {% if delivery_estimate %}
+            <div class="mt-2">
+              {% if delivery_estimate.serviceable %}
+                <p class="text-success caption">
+                  <strong>Delivery available to {{ remembered_pincode }}:</strong>
+                  {{ delivery_estimate.est_days_min }}&ndash;{{ delivery_estimate.est_days_max }} business days
+                  ({{ delivery_estimate.date_min|date:"D, M j" }} &ndash; {{ delivery_estimate.date_max|date:"D, M j" }})
+                  {% if delivery_estimate.cod_allowed %} &bull; Cash on Delivery eligible{% endif %}
+                </p>
+              {% else %}
+                <p class="text-danger caption">
+                  <strong>Delivery unavailable to PIN {{ remembered_pincode }}:</strong> {{ delivery_estimate.unavailable_reason }}
+                </p>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Available Coupons -->
+        {% if available_coupons %}
+          <div class="product-coupons-box mb-4">
+            <span class="label text-muted mb-2 block">Active Offers</span>
+            <div class="flex flex-col gap-2">
+              {% for cp in available_coupons %}
+                <div class="p-2 border-rule bg-surface flex justify-between items-center">
+                  <div>
+                    <span class="badge badge-accent">{{ cp.code }}</span>
+                    <span class="caption text-muted ml-2">
+                      {% if cp.discount_type == "percentage" %}
+                        {{ cp.discount_value|floatformat:0 }}% off
+                      {% else %}
+                        {{ cp.discount_value|inr }} off
+                      {% endif %}
+                      {% if cp.min_order_amount > 0 %}
+                        on orders over {{ cp.min_order_amount|inr }}
+                      {% endif %}
+                    </span>
+                  </div>
+                  <span class="caption text-muted">Use at checkout</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
 
         <!-- Purchase Actions -->
         <form action="{% url 'cart_add' product.id %}" method="post" data-fetch-enhance class="mb-4">
@@ -174,50 +259,6 @@
           </div>
         </section>
       {% endif %}
-
-      <!-- PIN Code Delivery Estimator -->
-      <section class="pincode-estimator-box mb-6" aria-labelledby="shipping-estimator-heading">
-        <h2 id="shipping-estimator-heading" class="label mb-2">Estimated Delivery &amp; Serviceability</h2>
-        <form action="{% url 'shipping_check' %}" method="post" class="flex gap-2 max-w-md" data-fetch-enhance>
-          {% csrf_token %}
-          <input type="hidden" name="next" value="{{ request.path }}">
-          <label for="shipping-pincode-input" class="sr-only">Enter 6-digit Indian PIN code</label>
-          <input
-            type="text"
-            id="shipping-pincode-input"
-            name="pincode"
-            class="form-control"
-            placeholder="Enter 6-digit PIN code"
-            pattern="[1-9][0-9]{5}"
-            maxlength="6"
-            value="{{ remembered_pincode }}"
-            required
-          >
-          <button type="submit" class="btn btn-secondary">Check</button>
-        </form>
-
-        {% if delivery_estimate %}
-          <div class="mt-3">
-            {% if delivery_estimate.serviceable %}
-              <p class="text-success body-sm">
-                <strong>Delivery available to PIN {{ remembered_pincode }}</strong>
-              </p>
-              <p class="caption mt-1">
-                Estimated arrival: {{ delivery_estimate.date_min|date:"D, M j" }} &ndash; {{ delivery_estimate.date_max|date:"D, M j" }}
-                ({{ delivery_estimate.est_days_min }}&ndash;{{ delivery_estimate.est_days_max }} business days)
-                {% if delivery_estimate.cod_allowed %} &bull; Cash on Delivery eligible{% endif %}
-              </p>
-            {% else %}
-              <p class="text-danger body-sm">
-                <strong>Delivery unavailable to PIN {{ remembered_pincode }}</strong>
-              </p>
-              <p class="caption mt-1">
-                {{ delivery_estimate.unavailable_reason }}
-              </p>
-            {% endif %}
-          </div>
-        {% endif %}
-      </section>
 
       <!-- Technical Specifications Table -->
       {% if specifications %}
@@ -277,6 +318,14 @@
       </div>
     </section>
   {% endif %}
+
+  <!-- Recently Viewed Products (Privacy-first client-side localStorage) -->
+  <section class="section pt-6" id="recently-viewed-section" style="display: none;" aria-labelledby="recent-heading">
+    <div class="hairline-bottom pb-2 mb-5">
+      <h2 id="recent-heading" class="label">Recently Viewed</h2>
+    </div>
+    <div class="grid-catalog" id="recently-viewed-grid"></div>
+  </section>
 </div>
 
 <!-- Mobile Sticky Bottom Purchase Bar -->
