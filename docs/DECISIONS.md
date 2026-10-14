@@ -229,6 +229,13 @@
 - **Reason**: Ensures clean layout, honest data representation, and zero plate geometry failures across all viewports.
 - **Alternative Rejected**: Deleting marquee secondary picks or hiding brands altogether.
 
-
-
-
+### DEC-040: Compact Two-Column Mega-Menu and Active World Scroll Thread (WP4)
+- **Date**: 2026-10-14
+- **Decision**: Redesigned the storefront header navigation into an editorial 2-column mega-menu panel (720px wide desktop; 100vw - 24px responsive mobile):
+  1. *Left Navigation Rail (320px)*: High-density vertical list of all 10 active categories with category world accent swatches, full titles, and right-aligned tabular counts (`font-variant-numeric: tabular-nums`). Completely eliminates text collision and single-word line wraps.
+  2. *Right Preview Rail*: Dynamic category preview card showing a 1:1 square thumbnail plate with multiply blend, starting price (`Priced from ₹...`), top 5 brand chips, budget shortcut link (`Under ₹...`), and deep category CTA (`Explore Category →`).
+  3. *Client-side Dynamic Preview*: Enhanced `menu-panel.js` with mouseenter/focus listeners updating the preview pane smoothly (160ms transition) without network requests or layout reflow. Added keyboard navigation (ArrowUp, ArrowDown, Home, End, Escape) and full `aria-expanded` synchronization.
+  4. *Mobile Adaptability*: On mobile (<=768px), hides preview rail, stacks the menu list to full width, and overrides position context to `position: static` so the panel spans full viewport width with 12px margin.
+  5. *Scroll Thread*: Pinned active world scroll progress thread along header bottom edge using GPU compositor `transform: scaleX(ratio)` with zero layout thrashing.
+- **Reason**: Converts the header into an informative, editorial discovery tool that previews category depths and price points immediately without blocking the viewport or causing horizontal overflow.
+- **Alternative Rejected**: Giant full-viewport mega-menus with heavy background imagery that overwhelm shoppers and gate content.

@@ -1,3 +1,4 @@
+{% load core_tags %}
 <header class="site-header" role="banner">
   <div class="container header-inner">
     <div class="header-brand-group">
@@ -12,19 +13,90 @@
           <span>Shop</span>
           <svg class="icon icon-xs" aria-hidden="true"><use href="#icon-chevron"></use></svg>
         </summary>
-        <div class="shop-dropdown-panel" role="region" aria-label="Shop categories">
-          <div class="shop-panel-header">
-            <a href="{% url 'category_list' %}" class="shop-panel-hub-link">All Categories &rarr;</a>
-            <a href="{% url 'brand_list' %}" class="shop-panel-hub-link">Brands Directory &rarr;</a>
-          </div>
-          <div class="shop-category-grid" role="list">
-            {% for cat in nav_categories %}
-              <a href="{% url 'category_detail' slug=cat.slug %}" class="shop-category-item" role="listitem">
-                <span class="cat-accent-swatch swatch-{{ cat.accent_key }}" aria-hidden="true"></span>
-                <span class="shop-cat-name">{{ cat.name }}</span>
-                <span class="shop-cat-count">{{ cat.product_count|default:"0" }}</span>
-              </a>
-            {% endfor %}
+        <div class="shop-dropdown-panel mega-menu-panel" id="mega-menu-panel" role="region" aria-label="Shop categories">
+          <div class="mega-menu-grid">
+            <!-- Left Column: Categories List -->
+            <div class="mega-menu-list-col">
+              <div class="shop-panel-header">
+                <a href="{% url 'category_list' %}" class="shop-panel-hub-link">All Categories &rarr;</a>
+                <a href="{% url 'brand_list' %}" class="shop-panel-hub-link">Brands Directory &rarr;</a>
+              </div>
+              <div class="mega-menu-cat-list" role="list">
+                {% for cat in nav_categories %}
+                  <a
+                    href="{% url 'category_detail' slug=cat.slug %}"
+                    class="mega-menu-cat-item{% if forloop.first %} is-active{% endif %}"
+                    role="listitem"
+                    data-cat-slug="{{ cat.slug }}"
+                    data-cat-name="{{ cat.name }}"
+                    data-cat-count="{{ cat.product_count|default:'0' }}"
+                    data-cat-price="{{ cat.price_from|inr }}"
+                    data-cat-cutout="{{ cat.cutout_url }}"
+                    data-cat-title="{{ cat.lead_title }}"
+                    data-cat-brands="{{ cat.top_brands_str }}"
+                    data-cat-budget-label="{{ cat.budget_label }}"
+                    data-cat-budget-url="{{ cat.budget_url }}"
+                    data-cat-accent="{{ cat.accent_key }}"
+                  >
+                    <span class="cat-accent-swatch swatch-{{ cat.accent_key }}" aria-hidden="true"></span>
+                    <span class="shop-cat-name">{{ cat.name }}</span>
+                    <span class="shop-cat-count">{{ cat.product_count|default:"0" }}</span>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Right Column: Interactive Preview Pane -->
+            <div class="mega-menu-preview-col" id="mega-menu-preview-pane" aria-live="polite">
+              {% with lead_cat=nav_categories|first %}
+                {% if lead_cat %}
+                  <div class="mega-preview-card" id="mega-preview-card">
+                    <div class="mega-preview-plate">
+                      {% if lead_cat.cutout_url %}
+                        <img src="{{ lead_cat.cutout_url }}" alt="" class="mega-preview-img" id="mega-preview-img" width="160" height="160" loading="eager">
+                      {% else %}
+                        <div class="image-fallback-plate" id="mega-preview-fallback">
+                          <span class="image-fallback-initial">{{ lead_cat.name|slice:":1" }}</span>
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div class="mega-preview-meta">
+                      <span class="mega-preview-cat-label" id="mega-preview-cat-label">{{ lead_cat.name }}</span>
+                      <p class="mega-preview-price-line" id="mega-preview-price-line">Priced from <strong id="mega-preview-price-val">{{ lead_cat.price_from|inr }}</strong></p>
+                      <div class="mega-preview-brands" id="mega-preview-brands">
+                        <span class="mega-preview-brands-title">Top Brands</span>
+                        <div class="mega-preview-brand-chips" id="mega-preview-brand-chips">
+                          {% for b in lead_cat.top_brands %}
+                            <a href="{% url 'category_detail' slug=lead_cat.slug %}?brand={{ b }}" class="mega-brand-chip">{{ b }}</a>
+                          {% endfor %}
+                        </div>
+                      </div>
+                      <div class="mega-preview-footer">
+                        {% if lead_cat.budget_url %}
+                          <a href="{{ lead_cat.budget_url }}" class="mega-budget-link" id="mega-preview-budget-link">{{ lead_cat.budget_label }} &rarr;</a>
+                        {% endif %}
+                        <a href="{% url 'category_detail' slug=lead_cat.slug %}" class="btn btn-sm btn-primary" id="mega-preview-view-link">Explore {{ lead_cat.name }} &rarr;</a>
+                      </div>
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="mega-preview-card" id="mega-preview-card">
+                    <div class="mega-preview-plate">
+                      <div class="image-fallback-plate" id="mega-preview-fallback">
+                        <span class="image-fallback-initial">E</span>
+                      </div>
+                    </div>
+                    <div class="mega-preview-meta">
+                      <span class="mega-preview-cat-label" id="mega-preview-cat-label">Electronics Catalogue</span>
+                      <p class="mega-preview-price-line" id="mega-preview-price-line">Explore curated electronics</p>
+                      <div class="mega-preview-footer">
+                        <a href="{% url 'category_list' %}" class="btn btn-sm btn-primary" id="mega-preview-view-link">Explore Catalogue &rarr;</a>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              {% endwith %}
+            </div>
           </div>
         </div>
       </details>
