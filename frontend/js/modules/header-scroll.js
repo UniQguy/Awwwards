@@ -4,7 +4,7 @@
 export function initHeaderScroll() {
   const header = document.querySelector(".site-header");
   const sentinel = document.querySelector("#header-sentinel");
-  const progressThread = document.querySelector("#header-progress-thread");
+  const progressThread = document.querySelector("#header-scroll-thread, #header-progress-thread");
 
   if (!header) return;
 
@@ -49,9 +49,12 @@ export function initHeaderScroll() {
     chapterElements.forEach((el) => worldObserver.observe(el));
   }
 
-  // 3. Scroll progress thread along bottom edge of header
+  // 3. Scroll progress thread along bottom edge of header (WP7)
   if (progressThread) {
+    progressThread.style.transformOrigin = "left center";
     let ticking = false;
+    let willChangeTimer = null;
+
     const updateProgress = () => {
       const scrollY = window.scrollY || window.pageYOffset;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -60,12 +63,21 @@ export function initHeaderScroll() {
       ticking = false;
     };
 
-    window.addEventListener("scroll", () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateProgress);
-        ticking = true;
-      }
-    }, { passive: true });
+    window.addEventListener(
+      "scroll",
+      () => {
+        progressThread.style.willChange = "transform";
+        if (!ticking) {
+          window.requestAnimationFrame(updateProgress);
+          ticking = true;
+        }
+        clearTimeout(willChangeTimer);
+        willChangeTimer = setTimeout(() => {
+          progressThread.style.willChange = "";
+        }, 150);
+      },
+      { passive: true }
+    );
 
     updateProgress();
   }

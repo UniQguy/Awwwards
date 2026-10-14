@@ -115,70 +115,14 @@ export function initHeadlineCutouts() {
     preloadedImages.add(url);
   }
 
-  // Stagger intervals between cutouts
-  const baseIntervalMs = 7500; // 7.5 seconds
-  const staggerOffsetMs = 2500; // 2.5 seconds between each cutout
-
+  // In R6 shop floor, headline cutouts serve as static typographic stamps.
+  // Recurring setInterval looping decoration is disabled per Rule D and Rule J (idle check).
   cutoutElements.forEach((cutout, cutoutIndex) => {
     const img = cutout.querySelector(".cutout-img");
     if (!img) return;
-
-    let currentItemIndex = cutoutIndex % cutoutData.length;
-
-    // Preload next image immediately
-    const nextIdx = getNextCycleIndex(currentItemIndex, cutoutData.length, cutoutElements.length);
-    if (cutoutData[nextIdx]) {
-      preloadImage(cutoutData[nextIdx].image_url);
+    if (cutoutData[cutoutIndex] && cutoutData[cutoutIndex].image_url) {
+      preloadImage(cutoutData[cutoutIndex].image_url);
     }
-
-    const delay = cutoutIndex * staggerOffsetMs;
-
-    const timeoutId = setTimeout(() => {
-      const intervalId = setInterval(() => {
-        const tier = document.documentElement.dataset.motionTier || "1";
-        const isHidden = typeof document !== "undefined" && document.hidden;
-        const isReduced =
-          typeof window !== "undefined" &&
-          window.matchMedia &&
-          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-        const shouldCycle = canCycleCutouts({
-          tier,
-          isHidden,
-          isIntersecting: isHeroIntersecting,
-          isHovered: isHeroHovered,
-          isReducedMotion: isReduced,
-        });
-
-        if (!shouldCycle) return;
-
-        // Advance to next unique product
-        currentItemIndex = getNextCycleIndex(currentItemIndex, cutoutData.length, cutoutElements.length);
-        const nextItem = cutoutData[currentItemIndex];
-        if (!nextItem || !nextItem.image_url) return;
-
-        // Crossfade & float transition
-        img.style.transition = "opacity 320ms cubic-bezier(0.4, 0, 0.2, 1), transform 320ms cubic-bezier(0.4, 0, 0.2, 1)";
-        img.style.opacity = "0";
-        img.style.transform = "translateY(-3px)";
-
-        setTimeout(() => {
-          img.src = nextItem.image_url;
-          img.style.opacity = "1";
-          img.style.transform = "translateY(0)";
-
-          // Preload the one after next
-          const futureIdx = getNextCycleIndex(currentItemIndex, cutoutData.length, cutoutElements.length);
-          if (cutoutData[futureIdx]) {
-            preloadImage(cutoutData[futureIdx].image_url);
-          }
-        }, 320);
-      }, baseIntervalMs);
-
-      activeIntervals.push(intervalId);
-    }, delay);
-
-    activeIntervals.push(timeoutId);
   });
 
   // Listen for motiontierchange

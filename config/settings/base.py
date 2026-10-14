@@ -262,6 +262,8 @@ CONTENT_SECURITY_POLICY = {
         "script-src": [
             "'self'",
             "https://checkout.razorpay.com",
+            "https://cdnjs.cloudflare.com",
+            "https://cdn.jsdelivr.net",
         ],
         "style-src": [
             "'self'",

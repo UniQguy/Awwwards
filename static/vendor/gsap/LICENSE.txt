@@ -1,0 +1,11 @@
+GreenSock Animation Platform (GSAP)
+Standard 'No Charge' License
+Version 3.12.5
+
+GreenSock's standard 'no charge' license allows GSAP to be used in personal, commercial,
+and non-commercial websites and applications without fee, provided that the work itself
+is not being sold to multiple end users (e.g., in a theme, template, or packaged product).
+
+For complete terms and commercial licensing information, visit:
+https://gsap.com/standard-license
+Copyright (c) 2008-2024 GreenSock Inc. All rights reserved.

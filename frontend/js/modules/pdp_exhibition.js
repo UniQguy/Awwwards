@@ -265,14 +265,19 @@ function setupFlyToBag() {
         return;
       }
 
-      // Create ghost thumbnail
-      const imgRect = mainImg.getBoundingClientRect();
-      const bagRect = bagTarget.getBoundingClientRect();
+      // Create 48x48 ghost thumbnail at button coordinates
+      const btn = form.querySelector('button[type="submit"]');
+      const originRect = btn ? btn.getBoundingClientRect() : mainImg.getBoundingClientRect();
+      const bagCountTarget = document.querySelector("#header-bag-count") || document.querySelector(".header-bag-link") || document.querySelector("a[href*='/cart/']");
+      const bagRect = bagCountTarget.getBoundingClientRect();
 
       const ghost = document.createElement("div");
       ghost.className = "fly-to-bag-ghost";
-      ghost.style.left = `${imgRect.left + (imgRect.width - 60) / 2}px`;
-      ghost.style.top = `${imgRect.top + (imgRect.height - 60) / 2}px`;
+      ghost.style.width = "48px";
+      ghost.style.height = "48px";
+      ghost.style.left = `${originRect.left + (originRect.width - 48) / 2}px`;
+      ghost.style.top = `${originRect.top + (originRect.height - 48) / 2}px`;
+      ghost.style.transition = "transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 500ms ease";
 
       const ghostImg = document.createElement("img");
       ghostImg.src = mainImg.src;
@@ -280,17 +285,23 @@ function setupFlyToBag() {
       ghost.appendChild(ghostImg);
       document.body.appendChild(ghost);
 
-      // Animate towards bag target
+      // Animate towards #header-bag-count over 0.5s
       requestAnimationFrame(() => {
-        const deltaX = (bagRect.left + bagRect.width / 2) - (imgRect.left + imgRect.width / 2);
-        const deltaY = (bagRect.top + bagRect.height / 2) - (imgRect.top + imgRect.height / 2);
+        const deltaX = (bagRect.left + bagRect.width / 2) - (originRect.left + originRect.width / 2);
+        const deltaY = (bagRect.top + bagRect.height / 2) - (originRect.top + originRect.height / 2);
 
         ghost.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.2)`;
-        ghost.style.opacity = "0.2";
+        ghost.style.opacity = "0";
 
         setTimeout(() => {
           if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
-        }, 420);
+          if (bagCountTarget) {
+            bagCountTarget.classList.add("bag-pulse");
+            setTimeout(() => {
+              bagCountTarget.classList.remove("bag-pulse");
+            }, 250);
+          }
+        }, 500);
       });
     });
   });

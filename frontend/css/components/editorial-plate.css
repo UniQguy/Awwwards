@@ -30,6 +30,32 @@
       opacity: 1;
       transform: translateX(6px);
     }
+
+    /* 3D Perspective Tilt on Tier 1 Fine Pointer (WP7) */
+    html[data-motion-tier="1"] .plate-collectible[data-tilt-card].is-tilting,
+    html[data-motion-tier="1"] .hero-plate-slot.is-tilting .plate-collectible {
+      transform: perspective(1000px) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg));
+      transition: none;
+    }
+
+    html[data-motion-tier="1"] .plate-collectible[data-tilt-card]:not(.is-tilting),
+    html[data-motion-tier="1"] .hero-plate-slot:not(.is-tilting) .plate-collectible {
+      transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+      transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow var(--transition-base), border-color var(--transition-base);
+    }
+  }
+
+  /* Specular Glare overlay on Plate Mat (WP7) */
+  .plate-collectible[data-tilt-card] .plate-mat::after,
+  .hero-plate-slot .plate-mat::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--tilt-glare-x, 50%) var(--tilt-glare-y, 50%), rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+    opacity: var(--tilt-glare-opacity, 0);
+    transition: opacity 160ms var(--ease-utility);
   }
 
   @media (pointer: coarse) {

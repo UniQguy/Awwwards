@@ -84,7 +84,7 @@ export function initCollectibleCards() {
   const isFine = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
   if (!isFine) return;
 
-  const cards = document.querySelectorAll("[data-tilt-card]");
+  const cards = document.querySelectorAll("[data-tilt-card], .hero-plate-slot");
   cards.forEach((card) => {
     let rafId = null;
     let isHovering = false;

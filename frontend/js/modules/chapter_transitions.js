@@ -142,6 +142,7 @@ export function setupDiagonalWipes(chapters) {
       // Tier 1: Scrubbed GSAP ScrollTrigger polygon wipe
       try {
         gsap.registerPlugin(ScrollTrigger);
+        ScrollTrigger.config({ syncInterval: 99999999 });
 
         const tween = gsap.fromTo(
           wipe,

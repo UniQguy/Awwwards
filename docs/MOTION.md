@@ -204,3 +204,45 @@ ELECTROCART implements an automated capability probe on initial page load (`fron
 - **LCP Preload**: Home template includes `<link rel="preload" as="image" href="..." fetchpriority="high">` targeting the primary hero plate image.
 - **Zero Layout Shift**: Strict aspect-ratio and dimension reservation across all plate containers and hero banners.
 
+---
+
+## 5. Final Pass R6 Motion System Specification (WP7)
+
+Every effect below fulfills Rule D by explicitly stating what the shopper learns from it. Any effect without a stated purpose has been eliminated.
+
+### A. Header Scroll Progress Thread
+- **Component**: `frontend/js/modules/header-scroll.js`, `#header-scroll-thread`
+- **Trigger**: Window scroll.
+- **Implementation**: GPU compositor `transform: scaleX(ratio)` with `will-change: transform` only while scrolling (cleared 150ms after scroll halts). Passive event listener.
+- **What the shopper learns from it**: The shopper learns their exact physical depth in the multi-category catalogue and the active category world color context.
+
+### B. Collectible & Hero Plate 3D Tilt
+- **Component**: `frontend/js/modules/collectible_cards.js`, `frontend/css/components/editorial-plate.css`
+- **Trigger**: Pointer movement across `.plate-collectible[data-tilt-card]` and `#hero-plate-slot`.
+- **Implementation**: Slow 3D tilt clamped to $\pm 6^\circ$ (`rotateX`/`rotateY`), `perspective: 1000px`, `requestAnimationFrame` throttled, passive listeners, canceled on pointerleave with spring-free ease (`cubic-bezier(0.2, 0.8, 0.2, 1)` over 280ms). Dynamic specular glare radial gradient on the plate mat. Active strictly on Tier 1 fine-pointer hardware.
+- **What the shopper learns from it**: The shopper learns the tactile three-dimensional materiality, craft finish, and physical geometry of the curated electronic object.
+
+### C. Chapter Entrances (GSAP ScrollTrigger Batch)
+- **Component**: `frontend/js/editorial.js` (`initChapterEntrances`)
+- **Trigger**: Category chapter monographs (`.chapter-shelf-monograph`) entering viewport.
+- **Implementation**: `ScrollTrigger.batch`: `y: 24 -> 0`, `opacity: 0 -> 1`, `duration: 0.45s`, `ease: "power2.out"`, `once: true`. Final static CSS has `opacity: 1; transform: none;`, guaranteeing that if GSAP is missing, blocked, or slow, the content renders in its static final state with zero missing text or layout shifts.
+- **What the shopper learns from it**: The shopper learns that they have crossed into a new curated editorial category chapter with dedicated lead and satellite hardware selections.
+
+### D. Product Page Flying Thumbnail & Bag Pulse
+- **Component**: `frontend/js/modules/pdp_exhibition.js`, `#header-bag-count`
+- **Trigger**: Submitting the "Add to Bag" form on the Product Detail Page.
+- **Implementation**: Clones a 48x48 thumbnail at button coordinates, animates transform directly towards `#header-bag-count` over 0.5s with `cubic-bezier(0.2, 0.8, 0.2, 1)`, fades out, and triggers a subtle 1.1x pulse on the header bag badge.
+- **What the shopper learns from it**: The shopper receives immediate, unambiguous visual confirmation that their chosen hardware unit has been safely placed into their shopping bag.
+
+### E. Dual-Thumb Price Range Histogram
+- **Component**: `frontend/js/modules/price_histogram.js`
+- **Trigger**: Adjusting min/max price sliders on category filter drawers.
+- **Implementation**: Stepped log-scale boundary mapping with debounced live count queries.
+- **What the shopper learns from it**: The shopper learns the statistical distribution of catalogue listings across price bands and the exact count of units meeting their budget.
+
+### F. Slop Audit & Eliminated Effects (Rule D & Rule J Compliance)
+- **Eliminated**: Looping cutout cycling intervals in `headline_cutouts.js` (eliminated recurring setInterval and idle DOM mutations; photographic stamps remain static).
+- **Eliminated**: Continuous Three.js WebGL render loop (replaced with CSS 3D tilt on collectible plate, zero idle GPU draw).
+- **Banned Sitewide**: Gradient blobs, glow, particles, floating shapes, cursor followers, magnetic buttons, text scramble, bounce or elastic easing, parallax on utility pages, count-ups without meaning, looping decoration, and autoplay sound.
+
+

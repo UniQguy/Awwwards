@@ -55,8 +55,9 @@ function bootstrapEditorial() {
   // 10. Initialize dual-thumb price histogram (utility enhancement on category detail)
   initPriceHistogram();
 
-  // 11. Initialize WebGL dynamic loader for homepage hero plate
-  setupHeroWebGLLoader();
+  // 11. Initialize Chapter Entrances (WP7: GSAP ScrollTrigger batch)
+  initChapterEntrances();
+  window.addEventListener("gsap:ready", () => initChapterEntrances());
 }
 
 /**
@@ -106,94 +107,42 @@ export function initHeroEntranceChoreography() {
 }
 
 /**
- * Dynamically loads and initializes the Three.js hero WebGL scene ONLY when:
- * - The hero container `#hero-webgl-canvas-container` is present in the DOM
- * - The active motion tier is 1 (full motion)
- * - The hero container is within or near the viewport (IntersectionObserver)
- *
- * In Tier 2, Tier 3, or when JS is disabled, Three.js is NEVER loaded over the network.
+/**
+ * Chapter Entrances (WP7).
+ * Batches .chapter-shelf-monograph with GSAP ScrollTrigger:
+ * y: 24 -> 0, opacity: 0 -> 1, duration: 0.45s, ease: "power2.out", once: true.
+ * Final static CSS already has opacity: 1 and transform: none, ensuring full visibility if GSAP is missing.
  */
-function setupHeroWebGLLoader() {
-  const container = document.getElementById("hero-webgl-canvas-container");
-  const slot = document.getElementById("hero-plate-slot");
-  if (!container || !slot) return;
+export function initChapterEntrances() {
+  const tier = parseInt(document.documentElement.dataset.motionTier || "1", 10);
+  const isReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (tier === 3 || isReduced) return;
 
-  const currentTier = document.documentElement.dataset.motionTier || "1";
-  if (currentTier !== "1") {
-    // Strict requirement: Tier 2 and Tier 3 never load the Three.js chunk
-    return;
-  }
+  const gsapObj = window.gsap || (typeof gsap !== "undefined" ? gsap : null);
+  const stObj = window.ScrollTrigger || (typeof ScrollTrigger !== "undefined" ? ScrollTrigger : null);
+  if (!gsapObj || !stObj) return;
 
-  const imageUrl = slot.dataset.heroImg;
-  if (!imageUrl) return;
-
-  if (typeof IntersectionObserver !== "undefined") {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          observer.disconnect();
-          loadHeroWebGLModule(container, slot, imageUrl);
-        }
-      },
-      { rootMargin: "250px" }
-    );
-    observer.observe(container);
-  } else {
-    loadHeroWebGLModule(container, slot, imageUrl);
-  }
-}
-
-async function loadHeroWebGLModule(container, slot, imageUrl) {
   try {
-    const { initHeroWebGL, pauseHeroWebGL, resumeHeroWebGL, teardownHeroWebGL } = await import(
-      "./modules/hero_webgl.js"
-    );
+    gsapObj.registerPlugin(stObj);
+    stObj.config({ syncInterval: 99999999 });
+    const elements = document.querySelectorAll(".chapter-shelf-monograph");
+    if (!elements.length) return;
 
-    // Read world background color from computed style or fallback
-    let worldBg = "#F5F2EB";
-    try {
-      const computed = getComputedStyle(document.body).getPropertyValue("--world-bg").trim();
-      if (computed && computed.startsWith("#")) {
-        worldBg = computed;
-      }
-    } catch (_) {}
-
-    const ctx = initHeroWebGL(container, imageUrl, worldBg);
-    if (!ctx) return;
-
-    // Pause rendering when document/tab is hidden
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        pauseHeroWebGL();
-      } else {
-        resumeHeroWebGL();
-      }
-    });
-
-    // Pause rendering when hero container is completely scrolled offscreen
-    if (typeof IntersectionObserver !== "undefined") {
-      const heroVis = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            resumeHeroWebGL();
-          } else {
-            pauseHeroWebGL();
-          }
-        },
-        { threshold: 0.05 }
-      );
-      heroVis.observe(container);
-    }
-
-    // Teardown WebGL immediately if motion tier changes away from Tier 1
-    window.addEventListener("motiontierchange", (e) => {
-      const newTier = e.detail && e.detail.tier;
-      if (newTier !== 1) {
-        teardownHeroWebGL();
-      }
+    stObj.batch(".chapter-shelf-monograph", {
+      onEnter: (batch) => {
+        gsapObj.from(batch, {
+          y: 24,
+          opacity: 0,
+          duration: 0.45,
+          ease: "power2.out",
+          stagger: 0.12,
+          overwrite: true,
+        });
+      },
+      once: true,
     });
   } catch (err) {
-    console.warn("Failed to dynamically load Hero WebGL module, remaining on CSS presentation:", err);
+    console.warn("GSAP chapter entrances init error:", err);
   }
 }
 

@@ -289,18 +289,10 @@
     opacity: 0;
   }
 
-  /* Tier 2: CSS-only Float */
+  /* Tier 2: Static Collectible Plate (Rule D & Rule J compliance) */
   html[data-motion-tier="2"] .hero-plate-slot .plate-collectible {
-    animation: heroPlateFloat 4s ease-in-out infinite alternate;
-  }
-
-  @keyframes heroPlateFloat {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(-4px);
-    }
+    animation: none;
+    transform: none;
   }
 
   /* Tier 3: Static Plate & Reduced Motion */

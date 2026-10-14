@@ -88,6 +88,7 @@ export function initScroller() {
   try {
     if (!scrollTriggerRegistered) {
       gsap.registerPlugin(ScrollTrigger);
+      ScrollTrigger.config({ syncInterval: 99999999 });
       scrollTriggerRegistered = true;
     }
 

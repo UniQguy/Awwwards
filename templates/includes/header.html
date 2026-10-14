@@ -152,12 +152,12 @@
       <a href="{% url 'cart_detail' %}" class="header-nav-link header-bag-link" aria-label="Bag ({{ cart_count }} items)">
         <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-bag"></use></svg>
         <span>Bag</span>
-        <span class="bag-badge">({{ cart_count }})</span>
+        <span class="bag-badge" id="header-bag-count">({{ cart_count }})</span>
       </a>
     </nav>
   </div>
 
-  <!-- Active world scroll progress thread & 1px hairline -->
-  <div class="header-progress-thread" id="header-progress-thread" aria-hidden="true"></div>
+  <!-- Active world scroll progress thread & 1px hairline (WP7) -->
+  <div class="header-progress-thread" id="header-scroll-thread" data-fallback-id="header-progress-thread" aria-hidden="true"></div>
 </header>
 
