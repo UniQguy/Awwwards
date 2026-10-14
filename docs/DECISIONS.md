@@ -262,5 +262,17 @@
   6. *Fly-to-Bag & Mini-Bag Confirmation*: Attached an accessible, motion-respecting flying thumbnail ghost transitioning into the header bag icon, followed by a native `<dialog id="mini-bag-dialog">` confirmation modal with direct links to Bag and Checkout.
 - **Reason**: Fulfills the PDP exhibition specification, allows close visual inspection of products, and provides shoppers with instant side-by-side feature comparisons without leaving the product page.
 - **Alternative Rejected**: Bulky third-party modal plugins or multi-page comparative flows that disrupt the reading flow.
-
-
+### DEC-043: Calm Editorial Shop Floor Rebuild (WP3)
+- **Date**: 2026-10-14
+- **Decision**: Rebuilt the storefront homepage (`/`) into a calm, high-density editorial shop floor strictly bounded to <=6 viewports (<=4608px) at 1456x820:
+  1. *Editorial Top-Aligned Hero*: Fraunces headline with integrated noun cutout tags, single-line brand provenance, 1 prominent cutout spotlight plate (near-square 1:1, product >=70% width coverage), and a quiet 4-thumbnail picker below it that swaps cutout imagery, price, brand, and category with zero layout reflow.
+  2. *Categories Snap-Rail Index*: Horizontal scroll-snap rail of active categories featuring 48x48 product cutouts, category listing counts, starting prices (`from ₹...`), world accent swatches, and keyboard-accessible prev/next arrows.
+  3. *Composed Chapter Shelves (3 Chapters)*: Replaced the giant pinned stage scroll trap with exactly 3 chapters for the top categories. Each chapter features a chapter numeral (`Chapter 01 / 03 · Audio & Sound`), editorial category intro, a 2-column lead product card with curator fidelity note, and three 1-column satellite cards with right-aligned tabular INR prices.
+  4. *Curated Stories (2 Collections Side-by-Side)*: 2 editorial collections presented in a 2-column desktop grid, each featuring collection intro, 3 product thumbnails with brand, title, and right-aligned INR prices, and a "Read chapter →" link.
+  5. *Budget Ladder (4 Brackets)*: 4 expenditure tiers (Under ₹500, Under ₹1,500, Under ₹5,000, Premium Grade) with real aggregate listing counts, sample thumbnail previews, and direct bracket query links.
+  6. *How Buying Works (3 Equal Columns)*: Clean, neutral-surface 3-column section outlining Curated verified batches, Direct dispatch from Bengaluru, and 7-day transit damage replacement.
+  7. *Verified Brand Flow*: Quiet horizontal flow of allow-listed brand marks with count chips and link to the brands directory.
+  8. *Height Gate Compliance*: Total document scroll height measured at 1456x820 desktop is 4474px, strictly passing the <=4608px 6-viewport gate.
+  9. *Audits Clean*: `overlap_audit.py` passes with 0 defects across all viewports; `void_audit.py` passes with 0 defects across all viewports; hero plate is visible above the fold on all 4 viewports.
+- **Reason**: Delivers an informative, dense, editorial commerce landing page that invites exploration without trapped scroll states or excessive vertical scrolling.
+- **Alternative Rejected**: Giant multi-scroll pinned monograph stages that hijack scroll behavior and stretch the page beyond 8000px.

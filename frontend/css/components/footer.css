@@ -3,16 +3,16 @@
     background-color: var(--world-surface);
     color: var(--world-text);
     border-top: 1px solid var(--world-rule);
-    padding-top: clamp(var(--space-8), 8vw, var(--space-11));
-    padding-bottom: var(--space-8);
-    margin-top: clamp(var(--space-8), 10vw, var(--space-12));
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-6);
+    margin-top: var(--space-8);
   }
 
   .footer-colophon-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--space-8);
-    margin-bottom: clamp(var(--space-8), 8vw, var(--space-11));
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
   }
 
   @media (min-width: 1024px) {

@@ -46,8 +46,9 @@ def home(request: HttpRequest) -> HttpResponse:
     - Closing line
     """
     # 1. Hero
-    hero_res = hero_products(n=3)
+    hero_res = hero_products(n=4)
     hero_plate_product = hero_res.products[0] if hero_res.products else None
+    hero_picker_products = hero_res.products[1:4] if len(hero_res.products) > 1 else []
     headline_cutouts = home_headline_cutouts()
     cutout_cable = headline_cutouts.get("cable")
     cutout_watch = headline_cutouts.get("watch")
@@ -60,13 +61,17 @@ def home(request: HttpRequest) -> HttpResponse:
     min_price_agg = Product.objects.filter(is_available=True, selling_price__gt=0).aggregate(Min("selling_price"))
     min_price = min_price_agg["selling_price__min"] or Decimal("0.00")
 
-    # 3. Typographic Index Rows
+    # 3. Categories Snap-Rail (10 tiles, WP3)
+    from apps.catalog.services.category_nav import get_mega_menu_categories
+    categories_rail = get_mega_menu_categories()
+
+    # 4. Typographic Index Rows (legacy fallback)
     index_list = index_rows()
 
-    # 4. Chapters
-    chapters = home_chapters(max_chapters=6)
+    # 5. Chapters: Top 3 categories only, 4 picks each (WP3)
+    chapters = home_chapters(max_chapters=3, picks_per_chapter=4)
 
-    # 5. How Buying Works data
+    # 6. How Buying Works data
     shipping_config = ShippingConfig.get_solo()
     free_shipping_threshold = shipping_config.free_shipping_threshold
     standard_shipping_fee = shipping_config.standard_fee
@@ -75,10 +80,10 @@ def home(request: HttpRequest) -> HttpResponse:
     is_bill_of_supply = not bool(seller_gstin)
     razorpay_enabled = bool(getattr(settings, "RAZORPAY_KEY_ID", ""))
 
-    # 6. Brands
+    # 7. Brands
     brands = get_editorial_brands(max_brands=35)
 
-    # 7. Cutout cycling data for Technique A progressive enhancement (in-memory, 0 extra queries)
+    # 8. Cutout cycling data for Technique A progressive enhancement (in-memory, 0 extra queries)
     cycle_candidates = list(hero_res.products)
     for ch in chapters:
         cycle_candidates.extend(ch.picks)
@@ -95,9 +100,61 @@ def home(request: HttpRequest) -> HttpResponse:
             if len(cutout_cycle_data) >= 10:
                 break
 
+    # 9. Curated Stories (2 collections with 3 items each, WP3)
+    from apps.catalog.models import FeaturedProduct
+    from django.db.models import Prefetch
+    curated_stories = list(
+        Collection.objects.filter(is_active=True)
+        .exclude(placement=Collection.PLACEMENT_HOME_HERO)
+        .prefetch_related(
+            Prefetch(
+                "featured_items",
+                queryset=FeaturedProduct.objects.select_related("product__category")
+                .prefetch_related("product__media")
+                .order_by("display_order", "id"),
+            )
+        )[:2]
+    )
+
+    # 10. Budget Ladder (4 price brackets with count and sample thumbnails, WP3)
+    p_qs = Product.objects.filter(is_available=True, selling_price__gt=0)
+    b_aggs = p_qs.aggregate(
+        c_500=Count("id", filter=Q(selling_price__lte=500)),
+        c_1500=Count("id", filter=Q(selling_price__gt=500, selling_price__lte=1500)),
+        c_5000=Count("id", filter=Q(selling_price__gt=1500, selling_price__lte=5000)),
+        c_prem=Count("id", filter=Q(selling_price__gt=5000)),
+    )
+    budget_ladder = [
+        {
+            "title": "Under ₹500",
+            "count": b_aggs["c_500"] or 0,
+            "url": "/search/?max_price=500",
+            "samples": [p for p in cycle_candidates if p.selling_price and p.selling_price <= 500 and p.primary_image_url][:3],
+        },
+        {
+            "title": "Under ₹1,500",
+            "count": b_aggs["c_1500"] or 0,
+            "url": "/search/?min_price=501&max_price=1500",
+            "samples": [p for p in cycle_candidates if p.selling_price and 500 < p.selling_price <= 1500 and p.primary_image_url][:3],
+        },
+        {
+            "title": "Under ₹5,000",
+            "count": b_aggs["c_5000"] or 0,
+            "url": "/search/?min_price=1501&max_price=5000",
+            "samples": [p for p in cycle_candidates if p.selling_price and 1500 < p.selling_price <= 5000 and p.primary_image_url][:3],
+        },
+        {
+            "title": "Premium Grade",
+            "count": b_aggs["c_prem"] or 0,
+            "url": "/search/?min_price=5001",
+            "samples": [p for p in cycle_candidates if p.selling_price and p.selling_price > 5000 and p.primary_image_url][:3],
+        },
+    ]
+
     context = {
         "hero": hero_res,
         "hero_plate_product": hero_plate_product,
+        "hero_picker_products": hero_picker_products,
         "cutout_cable": cutout_cable,
         "cutout_watch": cutout_watch,
         "cutout_earphones": cutout_earphones,
@@ -106,8 +163,11 @@ def home(request: HttpRequest) -> HttpResponse:
         "total_listings": total_listings,
         "total_categories": total_categories,
         "min_price": min_price,
+        "categories_rail": categories_rail,
         "index_rows": index_list,
         "chapters": chapters,
+        "curated_stories": curated_stories,
+        "budget_ladder": budget_ladder,
         "free_shipping_threshold": free_shipping_threshold,
         "standard_shipping_fee": standard_shipping_fee,
         "shipping_fee_confirmed": shipping_fee_confirmed,

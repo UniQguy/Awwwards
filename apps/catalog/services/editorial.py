@@ -201,11 +201,11 @@ WARM_WORLDS = {"earphones-headphones", "speakers", "cameras", "keyboards-mice", 
 COOL_WORLDS = {"smartphones", "smartwatches-bands", "tvs", "cables-chargers-powerbanks", "other"}
 
 
-def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
+def home_chapters(max_chapters: int = 6, picks_per_chapter: int = 3) -> List[HomeChapter]:
     """
     Active categories with at least 3 purchasable products.
     Alternates warm and cool monograph worlds so adjacent chapters contrast.
-    Each chapter has exactly 3 diverse picks grouped by family_key (never 4, no orphan rows).
+    Each chapter has picks grouped by family_key (defaults to 3 for backwards compatibility, supports 4 for WP3).
     """
     cats = (
         Category.objects.filter(is_active=True)
@@ -282,20 +282,20 @@ def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
         p_min = cat.price_min_agg or Decimal("0.00")
         p_max = cat.price_max_agg or Decimal("0.00")
 
-        # Exactly 3 picks
+        # Select picks up to picks_per_chapter
         col = curated_map.get(cat.id)
         if col:
             picks = [
                 fp.product
                 for fp in col.featured_items.all()
                 if fp.product.is_purchasable
-            ][:3]
+            ][:picks_per_chapter]
             is_auto = False
         else:
             picks = []
             is_auto = True
 
-        if len(picks) < 3:
+        if len(picks) < picks_per_chapter:
             candidates = (
                 Product.objects.filter(
                     category=cat,
@@ -313,9 +313,9 @@ def home_chapters(max_chapters: int = 6) -> List[HomeChapter]:
                 if fam not in seen_families:
                     seen_families.add(fam)
                     deduped_picks.append(prod)
-                    if len(deduped_picks) >= 3:
+                    if len(deduped_picks) >= picks_per_chapter:
                         break
-            picks = deduped_picks[:3]
+            picks = deduped_picks[:picks_per_chapter]
             is_auto = True
 
         if getattr(cat, "chapter_intro", None) and cat.chapter_intro.strip():

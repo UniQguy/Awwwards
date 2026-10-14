@@ -29,30 +29,33 @@ function bootstrapEditorial() {
   // 2. Initialize editorial scroll and chapter wipes
   initScroller();
   initChapterTransitions();
-  initChapterPinnedStage();
 
-  // 3. Initialize Category Index Horizontal Gallery Walk
+  // 3. Initialize Hero thumbnail picker & Category Snap Rail arrows (WP3)
+  initHeroThumbnailPicker();
+  initSnapRailArrows();
+
+  // 4. Initialize Category Index Horizontal Gallery Walk
   initCategoryGallery();
 
-  // 4. Initialize PDP Exhibition Frame Reveal
+  // 5. Initialize PDP Exhibition Frame Reveal
   initPdpExhibition();
 
-  // 5. Initialize collectible card 3D tilt
+  // 6. Initialize collectible card 3D tilt
   initCollectibleCards();
 
-  // 6. Initialize cycling inline cutouts in hero headline
+  // 7. Initialize cycling inline cutouts in hero headline
   initHeadlineCutouts();
 
-  // 7. Initialize section hairline draw & heading reveals
+  // 8. Initialize section hairline draw & heading reveals
   initSmallMotions();
 
-  // 8. Initialize media slots observer (Tier 1 Desktop video autoplay)
+  // 9. Initialize media slots observer (Tier 1 Desktop video autoplay)
   initMediaSlots();
 
-  // 9. Initialize dual-thumb price histogram (utility enhancement on category detail)
+  // 10. Initialize dual-thumb price histogram (utility enhancement on category detail)
   initPriceHistogram();
 
-  // 10. Initialize WebGL dynamic loader for homepage hero plate
+  // 11. Initialize WebGL dynamic loader for homepage hero plate
   setupHeroWebGLLoader();
 }
 
@@ -191,6 +194,55 @@ async function loadHeroWebGLModule(container, slot, imageUrl) {
     });
   } catch (err) {
     console.warn("Failed to dynamically load Hero WebGL module, remaining on CSS presentation:", err);
+  }
+}
+
+export function initHeroThumbnailPicker() {
+  const pickerBtns = document.querySelectorAll(".hero-thumb-btn");
+  const plateSlot = document.getElementById("hero-plate-slot");
+  if (!pickerBtns.length || !plateSlot) return;
+
+  const mainImg = plateSlot.querySelector(".plate-img");
+  const mainLink = plateSlot.querySelector("a[href*='/p/']");
+  const nameEl = plateSlot.querySelector(".plate-name");
+  const priceEl = plateSlot.querySelector(".plate-price");
+  const catEl = plateSlot.querySelector(".plate-category");
+
+  pickerBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      pickerBtns.forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+
+      const title = btn.dataset.heroTitle;
+      const url = btn.dataset.heroUrl;
+      const price = btn.dataset.heroPrice;
+      const img = btn.dataset.heroImg;
+      const category = btn.dataset.heroCategory;
+
+      if (mainImg && img) mainImg.src = img;
+      if (mainLink && url) mainLink.href = url;
+      if (nameEl && title) nameEl.textContent = title;
+      if (priceEl && price) priceEl.textContent = price;
+      if (catEl && category) catEl.textContent = category;
+    });
+  });
+}
+
+export function initSnapRailArrows() {
+  const prevBtn = document.getElementById("snap-rail-prev");
+  const nextBtn = document.getElementById("snap-rail-next");
+  const rail = document.getElementById("category-snap-rail");
+  if (!rail) return;
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      rail.scrollBy({ left: -320, behavior: "smooth" });
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      rail.scrollBy({ left: 320, behavior: "smooth" });
+    });
   }
 }
 

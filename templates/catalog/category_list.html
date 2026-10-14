@@ -27,7 +27,6 @@
 <div class="category-index-flow">
   {% for spread in category_spreads %}
     <section class="category-row-spread" data-world="{{ spread.category.accent_key }}" aria-labelledby="cat-title-{{ spread.category.id }}">
-      <div class="category-row-top-bar" aria-hidden="true"></div>
       <div class="container">
         <div class="category-row-grid {% if forloop.counter|divisibleby:2 %}category-row-grid-reverse{% endif %}">
           <!-- Text Column (5 cols) -->

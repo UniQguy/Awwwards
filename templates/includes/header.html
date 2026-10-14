@@ -24,7 +24,7 @@
               <div class="mega-menu-cat-list" role="list">
                 {% for cat in nav_categories %}
                   <a
-                    href="{% url 'category_detail' slug=cat.slug %}"
+                    href="{% if cat.slug %}{% url 'category_detail' slug=cat.slug %}{% else %}{% url 'category_list' %}{% endif %}"
                     class="mega-menu-cat-item{% if forloop.first %} is-active{% endif %}"
                     role="listitem"
                     data-cat-slug="{{ cat.slug }}"
@@ -32,7 +32,6 @@
                     data-cat-count="{{ cat.product_count|default:'0' }}"
                     data-cat-price="{{ cat.price_from|inr }}"
                     data-cat-cutout="{{ cat.cutout_url }}"
-                    data-cat-title="{{ cat.lead_title }}"
                     data-cat-brands="{{ cat.top_brands_str }}"
                     data-cat-budget-label="{{ cat.budget_label }}"
                     data-cat-budget-url="{{ cat.budget_url }}"
@@ -49,7 +48,7 @@
             <!-- Right Column: Interactive Preview Pane -->
             <div class="mega-menu-preview-col" id="mega-menu-preview-pane" aria-live="polite">
               {% with lead_cat=nav_categories|first %}
-                {% if lead_cat %}
+                {% if lead_cat and lead_cat.slug %}
                   <div class="mega-preview-card" id="mega-preview-card">
                     <div class="mega-preview-plate">
                       {% if lead_cat.cutout_url %}

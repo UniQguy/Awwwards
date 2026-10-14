@@ -13,12 +13,12 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
-  <!-- 1. HERO SECTION (WP2) -->
+<div class="container home-shop-floor">
+  <!-- 1. HERO SECTION (WP3) -->
   <section class="hero-composition" aria-labelledby="hero-heading">
     <div class="hero-text-col">
       <div class="hero-label-line">
-        <span class="hero-listings-label">{{ total_listings }} listings</span>
+        <span class="hero-listings-label">ELECTROCART &middot; EST. 2024 &middot; BANGALORE</span>
       </div>
 
       <h1 class="hero-headline" id="hero-heading">
@@ -30,12 +30,12 @@
       </h1>
 
       <p class="hero-live-stat">
-        {{ total_listings }} listings across {{ total_categories }} categories, priced from {{ min_price|inr }}.
+        {{ total_listings }} listings across {{ total_categories }} categories, priced from {{ min_price|inr }}. An editorial catalogue with transparent technical provenance.
       </p>
 
       <div class="hero-actions">
-        <a href="{% url 'category_list' %}" class="btn btn-primary">Browse Categories &rarr;</a>
-        <a href="{% url 'search_results' %}" class="btn btn-secondary">Search the Catalogue</a>
+        <a href="#chapters" class="btn btn-primary">Browse catalogue &rarr;</a>
+        <a href="#buying" class="btn btn-secondary">How we choose</a>
       </div>
     </div>
 
@@ -47,176 +47,264 @@
         {% if hero.is_auto %}
           <p class="hero-marginalia">Selected by number of ratings on Amazon</p>
         {% endif %}
+
+        {% if hero_picker_products %}
+          <div class="hero-thumb-picker" aria-label="Featured item picker">
+            <button
+              type="button"
+              class="hero-thumb-btn is-active picker-thumb thumbnail-slot"
+              data-hero-title="{{ hero_plate_product.display_name }}"
+              data-hero-url="{% url 'product_detail' slug=hero_plate_product.slug %}"
+              data-hero-price="{{ hero_plate_product.selling_price|inr }}"
+              data-hero-img="{{ hero_plate_product.primary_image_url }}"
+              data-hero-category="{{ hero_plate_product.category.name }}"
+              aria-label="Current: {{ hero_plate_product.display_name }}"
+            >
+              <img src="{{ hero_plate_product.primary_image_url }}" alt="" class="hero-thumb-img" loading="eager">
+            </button>
+            {% for hp in hero_picker_products %}
+              <button
+                type="button"
+                class="hero-thumb-btn picker-thumb thumbnail-slot"
+                data-hero-title="{{ hp.display_name }}"
+                data-hero-url="{% url 'product_detail' slug=hp.slug %}"
+                data-hero-price="{{ hp.selling_price|inr }}"
+                data-hero-img="{{ hp.primary_image_url }}"
+                data-hero-category="{{ hp.category.name }}"
+                aria-label="Switch hero featured item to {{ hp.display_name }}"
+              >
+                <img src="{{ hp.primary_image_url }}" alt="" class="hero-thumb-img" loading="lazy">
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
     {% endif %}
   </section>
 
-  <!-- 2. TYPOGRAPHIC CATEGORY INDEX -->
-  <section class="section" aria-labelledby="index-heading">
+  <!-- 2. CATEGORIES SNAP-RAIL (WP3) -->
+  <section class="section section-snap-rail" aria-labelledby="categories-rail-heading">
     <div class="flex justify-between items-baseline mb-4">
-      <h2 id="index-heading" class="label">The categories</h2>
-      <span class="caption">{{ total_categories }} categories</span>
+      <div>
+        <span class="label text-muted">Catalogue Index</span>
+        <h2 id="categories-rail-heading" class="display-s">The categories</h2>
+      </div>
+      <div class="snap-rail-arrows" aria-hidden="true">
+        <button type="button" class="btn btn-secondary btn-sm snap-rail-btn" id="snap-rail-prev" aria-label="Previous categories">&larr;</button>
+        <button type="button" class="btn btn-secondary btn-sm snap-rail-btn" id="snap-rail-next" aria-label="Next categories">&rarr;</button>
+      </div>
     </div>
 
-    <ul class="typographic-index-list">
-      {% for row in index_rows %}
-        <li data-world="{{ row.category.accent_key }}">
-          <a href="{% url 'category_detail' slug=row.category.slug %}" class="typographic-index-row">
-            <div class="index-row-title-group">
-              <span class="index-row-dot" aria-hidden="true"></span>
-              <span class="index-row-name">{{ row.category.name }}</span>
-            </div>
-
-            {% if row.pick and row.pick.primary_image_url %}
-              <div class="index-row-cutout" aria-hidden="true">
-                <img src="{{ row.pick.primary_image_url }}" alt="" width="56" height="56" loading="lazy">
-              </div>
-            {% endif %}
-
-            <div class="index-row-meta">
-              <span>{{ row.count }} item{{ row.count|pluralize }}</span>
-              <span class="index-row-price">from {{ row.price_from|inr }}</span>
-            </div>
-          </a>
-        </li>
-      {% endfor %}
-    </ul>
-  </section>
-</div>
-
-<!-- 3. CHAPTERS (WP3: Composed 3-Plate Unit & Contrast Worlds) -->
-{% if chapters %}
-  <aside class="chapter-nav-indicator" id="chapter-nav-indicator" aria-hidden="false" tabindex="-1">
-    <span class="chapter-indicator-count" id="chapter-indicator-count">01 / {{ chapters|length|stringformat:"02d" }}</span>
-    <span class="chapter-indicator-title" id="chapter-indicator-title">{{ chapters.0.category.name }}</span>
-  </aside>
-
-  <div>
-    {% for chapter in chapters %}
-      <section class="spread chapter-spread" data-world="{{ chapter.category.accent_key }}" data-chapter-index="{{ forloop.counter|stringformat:"02d" }}" data-chapter-total="{{ chapters|length|stringformat:"02d" }}" data-chapter-name="{{ chapter.category.name }}" aria-labelledby="chapter-{{ chapter.category.id }}">
-        <div class="chapter-wipe" aria-hidden="true"></div>
-        <div class="chapter-top-bar" aria-hidden="true"></div>
-        <div class="container chapter-grid">
-          <!-- Left Column: Chapter metadata and live stats (cols 1-4) -->
-          <div class="chapter-text-col">
-            <div class="chapter-label">
-              <span class="chapter-numeral">{{ forloop.counter|stringformat:"02d" }}</span>
-              <span class="chapter-hairline"></span>
-              <span>Chapter</span>
-            </div>
-
-            <h2 class="display-l mb-3" id="chapter-{{ chapter.category.id }}">{{ chapter.category.name|balance_amp }}</h2>
-
-            {% if chapter.category.chapter_intro %}
-              <p class="pull mb-4">{{ chapter.category.chapter_intro }}</p>
-            {% endif %}
-
-            <dl class="chapter-stats-list">
-              <div class="chapter-stat-item">
-                <dt class="chapter-stat-label">{% if not chapter.is_auto %}Curated listings{% else %}Listings{% endif %}</dt>
-                <dd class="chapter-stat-val">{{ chapter.product_count }}</dd>
-              </div>
-              <div class="chapter-stat-item">
-                <dt class="chapter-stat-label">Catalogue range</dt>
-                <dd class="chapter-stat-val">{{ chapter.price_min|inr }} &ndash; {{ chapter.price_max|inr }}</dd>
-              </div>
-            </dl>
-
-            <div class="chapter-enter-action">
-              <a href="{% url 'category_detail' slug=chapter.category.slug %}" class="chapter-enter-link">
-                Enter {{ chapter.category.name|balance_amp }} &rarr;
-              </a>
-            </div>
-          </div>
-
-          <!-- Right Area: Composed 3-Plate Unit (cols 6-12) -->
-          <div class="chapter-plates-unit">
-            <div class="chapter-composed-grid">
-              {% for pick in chapter.picks %}
-                {% if forloop.first %}
-                  <div class="chapter-lead-slot">
-                    {% include "includes/collectible_plate.html" with product=pick %}
-                  </div>
-                {% elif forloop.counter == 2 %}
-                  <div class="chapter-stack-slot">
-                    {% include "includes/collectible_plate.html" with product=pick %}
-                {% elif forloop.counter == 3 %}
-                    {% include "includes/collectible_plate.html" with product=pick %}
-                  </div>
-                {% endif %}
-              {% endfor %}
-              {% if chapter.picks|length == 2 %}
-                  </div>
+    <div class="category-snap-rail" id="category-snap-rail" tabindex="0" role="region" aria-label="Categories horizontal rail">
+      {% for cr in categories_rail %}
+        {% if cr.slug %}
+          <a href="{% url 'category_detail' slug=cr.slug %}" class="snap-rail-tile" data-world="{{ cr.accent_key }}">
+            <div class="snap-rail-tile-plate thumbnail-slot">
+              {% if cr.cutout_url %}
+                <img src="{{ cr.cutout_url }}" alt="" class="snap-rail-thumb" loading="lazy" width="48" height="48">
+              {% else %}
+                <span class="snap-rail-fallback-dot" style="background-color: var(--world-accent);"></span>
               {% endif %}
             </div>
-
-            <div class="chapter-mobile-snap" tabindex="0" role="region" aria-label="{{ chapter.category.name }} picks">
-              {% for pick in chapter.picks %}
-                <div class="chapter-mobile-snap-item">
-                  {% include "includes/collectible_plate.html" with product=pick %}
-                </div>
-              {% endfor %}
+            <div class="snap-rail-tile-body">
+              <div class="snap-rail-tile-title">{{ cr.name }}</div>
+              <div class="snap-rail-tile-meta">
+                <span class="snap-rail-count">{{ cr.product_count|default:"0" }} item{{ cr.product_count|default:"0"|pluralize }}</span>
+                <span class="snap-rail-price">from {{ cr.price_from|inr }}</span>
+              </div>
             </div>
-            <div class="chapter-mobile-counter" aria-hidden="true">
-              <span class="mobile-snap-index">1</span> / {{ chapter.picks|length }}
-            </div>
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
 
-            {% if chapter.is_auto %}
-              <p class="chapter-caption">Selected by number of ratings on Amazon</p>
+  <!-- 3. CHAPTERS: TOP 3 CATEGORIES (WP3) -->
+  <div id="chapters">
+    {% for chapter in chapters|slice:":3" %}
+      <section class="section chapter-shelf-monograph" data-world="{{ chapter.category.accent_key }}" aria-labelledby="chapter-{{ chapter.category.id }}">
+        <div class="chapter-shelf-header flex justify-between items-baseline mb-4">
+          <div>
+            <span class="label text-muted font-mono text-2xs uppercase">Chapter {{ forloop.counter|stringformat:"02d" }} / 03 &middot; {{ chapter.category.name }}</span>
+            <h2 class="display-m" id="chapter-{{ chapter.category.id }}">{{ chapter.category.name }}</h2>
+            {% if chapter.category.chapter_intro %}
+              <p class="caption text-muted mt-1">{{ chapter.category.chapter_intro }}</p>
             {% endif %}
           </div>
+          {% if chapter.category.slug %}
+            <a href="{% url 'category_detail' slug=chapter.category.slug %}" class="link-subtle font-semibold body-sm">
+              Explore all {{ chapter.product_count }} in {{ chapter.category.name }} &rarr;
+            </a>
+          {% endif %}
         </div>
+
+        <div class="chapter-composed-shelf">
+          {% for pick in chapter.picks|slice:":4" %}
+            {% if forloop.first %}
+              <div class="shelf-lead-card">
+                <a href="{% url 'product_detail' slug=pick.slug %}" class="block h-full text-none">
+                  <div class="shelf-lead-plate">
+                    {% if pick.primary_image_url %}
+                      <img src="{{ pick.primary_image_url }}" alt="{{ pick.display_name }}" class="shelf-lead-img" loading="lazy">
+                    {% endif %}
+                  </div>
+                  <div class="shelf-lead-details">
+                    <div class="label text-accent mb-1">{{ pick.parsed_brand }}</div>
+                    <h3 class="shelf-lead-title">{{ pick.display_name }}</h3>
+                    <p class="shelf-curator-note caption text-muted line-clamp-2">
+                      {% if chapter.category.chapter_intro %}
+                        {{ chapter.category.chapter_intro }}
+                      {% else %}
+                        Reference selection verified for industrial build and consistent technical fidelity.
+                      {% endif %}
+                    </p>
+                    <div class="shelf-lead-price mt-2">{{ pick.selling_price|inr }}</div>
+                  </div>
+                </a>
+              </div>
+            {% else %}
+              <div class="shelf-standard-card">
+                <a href="{% url 'product_detail' slug=pick.slug %}" class="block h-full text-none">
+                  <div class="shelf-standard-plate">
+                    {% if pick.primary_image_url %}
+                      <img src="{{ pick.primary_image_url }}" alt="{{ pick.display_name }}" class="shelf-standard-img" loading="lazy">
+                    {% endif %}
+                  </div>
+                  <div class="shelf-standard-details">
+                    <div class="label text-accent">{{ pick.parsed_brand }}</div>
+                    <h3 class="shelf-standard-title">{{ pick.display_name }}</h3>
+                    <div class="shelf-standard-price">{{ pick.selling_price|inr }}</div>
+                  </div>
+                </a>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        {% if chapter.is_auto %}
+          <p class="caption text-muted mt-2 text-right">Selected by number of ratings on Amazon</p>
+        {% endif %}
       </section>
     {% endfor %}
   </div>
-{% endif %}
 
-<div class="container section">
-  <!-- 4. HOW BUYING WORKS HERE (WP5) -->
-  <section class="how-buying-section" aria-labelledby="buying-heading">
-    <div class="how-buying-grid">
-      <div class="how-buying-col-left">
-        <h2 id="buying-heading" class="label mb-3">How buying works</h2>
-        <p class="how-buying-lead-sentence">Straightforward commerce with transparent terms and no surprises.</p>
+  <!-- 4. CURATED STORIES (WP3) -->
+  {% if curated_stories %}
+    <section class="section curated-stories-section" aria-labelledby="stories-heading">
+      <div class="hairline-bottom pb-2 mb-4 flex justify-between items-baseline">
+        <div>
+          <span class="label text-muted font-mono text-2xs uppercase">Curated Narratives</span>
+          <h2 id="stories-heading" class="display-m">Curated Collections</h2>
+        </div>
+        <span class="caption text-muted">Specialist themes &amp; reference selections</span>
       </div>
 
-      <div class="how-buying-col-right">
-        <dl class="how-buying-list">
-          <div class="how-buying-row">
-            <dt class="how-buying-term">Prices</dt>
-            <dd class="how-buying-desc">
-              {% if seller_mode == "bill_of_supply" %}
-                Prices are shown as listed. No GST is charged on this store's bills of supply.
-              {% else %}
-                Prices include GST. The invoice shows the tax split.
+      <div class="curated-stories-grid">
+        {% for story in curated_stories %}
+          <div class="curated-story-card">
+            <div class="curated-story-header">
+              <span class="badge badge-accent mb-1 inline-block">Curated</span>
+              <h3 class="display-s">{{ story.title }}</h3>
+              {% if story.intro %}
+                <p class="caption text-muted mt-1">{{ story.intro }}</p>
+              {% elif story.description %}
+                <p class="caption text-muted mt-1">{{ story.description }}</p>
               {% endif %}
-            </dd>
-          </div>
+            </div>
 
-          <div class="how-buying-row">
-            <dt class="how-buying-term">Delivery</dt>
-            <dd class="how-buying-desc">
-              Delivery is free on orders of {{ free_shipping_threshold|inr }} or more; below that {% if shipping_fee_confirmed %}it is {{ standard_shipping_fee|inr }}{% else %}a delivery fee applies{% endif %}. Enter your PIN code on any product to see the estimate.
-            </dd>
-          </div>
+            <div class="curated-story-thumbs-row">
+              {% for fp in story.featured_items.all|slice:":3" %}
+                <a href="{% url 'product_detail' slug=fp.product.slug %}" class="curated-story-thumb-card text-none">
+                  <div class="curated-story-thumb-plate thumbnail-slot">
+                    {% if fp.product.primary_image_url %}
+                      <img src="{{ fp.product.primary_image_url }}" alt="{{ fp.product.display_name }}" class="curated-story-thumb-img" loading="lazy">
+                    {% endif %}
+                  </div>
+                  <span class="caption text-accent line-clamp-1 font-mono text-2xs">{{ fp.product.parsed_brand }}</span>
+                  <h4 class="curated-story-thumb-title">{{ fp.product.display_name }}</h4>
+                  <span class="curated-story-thumb-price">{{ fp.product.selling_price|inr }}</span>
+                </a>
+              {% endfor %}
+            </div>
 
-          <div class="how-buying-row">
-            <dt class="how-buying-term">Payment</dt>
-            <dd class="how-buying-desc">
-              Pay on delivery where your PIN allows it.{% if razorpay_enabled %} Pay online by card, UPI or net banking.{% endif %}
-            </dd>
+            <div class="curated-story-footer mt-2">
+              <a href="{% url 'category_list' %}" class="link-subtle font-semibold body-sm">Read chapter &rarr;</a>
+            </div>
           </div>
-        </dl>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- 5. BUDGET LADDER (WP3) -->
+  <section class="section budget-ladder-section" aria-labelledby="budget-heading">
+    <div class="hairline-bottom pb-2 mb-4 flex justify-between items-baseline">
+      <div>
+        <span class="label text-muted font-mono text-2xs uppercase">Price Hierarchy</span>
+        <h2 id="budget-heading" class="display-m">Budget Ladder</h2>
+      </div>
+      <span class="caption text-muted">Indexed across 4 expenditure brackets</span>
+    </div>
+
+    <div class="budget-ladder-grid">
+      {% for tier in budget_ladder %}
+        <a href="{{ tier.url }}" class="budget-ladder-card">
+          <div class="budget-ladder-head">
+            <h3 class="budget-ladder-title">{{ tier.title }}</h3>
+            <span class="budget-ladder-count">{{ tier.count }} listing{{ tier.count|pluralize }}</span>
+          </div>
+          <div class="budget-thumb-stack">
+            {% for samp in tier.samples %}
+              <div class="budget-thumb-plate thumbnail-slot" style="--thumb-idx: {{ forloop.counter0 }};">
+                <img src="{{ samp.primary_image_url }}" alt="" class="budget-thumb-img" loading="lazy">
+              </div>
+            {% endfor %}
+          </div>
+          <div class="budget-ladder-link">
+            <span>Explore Bracket</span> &rarr;
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- 6. HOW BUYING WORKS HERE (WP3) -->
+  <section class="how-buying-section section" id="buying" aria-labelledby="buying-heading">
+    <div class="hairline-bottom pb-2 mb-4">
+      <span class="label text-muted font-mono text-2xs uppercase">Purchase Integrity</span>
+      <h2 id="buying-heading" class="display-s">How buying works</h2>
+    </div>
+    <div class="how-buying-three-cols">
+      <div class="how-buying-card">
+        <span class="how-buying-step-num font-mono">01</span>
+        <h3 class="how-buying-card-title">Curated from verified batches</h3>
+        <p class="caption text-muted">Every unit is sourced and inspected against strict catalog specifications before intake.</p>
+      </div>
+      <div class="how-buying-card">
+        <span class="how-buying-step-num font-mono">02</span>
+        <h3 class="how-buying-card-title">Direct dispatch from Bengaluru</h3>
+        <p class="caption text-muted">Orders ship securely packaged from our Karnataka hub with end-to-end tracked transit.</p>
+      </div>
+      <div class="how-buying-card">
+        <span class="how-buying-step-num font-mono">03</span>
+        <h3 class="how-buying-card-title">7-day transit damage replacement</h3>
+        <p class="caption text-muted">Damaged or defective parcels are covered with expedited pickup and immediate replacement.</p>
       </div>
     </div>
   </section>
 
-  <!-- 5. ALLOW-LISTED BRANDS FLOW (WP5) -->
+  <!-- 7. ALLOW-LISTED BRANDS FLOW (WP3) -->
   {% if brands %}
-    <section class="brands-flow-section" aria-labelledby="brands-heading">
-      <h2 id="brands-heading" class="label mb-3">The brands</h2>
+    <section class="brands-flow-section section" aria-labelledby="brands-heading">
+      <div class="hairline-bottom pb-2 mb-3 flex items-baseline justify-between">
+        <div>
+          <span class="label text-muted font-mono text-2xs uppercase">Directory</span>
+          <h2 id="brands-heading" class="label">The brands</h2>
+        </div>
+        <a href="{% url 'brand_list' %}" class="link-subtle font-semibold body-sm">View full directory &rarr;</a>
+      </div>
       <div class="brands-flow-wrap tag-list dense-list">
-        {% for b in brands|slice:":40" %}
+        {% for b in brands|slice:":30" %}
           <a href="{% url 'search_results' %}?brand={{ b.name|urlencode }}" class="brand-chip">
             <span class="brand-chip-name">{{ b.name }}</span>
             <span class="brand-chip-count">{{ b.product_count }}</span>
@@ -225,15 +313,6 @@
       </div>
     </section>
   {% endif %}
-
-  <!-- 6. CLOSING LINE (WP5) -->
-  <section class="closing-callout-section">
-    <div class="closing-callout-hairline" aria-hidden="true"></div>
-    <div class="closing-callout-inner">
-      <p class="display-m mb-4">Start with the category you need.</p>
-      <a href="{% url 'category_list' %}" class="btn btn-primary">Browse all categories &rarr;</a>
-    </div>
-  </section>
 </div>
 
 {{ cutout_cycle_data|json_script:"hero-cutouts-data" }}
