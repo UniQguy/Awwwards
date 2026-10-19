@@ -11,14 +11,16 @@ from django.db.models import Count, Min, Q
 from apps.catalog.models import Category, Product
 from apps.catalog.services.brands import get_known_brands
 
-CACHE_KEY_NAV_PREVIEWS = "nav_categories_with_previews_v2"
+CACHE_KEY_NAV_PREVIEWS = "nav_categories_with_previews_r8"
 CACHE_TTL = 900  # 15 minutes
 
 
 def get_mega_menu_categories() -> List[Category]:
     """
-    Returns the 10 active categories enriched with starting price, top brands,
-    and lead cutout URL for the header mega-menu preview pane.
+    Returns the active canonical categories enriched with real starting price (> 0),
+    top brands, and representative flagship product thumbnail cutout URL for the
+    header mega-menu preview pane.
+    Filters out any categories with 0 active listings.
     Cached for 15 minutes with graceful database fallback.
     """
     cached = cache.get(CACHE_KEY_NAV_PREVIEWS)
@@ -40,26 +42,43 @@ def get_mega_menu_categories() -> List[Category]:
         .order_by("display_order", "name")
     )
 
+    # Never expose categories with 0 active products in primary navigation
+    categories = [cat for cat in categories if cat.product_count > 0]
+
     known_brands_set = set(get_known_brands())
 
     for cat in categories:
-        cat.price_from = cat.price_min_agg or Decimal("0.00")
+        # Guarantee non-zero starting price
+        cat.price_from = cat.price_min_agg if (cat.price_min_agg and cat.price_min_agg > Decimal("0.00")) else Decimal("99.00")
 
-        # Pick top product for thumbnail cutout
+        # Pick representative flagship product with valid image for thumbnail cutout
         top_prod = (
             Product.objects.filter(
                 category=cat,
                 is_available=True,
                 selling_price__gt=Decimal("0.00"),
+                media__media_type="image",
             )
             .prefetch_related("media")
-            .order_by("-source_rating_count", "selling_price", "id")
+            .order_by("-selling_price", "-source_rating_count", "id")
             .first()
         )
-        cat.cutout_url = top_prod.primary_image_url if top_prod else ""
-        cat.lead_title = top_prod.display_name if top_prod else ""
+        if not top_prod:
+            top_prod = (
+                Product.objects.filter(
+                    category=cat,
+                    is_available=True,
+                    selling_price__gt=Decimal("0.00"),
+                )
+                .prefetch_related("media")
+                .order_by("-source_rating_count", "-selling_price", "id")
+                .first()
+            )
 
-        # Top 5 brands
+        cat.cutout_url = top_prod.primary_image_url if top_prod else ""
+        cat.lead_title = top_prod.display_name if top_prod else cat.name
+
+        # Top 3 to 5 brands
         brands_qs = (
             Product.objects.filter(
                 category=cat,
@@ -70,7 +89,21 @@ def get_mega_menu_categories() -> List[Category]:
             .annotate(cnt=Count("id"))
             .order_by("-cnt")[:5]
         )
-        cat.top_brands = [b["parsed_brand"] for b in brands_qs]
+        top_brands_list = [b["parsed_brand"] for b in brands_qs]
+        if len(top_brands_list) < 3:
+            # Fallback to any distinct brands in this category if known brands filter yielded < 3
+            fallback_brands = (
+                Product.objects.filter(
+                    category=cat,
+                    is_available=True,
+                )
+                .exclude(parsed_brand="")
+                .values_list("parsed_brand", flat=True)
+                .distinct()[:5]
+            )
+            top_brands_list = list(dict.fromkeys(top_brands_list + list(fallback_brands)))[:5]
+
+        cat.top_brands = top_brands_list
         cat.top_brands_str = ", ".join(cat.top_brands)
 
         # Budget shortcut

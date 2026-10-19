@@ -339,3 +339,76 @@ def classify_category(title: str, sub_category: str = "") -> str:
         return "cables-chargers-powerbanks"
 
     return "other"
+
+
+def merge_duplicate_categories() -> Dict[str, int]:
+    """
+    Finds and merges duplicate Category records into their canonical Category
+    defined in CATEGORY_DEFINITIONS.
+    Reassigns all Product, Collection, and Coupon foreign keys before deleting duplicate categories.
+    Returns summary dict of actions taken.
+    """
+    from apps.catalog.models import Category, Collection, Product
+    from apps.promotions.models import Coupon
+
+    canonical_by_slug = {}
+    for item in CATEGORY_DEFINITIONS:
+        cat, _ = Category.objects.update_or_create(
+            slug=item["slug"],
+            defaults={
+                "name": item["name"],
+                "accent_key": item["accent_key"],
+                "hsn_code": item["hsn_code"],
+                "gst_rate": item["gst_rate"],
+                "is_gst_rate_verified": item["is_gst_rate_verified"],
+                "display_order": item["display_order"],
+                "description": item["description"],
+                "is_active": True,
+            },
+        )
+        canonical_by_slug[item["slug"]] = cat
+
+    canonical_slugs = set(canonical_by_slug.keys())
+    canonical_by_name = {c.name.strip().lower(): c for c in canonical_by_slug.values()}
+
+    reassigned_products = 0
+    deleted_categories = 0
+
+    all_categories = list(Category.objects.all())
+    for cat in all_categories:
+        if cat.slug in canonical_slugs:
+            continue
+
+        # Find target canonical category
+        target = None
+        cat_name_clean = cat.name.strip().lower()
+        if cat_name_clean in canonical_by_name:
+            target = canonical_by_name[cat_name_clean]
+        else:
+            for c_slug, c_cat in canonical_by_slug.items():
+                if cat.slug.startswith(c_slug):
+                    target = c_cat
+                    break
+
+        if not target:
+            target = canonical_by_slug["other"]
+
+        # Reassign products
+        prod_count = Product.objects.filter(category=cat).update(category=target)
+        reassigned_products += prod_count
+
+        # Reassign collections
+        Collection.objects.filter(category=cat).update(category=target)
+
+        # Reassign coupons
+        for coupon in Coupon.objects.filter(applicable_categories=cat):
+            coupon.applicable_categories.remove(cat)
+            coupon.applicable_categories.add(target)
+
+        cat.delete()
+        deleted_categories += 1
+
+    return {
+        "reassigned_products": reassigned_products,
+        "deleted_categories": deleted_categories,
+    }

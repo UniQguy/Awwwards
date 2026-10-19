@@ -30,6 +30,16 @@ class Command(BaseCommand):
         mode_str = "DRY RUN (no database changes)" if dry_run else "LIVE EXECUTION (updating database)"
         self.stdout.write(self.style.NOTICE(f"[*] Starting catalog reclassification: {mode_str}..."))
 
+        if not dry_run:
+            from apps.catalog.services.category_rules import merge_duplicate_categories
+            cleanup_stats = merge_duplicate_categories()
+            if cleanup_stats["deleted_categories"] > 0:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"[*] Merged {cleanup_stats['deleted_categories']} duplicate categories ({cleanup_stats['reassigned_products']} products reassigned)."
+                    )
+                )
+
         categories = {c.slug: c for c in Category.objects.all()}
         total_products = Product.objects.count()
         self.stdout.write(f"[*] Total catalog products to inspect: {total_products}")

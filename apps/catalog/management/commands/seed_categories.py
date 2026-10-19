@@ -4,13 +4,23 @@ Management command to seed the 10 canonical editorial categories with confirmed 
 
 from django.core.management.base import BaseCommand
 from apps.catalog.models import Category
-from apps.catalog.services.category_rules import CATEGORY_DEFINITIONS
+from apps.catalog.services.category_rules import CATEGORY_DEFINITIONS, merge_duplicate_categories
 
 
 class Command(BaseCommand):
-    help = "Seeds the 10 canonical categories with HSN codes, GST rates, and colour worlds."
+    help = "Seeds the 10 canonical categories with HSN codes, GST rates, and colour worlds, merging duplicates."
 
     def handle(self, *args, **options):
+        # 1. Merge any duplicate or non-canonical categories first
+        cleanup_stats = merge_duplicate_categories()
+        if cleanup_stats["deleted_categories"] > 0:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Merged duplicate categories: {cleanup_stats['deleted_categories']} deleted, "
+                    f"{cleanup_stats['reassigned_products']} products reassigned."
+                )
+            )
+
         created_count = 0
         updated_count = 0
 
