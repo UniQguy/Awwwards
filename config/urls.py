@@ -94,6 +94,7 @@ from django.conf import settings
 if getattr(settings, "DEBUG", False):
     from apps.core.views_outbox import dev_outbox
     from django.conf.urls.static import static
+    urlpatterns.insert(0, path("outbox/", dev_outbox, name="outbox"))
     urlpatterns.insert(0, path("dev/outbox/", dev_outbox, name="dev_outbox"))
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

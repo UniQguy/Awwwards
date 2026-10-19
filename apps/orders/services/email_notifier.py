@@ -237,3 +237,44 @@ def send_cod_placed(order: Order, guest_token: Optional[str] = None) -> None:
         _send_transactional_email(order, event, subject, "emails/cod_placed", context)
 
     transaction.on_commit(_dispatch)
+
+
+def send_guest_cod_otp(recipient_email: str, otp: str) -> bool:
+    """
+    Dispatches 6-digit verification OTP to unauthenticated guest customer
+    prior to confirming Cash on Delivery (COD) order.
+    """
+    subject = f"ElectroCart Verification Code: {otp}"
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "orders@electrocart.in")
+    text_content = (
+        f"Your verification code is: {otp}\n\n"
+        f"Enter this 6-digit code on the checkout screen to confirm your Cash on Delivery order.\n"
+        f"This code will expire in 10 minutes.\n\n"
+        f"If you did not place this order, please ignore this email.\n\n"
+        f"ElectroCart Ahmedabad"
+    )
+    html_content = (
+        f"<div style='font-family: sans-serif; max-width: 600px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px;'>"
+        f"<h2 style='color: #0f172a; margin-top: 0;'>Verify Cash on Delivery Order</h2>"
+        f"<p style='color: #475569;'>Use the following 6-digit verification code to confirm your Cash on Delivery order:</p>"
+        f"<div style='background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 16px; text-align: center; font-size: 28px; font-weight: bold; letter-spacing: 6px; color: #1e293b; margin: 20px 0;'>"
+        f"{otp}"
+        f"</div>"
+        f"<p style='color: #64748b; font-size: 14px;'>This verification code is valid for 10 minutes.</p>"
+        f"<p style='color: #94a3b8; font-size: 12px; margin-bottom: 0;'>ElectroCart Ahmedabad &middot; Honest Commerce</p>"
+        f"</div>"
+    )
+    try:
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=text_content,
+            from_email=from_email,
+            to=[recipient_email],
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+        logger.info("Successfully sent guest COD OTP to %s", mask_email(recipient_email))
+        return True
+    except Exception as exc:
+        logger.error("Failed to send guest COD OTP to %s: %s", mask_email(recipient_email), exc)
+        return False

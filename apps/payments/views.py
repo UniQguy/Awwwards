@@ -50,10 +50,24 @@ def razorpay_checkout_page(request: HttpRequest, order_number: str) -> HttpRespo
     amount_paise = int(order.total_amount * 100)
     can_cod = (order.total_amount <= Decimal("50000.00"))
 
+    from apps.payments.providers import RazorpayProvider
+    provider = RazorpayProvider()
+    clean_ord = order.order_number.replace("-", "")
+    sandbox_order_id = f"order_sandbox_{clean_ord}"
+    sandbox_payment_id = f"pay_sandbox_{clean_ord[:12]}"
+    sandbox_signature = provider.generate_test_payment_signature(
+        order_id=sandbox_order_id,
+        payment_id=sandbox_payment_id,
+        secret=provider.key_secret,
+    )
+
     context = {
         "order": order,
         "key_id": key_id,
         "keys_unconfigured": keys_unconfigured,
+        "sandbox_order_id": sandbox_order_id,
+        "sandbox_payment_id": sandbox_payment_id,
+        "sandbox_signature": sandbox_signature,
         "amount_paise": amount_paise,
         "can_cod": can_cod,
         "token": request.GET.get("token") or request.session.get(f"order_token_{order.order_number}"),

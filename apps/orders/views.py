@@ -2,12 +2,15 @@
 Storefront views for checkout flow, order confirmation, tracking, invoice presentation, and cancellation.
 """
 
+import datetime
 from decimal import Decimal
+import secrets
 import uuid
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -21,6 +24,7 @@ from apps.orders.models import Order
 from apps.orders.services.email_notifier import (
     send_cancellation_refund,
     send_cod_placed,
+    send_guest_cod_otp,
     send_order_confirmation,
 )
 from apps.orders.services.invoice_pdf import build_credit_note_pdf, build_invoice_pdf
@@ -273,8 +277,43 @@ def checkout_review(request: HttpRequest) -> HttpResponse:
         payment_method="cod",
     )
 
+    is_guest = not request.user.is_authenticated
+    cod_limit = Decimal("15000.00") if is_guest else Decimal("35000.00")
     est = estimate_delivery(address["pincode"])
-    can_cod = est.cod_allowed and summary["grand_total"] <= Decimal("50000.00")
+
+    can_cod = est.cod_allowed and (summary["grand_total"] <= cod_limit)
+    cod_disabled_reason = ""
+    if summary["grand_total"] > cod_limit:
+        if is_guest:
+            cod_disabled_reason = "Orders above ₹15,000 require Online Payment (UPI/Card) or Verified Account Login."
+        else:
+            cod_disabled_reason = "Orders above ₹35,000 require Online Payment (UPI/Card)."
+    elif not est.cod_allowed:
+        cod_disabled_reason = est.unavailable_reason or f"Cash on Delivery is unavailable for PIN code {address.get('pincode', '')}."
+
+    # Velocity Guard: Maximum 2 active COD orders per 24 hours
+    if can_cod:
+        one_day_ago = timezone.now() - datetime.timedelta(hours=24)
+        cod_orders_filter = Q(payment_method="cod", created_at__gte=one_day_ago) & ~Q(status=Order.STATUS_CANCELLED)
+        if request.user.is_authenticated:
+            cod_count = Order.objects.filter(cod_orders_filter, user=request.user).count()
+        else:
+            guest_info = request.session.get("checkout_guest", {})
+            g_email = guest_info.get("email", "").strip()
+            g_phone = guest_info.get("phone", "").strip()
+            guest_q = Q()
+            if g_email:
+                guest_q |= Q(guest_email__iexact=g_email)
+            if g_phone:
+                clean_p = "".join(filter(str.isdigit, g_phone))
+                if clean_p:
+                    guest_q |= Q(guest_phone=clean_p)
+            cod_count = Order.objects.filter(cod_orders_filter & guest_q).count() if guest_q else 0
+
+        if cod_count >= 2:
+            can_cod = False
+            cod_disabled_reason = "Maximum 2 active Cash on Delivery orders allowed per 24 hours. Please complete your order via Online Payment."
+
     can_razorpay = True
 
     context = {
@@ -283,6 +322,8 @@ def checkout_review(request: HttpRequest) -> HttpResponse:
         "address": address,
         "estimate": est,
         "can_cod": can_cod,
+        "cod_disabled_reason": cod_disabled_reason,
+        "is_guest": is_guest,
         "can_razorpay": can_razorpay,
         "hold_minutes": 15,
         "breadcrumbs": [
@@ -299,6 +340,7 @@ def checkout_place(request: HttpRequest) -> HttpResponse:
     """
     Step 3: Final atomic order placement.
     Converts cart to Order, locks stock reservations, and redirects to COD success or Razorpay page.
+    Enforces Guest COD OTP verification and tiered value limits.
     """
     if getattr(request, "limited", False):
         from apps.core.views import error_429
@@ -326,6 +368,105 @@ def checkout_place(request: HttpRequest) -> HttpResponse:
 
     user = request.user if request.user.is_authenticated else None
     coupon_code = request.session.get("applied_coupon_code", "")
+
+    # COD specific verification guards
+    if payment_method == "cod":
+        is_guest = not (user and user.is_authenticated)
+        cod_limit = Decimal("15000.00") if is_guest else Decimal("35000.00")
+
+        coupon_discount = Decimal("0.00")
+        if coupon_code:
+            res = validate_coupon(coupon_code, cart, user=user)
+            if res.is_valid:
+                coupon_discount = res.discount_amount
+
+        summary = calculate_cart_summary(
+            cart=cart,
+            buyer_state=address.get("state", ""),
+            coupon_discount=coupon_discount,
+            payment_method="cod",
+        )
+
+        if summary["grand_total"] > cod_limit:
+            if is_guest:
+                messages.error(request, "Orders above ₹15,000 require Online Payment (UPI/Card) or Verified Account Login.")
+            else:
+                messages.error(request, "Orders above ₹35,000 require Online Payment (UPI/Card).")
+            return redirect("checkout_review")
+
+        # Velocity check: maximum 2 active COD orders per 24 hours
+        one_day_ago = timezone.now() - datetime.timedelta(hours=24)
+        cod_orders_filter = Q(payment_method="cod", created_at__gte=one_day_ago) & ~Q(status=Order.STATUS_CANCELLED)
+        if user:
+            cod_count = Order.objects.filter(cod_orders_filter, user=user).count()
+        else:
+            guest_q = Q()
+            if guest_email:
+                guest_q |= Q(guest_email__iexact=guest_email)
+            if guest_phone:
+                clean_p = "".join(filter(str.isdigit, guest_phone))
+                if clean_p:
+                    guest_q |= Q(guest_phone=clean_p)
+            cod_count = Order.objects.filter(cod_orders_filter & guest_q).count() if guest_q else 0
+
+        if cod_count >= 2:
+            messages.error(request, "Maximum 2 active Cash on Delivery orders allowed per 24 hours. Please complete your order via Online Payment.")
+            return redirect("checkout_review")
+
+        # Guest COD OTP Verification Gate
+        if is_guest:
+            submitted_otp = request.POST.get("guest_cod_otp", "").strip()
+            stored_otp = request.session.get("guest_cod_otp")
+            stored_expiry = request.session.get("guest_cod_otp_expiry", 0)
+            now_ts = timezone.now().timestamp()
+
+            if not submitted_otp:
+                # Generate fresh 6-digit OTP
+                otp = f"{secrets.randbelow(900000) + 100000}"
+                request.session["guest_cod_otp"] = otp
+                request.session["guest_cod_otp_expiry"] = now_ts + 600
+                request.session["guest_cod_notes"] = customer_notes
+                request.session.modified = True
+                send_guest_cod_otp(guest_email, otp)
+
+                context = {
+                    "guest_email": guest_email,
+                    "guest_phone": guest_phone,
+                    "summary": summary,
+                    "address": address,
+                    "notes": customer_notes,
+                    "breadcrumbs": [
+                        {"title": "Checkout", "url": "/checkout/"},
+                        {"title": "Review & Payment", "url": "/checkout/review/"},
+                        {"title": "Verify COD", "url": "#"},
+                    ],
+                }
+                return render(request, "orders/checkout_otp.html", context)
+
+            if submitted_otp != stored_otp or now_ts > stored_expiry:
+                context = {
+                    "guest_email": guest_email,
+                    "guest_phone": guest_phone,
+                    "summary": summary,
+                    "address": address,
+                    "notes": customer_notes,
+                    "error": "Invalid or expired verification code. Please check your developer outbox or email and try again.",
+                    "breadcrumbs": [
+                        {"title": "Checkout", "url": "/checkout/"},
+                        {"title": "Review & Payment", "url": "/checkout/review/"},
+                        {"title": "Verify COD", "url": "#"},
+                    ],
+                }
+                return render(request, "orders/checkout_otp.html", context)
+
+            # OTP verified successfully! Clear session OTP
+            if "guest_cod_otp" in request.session:
+                del request.session["guest_cod_otp"]
+            if "guest_cod_otp_expiry" in request.session:
+                del request.session["guest_cod_otp_expiry"]
+            if "guest_cod_notes" in request.session:
+                del request.session["guest_cod_notes"]
+            request.session.modified = True
 
     seller_gstin = getattr(settings, "SELLER_GSTIN", "").strip()
     is_bill_of_supply = not bool(seller_gstin)

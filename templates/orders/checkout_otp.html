@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load core_tags %}
+
+{% block title %}Verify Cash on Delivery — ELECTROCART Checkout{% endblock %}
+{% block meta_description %}Enter your 6-digit verification code to confirm your Cash on Delivery order.{% endblock %}
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block content %}
+<div class="container section">
+  {% include "includes/breadcrumbs.html" %}
+
+  <nav class="checkout-stepper" aria-label="Checkout progression">
+    <div class="checkout-step-item">
+      <span class="step-index-circle">1</span>
+      <span>Sign In / Guest</span>
+    </div>
+    <div class="step-connector" aria-hidden="true"></div>
+    <div class="checkout-step-item">
+      <span class="step-index-circle">2</span>
+      <span>Delivery Address</span>
+    </div>
+    <div class="step-connector" aria-hidden="true"></div>
+    <div class="checkout-step-item" aria-current="step">
+      <span class="step-index-circle">3</span>
+      <span>Verify COD</span>
+    </div>
+  </nav>
+
+  <div class="max-w-md mx-auto">
+    <header class="mb-6 text-center">
+      <h1 class="display-l">Verify Cash on Delivery</h1>
+      <p class="body-sm text-muted mt-2">
+        To prevent automated or mistaken orders, we sent a 6-digit confirmation code to <strong>{{ guest_email }}</strong>.
+      </p>
+    </header>
+
+    <!-- Faculty / University Demo Mode Outbox Bridge Badge -->
+    <div class="alert alert-info mb-6 flex justify-between items-center" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 12px 16px;">
+      <div class="caption" style="color: #1e40af;">
+        <strong>University Demo Mode:</strong> Check verification code in the developer outbox.
+      </div>
+      <a href="/outbox/" target="_blank" class="btn btn-sm btn-secondary" style="font-size: 12px; white-space: nowrap;">
+        View OTP in Local Outbox &nearr;
+      </a>
+    </div>
+
+    {% if error %}
+      <div class="alert alert-danger mb-6" style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 6px;">
+        {{ error }}
+      </div>
+    {% endif %}
+
+    <div class="checkout-card">
+      <form action="{% url 'checkout_place' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="payment_method" value="cod">
+        <input type="hidden" name="notes" value="{{ notes }}">
+
+        <div class="form-group mb-4">
+          <label for="id-guest-cod-otp" class="form-label">
+            <span>6-Digit Verification Code</span>
+          </label>
+          <input
+            type="text"
+            id="id-guest-cod-otp"
+            name="guest_cod_otp"
+            class="form-control text-center font-mono"
+            style="font-size: 24px; letter-spacing: 8px; font-weight: bold;"
+            placeholder="000000"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            required
+            autofocus
+          >
+          <div class="caption text-muted mt-2">
+            Code valid for 10 minutes.
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          Confirm Order ({{ summary.grand_total|inr }}) &rarr;
+        </button>
+      </form>
+
+      <div class="hairline-top pt-4 mt-6 text-center">
+        <form action="{% url 'checkout_place' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <input type="hidden" name="payment_method" value="cod">
+          <input type="hidden" name="notes" value="{{ notes }}">
+          <button type="submit" class="btn btn-secondary btn-sm">
+            Resend Verification Code
+          </button>
+        </form>
+        <span class="caption text-muted mx-2">&bull;</span>
+        <a href="{% url 'checkout_review' %}" class="caption">
+          Change Payment Method
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -102,10 +102,11 @@
                   <strong>Cash on Delivery (COD)</strong>
                   <div class="caption mt-1">
                     Pay in cash or UPI QR code upon physical delivery to your doorstep.
+                    {% if is_guest %}<span class="text-muted">(Requires 6-digit confirmation code via outbox/email)</span>{% endif %}
                   </div>
                   {% if not can_cod %}
                     <div class="text-danger caption mt-1">
-                      Unavailable for this PIN code or order value exceeds ₹50,000 threshold.
+                      {{ cod_disabled_reason|default:"Unavailable for this delivery destination or order value." }}
                     </div>
                   {% endif %}
                 </div>
