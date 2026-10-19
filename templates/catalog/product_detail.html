@@ -57,6 +57,7 @@
       {% if comparison_products %}
         <a href="#section-compare" class="pdp-subnav-tab" data-section="section-compare">Compare Similar</a>
       {% endif %}
+      <a href="#customer-reviews" class="pdp-subnav-tab" data-section="customer-reviews">Customer Reviews</a>
       <div class="pdp-subnav-quick-buy">
         <span class="pdp-subnav-price">{{ product.selling_price|inr }}</span>
         <form action="{% url 'cart_add' product.id %}" method="post" data-fetch-enhance class="m-0">
@@ -438,6 +439,164 @@
       </div>
     </section>
   {% endif %}
+
+  <!-- Customer Reviews & Rating Distribution (Phase R8) -->
+  <section class="section" id="customer-reviews" aria-labelledby="reviews-heading">
+    <div class="hairline-bottom pb-2 mb-6 flex justify-between items-baseline flex-wrap gap-4">
+      <div>
+        <h2 id="reviews-heading" class="display-m">Customer Reviews &amp; Ratings</h2>
+        <p class="caption text-muted mt-1">Verified purchaser feedback and technical impressions</p>
+      </div>
+      <div>
+        <a href="#review-form-card" class="btn btn-secondary btn-sm">Write a Review</a>
+      </div>
+    </div>
+
+    <div class="grid-2 gap-8 mb-8">
+      <!-- Ratings Scorecard & Distribution Bars -->
+      <div class="checkout-card p-6 bg-surface border-rule flex flex-col justify-center">
+        <div class="flex items-center gap-6 mb-6">
+          <div class="text-center">
+            <span class="display-xl font-bold text-accent">{{ avg_rating }}</span>
+            <span class="caption block text-muted">out of 5.0</span>
+          </div>
+          <div class="flex-1">
+            <div class="font-semibold body-sm mb-1">
+              {% if total_reviews > 0 %}{{ total_reviews }} Customer Review{{ total_reviews|pluralize }}{% else %}Catalogue Benchmark Rating{% endif %}
+            </div>
+            <p class="caption text-muted mb-0">Ratings submitted by verified customers and catalog benchmarks.</p>
+          </div>
+        </div>
+
+        <!-- Rating Distribution Bars -->
+        <div class="flex flex-col gap-2">
+          {% for b in rating_bars %}
+            <div class="flex items-center gap-3 body-sm">
+              <span class="font-medium" style="width: 50px;">{{ b.stars }} Stars</span>
+              <div class="flex-1 rounded overflow-hidden" style="height: 8px; background: #e2e8f0;">
+                <div style="width: {{ b.percentage }}%; height: 100%; background: #0f766e;"></div>
+              </div>
+              <span class="caption text-muted text-right" style="width: 40px;">{{ b.count }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Submit Review Form Card -->
+      <div class="checkout-card p-6 bg-surface border-rule" id="review-form-card">
+        <h3 class="heading mb-3">Submit Customer Review</h3>
+        <form method="post" action="#customer-reviews" class="flex flex-col gap-3">
+          {% csrf_token %}
+          <input type="hidden" name="submit_review" value="1">
+
+          <div class="grid-2 gap-3">
+            <div class="form-group">
+              <label for="id-reviewer-name" class="form-label">
+                <span>Your Name</span>
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                id="id-reviewer-name"
+                name="reviewer_name"
+                class="form-control"
+                value="{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"
+                placeholder="e.g. Priyanshu Sharma"
+                required
+              >
+            </div>
+            <div class="form-group">
+              <label for="id-reviewer-email" class="form-label">
+                <span>Email Address</span>
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="email"
+                id="id-reviewer-email"
+                name="reviewer_email"
+                class="form-control"
+                value="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                placeholder="you@example.com"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id-review-rating" class="form-label">
+              <span>Overall Rating</span>
+              <span class="text-danger">*</span>
+            </label>
+            <select id="id-review-rating" name="rating" class="form-control" required>
+              <option value="5">5 Stars &ndash; Exceptional Hardware</option>
+              <option value="4">4 Stars &ndash; Good Value &amp; Performance</option>
+              <option value="3">3 Stars &ndash; Meets Expectations</option>
+              <option value="2">2 Stars &ndash; Below Average</option>
+              <option value="1">1 Star &ndash; Unsatisfactory</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="id-review-title" class="form-label">Review Headline</label>
+            <input
+              type="text"
+              id="id-review-title"
+              name="title"
+              class="form-control"
+              placeholder="e.g. Daily performance, optical clarity and build"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="id-review-body" class="form-label">
+              <span>Review Comments</span>
+              <span class="text-danger">*</span>
+            </label>
+            <textarea
+              id="id-review-body"
+              name="body"
+              rows="3"
+              class="form-control"
+              placeholder="Share details on performance, ergonomics, battery, or build quality."
+              required
+            ></textarea>
+          </div>
+
+          <div>
+            <button type="submit" class="btn btn-primary btn-sm">Post Review &rarr;</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Published Reviews Feed -->
+    {% if reviews %}
+      <div class="flex flex-col gap-4">
+        {% for r in reviews %}
+          <article class="p-5 bg-surface border-rule">
+            <div class="flex justify-between items-baseline mb-2 flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="font-semibold body-sm">{{ r.reviewer_name }}</span>
+                {% if r.is_verified_purchase %}
+                  <span class="badge badge-in-stock text-xs">Verified Purchase</span>
+                {% endif %}
+              </div>
+              <span class="caption text-muted">{{ r.created_at|date:"d M Y" }}</span>
+            </div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-accent font-bold">{{ r.rating }} / 5 Stars</span>
+              <span class="font-medium body-sm">&bull; {{ r.title }}</span>
+            </div>
+            <p class="body-sm text-muted mb-0">{{ r.body }}</p>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info p-4 bg-surface border-rule">
+        <p class="body-sm mb-0">No customer reviews published yet. Be the first to submit feedback on this hardware.</p>
+      </div>
+    {% endif %}
+  </section>
 
   <!-- Related Products in Category -->
   {% if related_products %}

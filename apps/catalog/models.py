@@ -4,6 +4,7 @@ All financial arithmetic strictly utilizes Decimal. Check constraints and indexe
 """
 
 from decimal import Decimal
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -439,3 +440,44 @@ class FeaturedProduct(TimeStampedModel):
     def __str__(self):
         hero = " (Hero)" if self.is_hero else ""
         return f"{self.collection.title} -> {self.product.display_name}{hero}"
+
+
+class ProductReview(TimeStampedModel):
+    """
+    Direct customer product reviews and ratings on product detail page (Phase R8).
+    """
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="reviews",
+        verbose_name=_("product"),
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="product_reviews",
+        verbose_name=_("customer"),
+    )
+    reviewer_name = models.CharField(_("reviewer name"), max_length=120)
+    reviewer_email = models.EmailField(_("reviewer email"))
+    rating = models.PositiveSmallIntegerField(_("star rating"), default=5)
+    title = models.CharField(_("headline"), max_length=200)
+    body = models.TextField(_("review body"))
+    is_verified_purchase = models.BooleanField(_("verified purchase"), default=False)
+
+    class Meta:
+        verbose_name = _("product review")
+        verbose_name_plural = _("product reviews")
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(rating__gte=1, rating__lte=5),
+                name="check_product_review_rating_1_to_5",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.product.sku} - {self.rating} stars by {self.reviewer_name}"

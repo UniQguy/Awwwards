@@ -28,7 +28,11 @@ class Command(BaseCommand):
         self.stdout.write(f"[*] Cleared {deleted_count} existing parsed specifications.")
 
         # 2. Extract specs for all products
-        products = list(Product.objects.select_related("category").only("id", "raw_name", "category__slug"))
+        products = list(
+            Product.objects.select_related("category").only(
+                "id", "raw_name", "category__slug", "selling_price", "parsed_brand", "description"
+            )
+        )
         specs_to_create: List[ProductSpecification] = []
 
         # Metric tracking per category: {category_slug: {spec_key: [numeric_values]}}
@@ -36,7 +40,13 @@ class Command(BaseCommand):
 
         for prod in products:
             cat_slug = prod.category.slug if prod.category else ""
-            extracted = extract_specifications(prod.raw_name, category_slug=cat_slug)
+            extracted = extract_specifications(
+                prod.raw_name,
+                category_slug=cat_slug,
+                price=prod.selling_price,
+                brand=prod.parsed_brand,
+                description=prod.description,
+            )
 
             for order_idx, (spec_key, spec_data) in enumerate(extracted.items(), start=1):
                 val_str = spec_data["value"]

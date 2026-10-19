@@ -1,51 +1,70 @@
 {% extends "base.html" %}
 {% load core_tags %}
 
-{% block title %}Product Comparison — ELECTROCART{% endblock %}
-{% block meta_description %}Side-by-side technical specification comparison of selected electronics.{% endblock %}
+{% block title %}Hardware Specification Matrix — ELECTROCART{% endblock %}
+{% block meta_description %}Side-by-side technical specification comparison of selected electronics with price tier delta advisory.{% endblock %}
 {% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
 
 {% block content %}
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <div class="flex justify-between items-baseline mb-6">
+  <header class="flex justify-between items-baseline mb-6 flex-wrap gap-4">
     <div>
-      <h1 class="display-l">Product Comparison</h1>
+      <h1 class="display-l">Hardware Specification Matrix</h1>
       {% if common_category %}
-        <p class="subhead mt-1">Comparing products in <strong>{{ common_category.name }}</strong> (Max 3 items)</p>
+        <p class="caption mt-1">Comparing hardware in <strong>{{ common_category.name }}</strong> ({{ compared_products|length }} items)</p>
       {% endif %}
     </div>
 
     {% if compared_products %}
-      <form action="{% url 'compare_clear' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-secondary btn-sm">Clear Comparison</button>
-      </form>
+      <div class="flex gap-2 items-center flex-wrap">
+        <button type="button" id="toggle-diffs-btn" class="btn btn-secondary btn-sm" onclick="toggleOnlyDifferences()">
+          Show Only Differences
+        </button>
+        <form action="{% url 'compare_clear' %}" method="post" class="m-0">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-quiet btn-sm">Clear Tray</button>
+        </form>
+      </div>
     {% endif %}
-  </div>
+  </header>
+
+  {% if delta_advisory %}
+    <div class="alert alert-warning p-4 bg-surface border-rule mb-6" role="status">
+      <div class="flex items-center gap-3">
+        <span class="badge badge-warning text-sm uppercase font-semibold">{{ delta_advisory.multiplier }}x Price Delta</span>
+        <div>
+          <h2 class="heading text-accent mb-0">{{ delta_advisory.headline }}</h2>
+          <p class="caption text-muted mb-0 mt-1">{{ delta_advisory.subtext }}</p>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 
   {% if compared_products %}
-    <div class="compare-container">
-      <table class="compare-table">
-        <caption class="sr-only">Side by side product comparison matrix</caption>
+    <div class="compare-container overflow-x-auto">
+      <table class="compare-table w-full border-collapse" id="compare-matrix-table">
+        <caption class="sr-only">Side-by-side technical hardware comparison matrix</caption>
         <thead>
           <tr>
-            <th scope="col">Feature</th>
+            <th scope="col" class="text-left p-3 border-rule bg-surface" style="width: 220px;">Specification</th>
             {% for prod in compared_products %}
-              <th scope="col" class="text-center">
-                <div class="mb-2 mx-auto max-w-md">
+              <th scope="col" class="text-center p-4 border-rule bg-surface align-top" style="min-width: 240px;">
+                <div class="mb-3 mx-auto" style="max-width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;">
                   {% include "includes/product_image.html" with product=prod %}
                 </div>
-                <div class="heading mb-2">
-                  <a href="{% url 'product_detail' slug=prod.slug %}">{{ prod.display_name }}</a>
+                <div class="heading mb-2 body-sm font-semibold">
+                  <a href="{% url 'product_detail' slug=prod.slug %}" class="hover:underline">{{ prod.display_name }}</a>
                 </div>
-                {% include "includes/price_block.html" with product=prod %}
-                <div class="flex gap-2 justify-center mt-3">
+                <div class="mb-3">
+                  {% include "includes/price_block.html" with product=prod %}
+                </div>
+                <div class="flex gap-2 justify-center items-center">
                   {% include "includes/add_to_cart_form.html" with product=prod %}
-                  <form action="{% url 'compare_remove' product_id=prod.id %}" method="post" class="u-inline-form">
+                  <form action="{% url 'compare_remove' product_id=prod.id %}" method="post" class="u-inline-form m-0">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-secondary" aria-label="Remove {{ prod.display_name }} from comparison">&times;</button>
+                    <button type="submit" class="btn btn-sm btn-secondary" aria-label="Remove {{ prod.display_name }} from comparison" title="Remove">&times;</button>
                   </form>
                 </div>
               </th>
@@ -53,25 +72,39 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <th scope="row">Brand</th>
+          <!-- Brand Row -->
+          <tr class="spec-row">
+            <th scope="row" class="text-left p-3 border-rule font-medium bg-surface">Brand</th>
             {% for prod in compared_products %}
-              <td class="text-center">{{ prod.parsed_brand }}</td>
+              <td class="text-center p-3 border-rule">{{ prod.parsed_brand }}</td>
             {% endfor %}
           </tr>
-          <tr>
-            <th scope="row">Availability</th>
+
+          <!-- Stock Availability Row -->
+          <tr class="spec-row">
+            <th scope="row" class="text-left p-3 border-rule font-medium bg-surface">Stock Status</th>
             {% for prod in compared_products %}
-              <td class="text-center">{% include "includes/stock_badge.html" with product=prod %}</td>
+              <td class="text-center p-3 border-rule">{% include "includes/stock_badge.html" with product=prod %}</td>
             {% endfor %}
           </tr>
-          {% for key, row_values in spec_matrix.items %}
-            <tr>
-              <th scope="row">{{ key }}</th>
+
+          <!-- Technical Specs Rows -->
+          {% for row in spec_rows %}
+            <tr class="spec-row {% if row.is_identical %}row-identical{% endif %}">
+              <th scope="row" class="text-left p-3 border-rule font-medium bg-surface">{{ row.label }}</th>
               {% for prod in compared_products %}
-                <td class="text-center">
-                  {% for pid, val in row_values.items %}
-                    {% if pid == prod.id %}{{ val }}{% endif %}
+                <td class="text-center p-3 border-rule {% if row.winner_id == prod.id %}bg-surface-tint font-medium{% endif %}">
+                  {% for pid, val in row.values.items %}
+                    {% if pid == prod.id %}
+                      {% if row.is_price %}
+                        {{ val|inr }}
+                      {% else %}
+                        {{ val }}
+                      {% endif %}
+                      {% if row.winner_id == prod.id %}
+                        <span class="badge badge-in-stock ml-2 text-xs">{{ row.winner_badge }}</span>
+                      {% endif %}
+                    {% endif %}
                   {% endfor %}
                 </td>
               {% endfor %}
@@ -80,11 +113,40 @@
         </tbody>
       </table>
     </div>
+
+    <style>
+      .compare-table.show-only-diffs tr.row-identical {
+        display: none;
+      }
+      .bg-surface-tint {
+        background-color: rgba(14, 165, 233, 0.08);
+      }
+    </style>
+
+    <script>
+      function toggleOnlyDifferences() {
+        const table = document.getElementById('compare-matrix-table');
+        const btn = document.getElementById('toggle-diffs-btn');
+        if (!table || !btn) return;
+        table.classList.toggle('show-only-diffs');
+        if (table.classList.contains('show-only-diffs')) {
+          btn.textContent = 'Show All Specs';
+          btn.classList.add('btn-primary');
+          btn.classList.remove('btn-secondary');
+        } else {
+          btn.textContent = 'Show Only Differences';
+          btn.classList.add('btn-secondary');
+          btn.classList.remove('btn-primary');
+        }
+      }
+    </script>
   {% else %}
-    <div class="alert alert-info">
-      <p>No products are currently in your comparison tray.</p>
-      <p class="caption mt-1">Browse categories and click "Compare" on any item to view side-by-side technical specifications.</p>
-      <p class="mt-4"><a href="{% url 'category_list' %}" class="btn btn-primary btn-sm">Browse Categories</a></p>
+    <div class="alert alert-info p-6 bg-surface border-rule max-w-lg mx-auto text-center">
+      <h2 class="heading mb-2">No hardware in comparison tray</h2>
+      <p class="body-sm text-muted mb-4">
+        Select products in any category to launch a side-by-side technical hardware evaluation with price delta analysis.
+      </p>
+      <a href="{% url 'category_list' %}" class="btn btn-primary btn-sm">Explore Categories &rarr;</a>
     </div>
   {% endif %}
 </div>

@@ -4,6 +4,7 @@ Storefront views for catalog browsing, categorization, product detail, and compa
 
 from collections import defaultdict
 from decimal import Decimal
+import re
 import urllib.parse
 
 from django.conf import settings
@@ -17,7 +18,8 @@ from django.views.decorators.http import require_GET, require_POST
 
 from django.utils import timezone
 
-from apps.catalog.models import Category, Collection, Product
+from apps.catalog.models import Category, Collection, Product, ProductReview
+from apps.orders.models import Order
 from apps.promotions.models import Coupon
 from apps.catalog.services.editorial import (
     brand_list as get_editorial_brands,
@@ -372,17 +374,53 @@ def category_price_count(request: HttpRequest, slug: str) -> HttpResponse:
     })
 
 
-@require_GET
 def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
     """
-    Detailed product presentation including specifications, media, ratings, and pincode check.
+    Detailed product presentation including specifications, media, customer reviews, and delivery estimate.
+    Handles review submission with verified purchase detection.
     """
     product = get_object_or_404(
         Product.objects.select_related("category", "inventory").prefetch_related(
-            "specifications", "media"
+            "specifications", "media", "reviews"
         ),
         slug=slug,
     )
+
+    if request.method == "POST" and "submit_review" in request.POST:
+        reviewer_name = request.POST.get("reviewer_name", "").strip()
+        reviewer_email = request.POST.get("reviewer_email", "").strip()
+        title_text = request.POST.get("title", "").strip()
+        body_text = request.POST.get("body", "").strip()
+        try:
+            rating_val = int(request.POST.get("rating", 5))
+            rating_val = max(1, min(5, rating_val))
+        except (ValueError, TypeError):
+            rating_val = 5
+
+        if not reviewer_name or not reviewer_email or not body_text:
+            messages.error(request, "Please enter your name, email address, and review details.")
+        else:
+            user = request.user if request.user.is_authenticated else None
+            check_email = (user.email if user and user.email else reviewer_email).strip().lower()
+            is_verified = Order.objects.filter(
+                items__product=product,
+                status__in=[Order.STATUS_CONFIRMED, Order.STATUS_PROCESSING, Order.STATUS_SHIPPED, Order.STATUS_DELIVERED],
+            ).filter(
+                Q(user=user) if user else Q(guest_email__iexact=check_email)
+            ).exists()
+
+            ProductReview.objects.create(
+                product=product,
+                user=user,
+                reviewer_name=reviewer_name,
+                reviewer_email=reviewer_email,
+                rating=rating_val,
+                title=title_text or f"{rating_val}-Star Rating",
+                body=body_text,
+                is_verified_purchase=is_verified,
+            )
+            messages.success(request, "Thank you for your feedback. Your review has been recorded.")
+            return redirect(f"/p/{product.slug}/#customer-reviews")
 
     media_items = list(product.media.all())
     specifications = list(product.specifications.all())
@@ -457,6 +495,28 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
                 "comp_vals": [cd.get(k, "\u2014") for cd in comp_spec_dicts],
             })
 
+    # Customer Reviews & Ratings Distribution (Phase R8)
+    reviews = list(product.reviews.all().order_by("-created_at"))
+    total_reviews = len(reviews)
+    if total_reviews > 0:
+        avg_rating = round(sum(r.rating for r in reviews) / total_reviews, 1)
+    else:
+        avg_rating = float(product.amazon_rating or 4.5)
+
+    rating_counts = {i: 0 for i in range(1, 6)}
+    for r in reviews:
+        rating_counts[r.rating] = rating_counts.get(r.rating, 0) + 1
+
+    rating_bars = []
+    for s in range(5, 0, -1):
+        cnt = rating_counts[s]
+        pct = int((cnt / total_reviews) * 100) if total_reviews > 0 else (75 if s == 5 else (18 if s == 4 else (7 if s == 3 else 0)))
+        rating_bars.append({
+            "stars": s,
+            "count": cnt,
+            "percentage": pct,
+        })
+
     context = {
         "product": product,
         "specifications": specifications,
@@ -466,6 +526,10 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
         "related_products": related_products,
         "comparison_products": comparison_products,
         "comp_rows": comp_rows,
+        "reviews": reviews,
+        "total_reviews": total_reviews,
+        "avg_rating": avg_rating,
+        "rating_bars": rating_bars,
         "delivery_estimate": delivery_estimate,
         "remembered_pincode": remembered_pincode,
         "available_coupons": available_coupons,
@@ -519,7 +583,8 @@ def brand_list(request: HttpRequest) -> HttpResponse:
 @require_GET
 def compare_tray(request: HttpRequest) -> HttpResponse:
     """
-    Presents side-by-side spec comparison table for up to 3 products in the same category.
+    Presents side-by-side spec comparison table for up to 3 products in the same category,
+    with Price-Tier & Value Delta Advisory, 'Show Only Differences' flags, and Spec Winners.
     """
     tray_ids = request.session.get("compare_tray", [])
     products = list(
@@ -528,26 +593,126 @@ def compare_tray(request: HttpRequest) -> HttpResponse:
         .prefetch_related("specifications", "media")
     )
 
-    # Build spec matrix
-    spec_matrix = {}
     common_category = products[0].category if products else None
+    if products and any(p.category_id != common_category.id for p in products):
+        products = [p for p in products if p.category_id == common_category.id]
+        request.session["compare_tray"] = [p.id for p in products]
+        request.session.modified = True
 
+    # Price-Tier & Value Delta Advisory (Flagship vs Budget)
+    delta_advisory = None
+    if len(products) >= 2:
+        prices = [p.selling_price for p in products if p.selling_price and p.selling_price > 0]
+        if prices:
+            min_p = min(prices)
+            max_p = max(prices)
+            if max_p >= Decimal("50000.00") and min_p <= Decimal("15000.00") and min_p > 0:
+                mult = round(float(max_p / min_p), 1)
+                delta_advisory = {
+                    "multiplier": mult,
+                    "max_price": max_p,
+                    "min_price": min_p,
+                    "headline": f"Flagship vs Budget Tier: {mult}x Price Delta",
+                    "subtext": "Comparing Ultra-Tier Silicon & Optics against Entry-Level Hardware Utility",
+                }
+
+    spec_rows = []
     if products:
-        all_keys = set()
+        # Price row
+        min_price_prod = min(products, key=lambda p: p.selling_price or Decimal("999999"))
+        price_vals = {p.id: p.selling_price for p in products}
+        all_same_price = len(set(price_vals.values())) <= 1
+        spec_rows.append({
+            "key": "price",
+            "label": "Selling Price",
+            "is_price": True,
+            "values": price_vals,
+            "winner_id": min_price_prod.id if not all_same_price else None,
+            "winner_badge": "Best Value",
+            "is_identical": all_same_price,
+        })
+
+        spec_map_by_prod = {}
+        for p in products:
+            spec_map_by_prod[p.id] = {s.key: s.value for s in p.specifications.all()}
+
+        all_keys = []
         for p in products:
             for s in p.specifications.all():
-                all_keys.add(s.key)
+                if s.key not in all_keys and s.key != "price":
+                    all_keys.append(s.key)
 
-        sorted_keys = sorted(all_keys)
-        for key in sorted_keys:
-            spec_matrix[key] = {}
+        for key in all_keys:
+            raw_vals = {p.id: spec_map_by_prod[p.id].get(key, "—") for p in products}
+            distinct_vals = set(raw_vals.values())
+            is_identical = len(distinct_vals) <= 1
+
+            winner_id = None
+            numeric_scores = {}
             for p in products:
-                match = next((s.value for s in p.specifications.all() if s.key == key), "—")
-                spec_matrix[key][p.id] = match
+                v_str = str(raw_vals[p.id])
+                score = None
+                if key == "ram":
+                    m = re.search(r"(\d+)", v_str)
+                    if m: score = float(m.group(1))
+                elif key == "storage":
+                    m = re.search(r"(\d+)", v_str)
+                    if m:
+                        score = float(m.group(1))
+                        if "TB" in v_str.upper(): score *= 1024
+                elif key == "battery":
+                    m = re.search(r"(\d+)", v_str)
+                    if m: score = float(m.group(1))
+                elif key in ("charging_wattage", "wattage"):
+                    m = re.search(r"(\d+)", v_str)
+                    if m: score = float(m.group(1))
+                elif key == "playtime":
+                    m = re.search(r"(\d+)", v_str)
+                    if m: score = float(m.group(1))
+                elif key == "noise_cancellation":
+                    m = re.search(r"(\d+)\s*dB", v_str)
+                    if m: score = float(m.group(1))
+                elif key == "camera":
+                    m = re.search(r"(\d+)\s*MP", v_str)
+                    if m: score = float(m.group(1))
+                elif key in ("display", "screen_size"):
+                    m = re.search(r"(\d+)\s*Hz", v_str)
+                    if m: score = float(m.group(1))
+
+                if score is not None:
+                    numeric_scores[p.id] = score
+
+            if numeric_scores and len(numeric_scores) == len(products):
+                max_score = max(numeric_scores.values())
+                winners = [pid for pid, sc in numeric_scores.items() if sc == max_score]
+                if len(winners) == 1:
+                    winner_id = winners[0]
+
+            label = key.replace("_", " ").title()
+            if key == "ram": label = "RAM Memory"
+            elif key == "storage": label = "Internal Storage"
+            elif key == "screen_size": label = "Display Size"
+            elif key == "charging_wattage": label = "Power / Fast Charging"
+            elif key == "playtime": label = "Battery Playtime"
+            elif key == "noise_cancellation": label = "Active Noise Cancellation"
+            elif key == "processor": label = "Processor / Architecture"
+            elif key == "camera": label = "Primary Camera"
+            elif key == "driver_unit": label = "Acoustic Driver"
+
+            spec_rows.append({
+                "key": key,
+                "label": label,
+                "is_price": False,
+                "values": raw_vals,
+                "winner_id": winner_id,
+                "winner_badge": "Spec Winner",
+                "is_identical": is_identical,
+            })
 
     context = {
         "compared_products": products,
-        "spec_matrix": spec_matrix,
+        "spec_rows": spec_rows,
+        "delta_advisory": delta_advisory,
         "common_category": common_category,
         "breadcrumbs": [{"title": "Product Comparison", "url": "/compare/"}],
     }
