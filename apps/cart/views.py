@@ -346,3 +346,36 @@ def cart_move_to_bag(request: HttpRequest, product_id: int) -> HttpResponse:
         return JsonResponse({"status": "moved", "product_id": product_id})
 
     return redirect("cart_detail")
+
+
+@require_POST
+def cart_add_bundle(request: HttpRequest) -> HttpResponse:
+    """
+    Adds multiple product IDs in a single request (e.g. Desk Setup Bundle).
+    """
+    raw_ids = request.POST.getlist("product_ids")
+    if not raw_ids and request.POST.get("product_ids"):
+        raw_ids = request.POST.get("product_ids", "").split(",")
+
+    cart = _get_cart_for_request(request)
+    added = 0
+    for pid in raw_ids:
+        pid = str(pid).strip()
+        if not pid or not pid.isdigit():
+            continue
+        prod = Product.objects.filter(id=int(pid), is_available=True).first()
+        if prod:
+            try:
+                add_to_cart(cart, prod, quantity=1)
+                added += 1
+            except Exception:
+                pass
+
+    if added:
+        messages.success(request, f"Added {added} desk bundle items to your shopping bag.")
+    else:
+        messages.info(request, "Select items to add bundle to your shopping bag.")
+
+    response = redirect("cart_detail")
+    return _ensure_guest_cookie(response, request)
+

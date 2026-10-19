@@ -21,8 +21,11 @@ import { initChapterPinnedStage } from "./modules/chapter_pinned.js";
 import { initCategoryGallery } from "./modules/category_gallery.js";
 import { initPdpExhibition } from "./modules/pdp_exhibition.js";
 import { initMediaSlots } from "./modules/media_slot.js";
+import { initKineticChapters } from "./modules/kinetic_chapters.js";
 
 function bootstrapEditorial() {
+  // 0. Initialize 9-Chapter Kinetic Monograph modules (Phase R8)
+  initKineticChapters();
   // 1. Initialize hero entrance choreography (Tier 1 & 2 only, once per session)
   initHeroEntranceChoreography();
 

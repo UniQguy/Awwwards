@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.db.models import Count, Max, Min, Q
+from django.db.models import Count, F, Max, Min, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
@@ -47,7 +47,7 @@ def home(request: HttpRequest) -> HttpResponse:
     - Allow-listed brand flowing paragraph
     - Closing line
     """
-    # 1. Hero
+    # 1. Hero & Flagship Anatomy
     hero_res = hero_products(n=4)
     hero_plate_product = hero_res.products[0] if hero_res.products else None
     hero_picker_products = hero_res.products[1:4] if len(hero_res.products) > 1 else []
@@ -57,23 +57,111 @@ def home(request: HttpRequest) -> HttpResponse:
     cutout_earphones = headline_cutouts.get("earphones")
     cutouts = [c for c in [cutout_cable, cutout_watch, cutout_earphones] if c is not None]
 
-    # 2. Stats for live hero sentence
+    # 2. Stats
     total_listings = Product.objects.filter(is_available=True, selling_price__gt=0).count()
     total_categories = Category.objects.filter(is_active=True).count()
     min_price_agg = Product.objects.filter(is_available=True, selling_price__gt=0).aggregate(Min("selling_price"))
     min_price = min_price_agg["selling_price__min"] or Decimal("0.00")
 
-    # 3. Categories Snap-Rail (10 tiles, WP3)
+    # 3. Chapter 03: The Vault (Deals & Promo Codes)
+    vault_coupons = list(Coupon.objects.filter(is_active=True).order_by("-discount_value")[:4])
+    vault_deals_qs = (
+        Product.objects.filter(
+            is_available=True,
+            mrp__gt=F("selling_price"),
+            selling_price__gt=0,
+            media__media_type="image",
+        )
+        .select_related("category")
+        .prefetch_related("media")
+        .order_by("-mrp")[:4]
+    )
+    vault_deals = []
+    for vd in vault_deals_qs:
+        pct = int(round(((vd.mrp - vd.selling_price) / vd.mrp) * 100)) if vd.mrp else 0
+        vault_deals.append({
+            "product": vd,
+            "discount_pct": pct,
+            "savings": vd.mrp - vd.selling_price,
+        })
+
+    # 4. Chapter 04: Head-to-Head Spec Duel (Flagship vs Mid-Range)
+    duel_a = (
+        Product.objects.filter(category__slug="smartphones", selling_price__gte=50000, media__media_type="image")
+        .select_related("category")
+        .prefetch_related("media", "specifications")
+        .order_by("-selling_price")
+        .first()
+    )
+    duel_b = (
+        Product.objects.filter(category__slug="smartphones", selling_price__lte=25000, selling_price__gte=8000, media__media_type="image")
+        .select_related("category")
+        .prefetch_related("media", "specifications")
+        .order_by("-selling_price")
+        .first()
+    )
+    duel_specs = [
+        {"label": "Processor Silicon", "val_a": "Qualcomm Snapdragon 8 Gen 2 (4nm)", "val_b": "MediaTek Helio G85 (12nm)", "winner": "a"},
+        {"label": "RAM Architecture", "val_a": "12 GB LPDDR5X", "val_b": "4 GB LPDDR4X", "winner": "a", "bar_a": 95, "bar_b": 35},
+        {"label": "Display Refresh", "val_a": "120Hz Dynamic AMOLED LTPO", "val_b": "60Hz IPS LCD", "winner": "a", "bar_a": 100, "bar_b": 50},
+        {"label": "Primary Optics", "val_a": "200 MP Primary + OIS", "val_b": "13 MP Dual AI", "winner": "a", "bar_a": 98, "bar_b": 25},
+        {"label": "Fast Charging", "val_a": "45W Super Fast", "val_b": "10W Standard", "winner": "a", "bar_a": 75, "bar_b": 20},
+    ]
+
+    # 5. Chapter 05: Horizontal Collector's Plate Rail (6 distinct categories)
+    plate_categories = ["smartphones", "tvs", "earphones-headphones", "cameras", "smartwatches-bands", "keyboards-mice"]
+    plate_rail_products = []
+    for cat_slug in plate_categories:
+        p_match = (
+            Product.objects.filter(category__slug=cat_slug, is_available=True, media__media_type="image", selling_price__gt=0)
+            .select_related("category")
+            .prefetch_related("media", "specifications")
+            .order_by("-selling_price", "-source_rating_count")
+            .first()
+        )
+        if p_match:
+            plate_rail_products.append(p_match)
+
+    # 6. Chapter 06: The 10 Category Worlds (Bento Matrix)
     from apps.catalog.services.category_nav import get_mega_menu_categories
     categories_rail = get_mega_menu_categories()
 
-    # 4. Typographic Index Rows (legacy fallback)
-    index_list = index_rows()
+    # 7. Chapter 07: Curate Your Desk Setup Bundle Builder
+    bundle_audio_items = list(
+        Product.objects.filter(
+            category__slug__in=["earphones-headphones", "speakers"],
+            is_available=True,
+            media__media_type="image",
+            selling_price__gt=0,
+        )
+        .select_related("category")
+        .prefetch_related("media")
+        .order_by("-selling_price")[:3]
+    )
+    bundle_device_items = list(
+        Product.objects.filter(
+            category__slug__in=["smartphones", "smartwatches-bands"],
+            is_available=True,
+            media__media_type="image",
+            selling_price__gt=0,
+        )
+        .select_related("category")
+        .prefetch_related("media")
+        .order_by("-selling_price")[:3]
+    )
+    bundle_accessory_items = list(
+        Product.objects.filter(
+            category__slug__in=["cables-chargers-powerbanks", "keyboards-mice"],
+            is_available=True,
+            media__media_type="image",
+            selling_price__gt=0,
+        )
+        .select_related("category")
+        .prefetch_related("media")
+        .order_by("-selling_price")[:3]
+    )
 
-    # 5. Chapters: Top 3 categories only, 4 picks each (WP3)
-    chapters = home_chapters(max_chapters=3, picks_per_chapter=4)
-
-    # 6. How Buying Works data
+    # 8. Shipping & Manifesto
     shipping_config = ShippingConfig.get_solo()
     free_shipping_threshold = shipping_config.free_shipping_threshold
     standard_shipping_fee = shipping_config.standard_fee
@@ -81,14 +169,11 @@ def home(request: HttpRequest) -> HttpResponse:
     seller_gstin = getattr(settings, "SELLER_GSTIN", "")
     is_bill_of_supply = not bool(seller_gstin)
     razorpay_enabled = bool(getattr(settings, "RAZORPAY_KEY_ID", ""))
+    remembered_pincode = request.session.get("pincode", "380009")
+    delivery_estimate = estimate_delivery(remembered_pincode)
 
-    # 7. Brands
-    brands = get_editorial_brands(max_brands=35)
-
-    # 8. Cutout cycling data for Technique A progressive enhancement (in-memory, 0 extra queries)
-    cycle_candidates = list(hero_res.products)
-    for ch in chapters:
-        cycle_candidates.extend(ch.picks)
+    # Cutout cycling data
+    cycle_candidates = list(hero_res.products) + plate_rail_products
     seen_ids = set()
     cutout_cycle_data = []
     for p in cycle_candidates:
@@ -102,56 +187,8 @@ def home(request: HttpRequest) -> HttpResponse:
             if len(cutout_cycle_data) >= 10:
                 break
 
-    # 9. Curated Stories (2 collections with 3 items each, WP3)
-    from apps.catalog.models import FeaturedProduct
-    from django.db.models import Prefetch
-    curated_stories = list(
-        Collection.objects.filter(is_active=True)
-        .exclude(placement=Collection.PLACEMENT_HOME_HERO)
-        .prefetch_related(
-            Prefetch(
-                "featured_items",
-                queryset=FeaturedProduct.objects.select_related("product__category")
-                .prefetch_related("product__media")
-                .order_by("display_order", "id"),
-            )
-        )[:2]
-    )
-
-    # 10. Budget Ladder (4 price brackets with count and sample thumbnails, WP3)
-    p_qs = Product.objects.filter(is_available=True, selling_price__gt=0)
-    b_aggs = p_qs.aggregate(
-        c_500=Count("id", filter=Q(selling_price__lte=500)),
-        c_1500=Count("id", filter=Q(selling_price__gt=500, selling_price__lte=1500)),
-        c_5000=Count("id", filter=Q(selling_price__gt=1500, selling_price__lte=5000)),
-        c_prem=Count("id", filter=Q(selling_price__gt=5000)),
-    )
-    budget_ladder = [
-        {
-            "title": "Under ₹500",
-            "count": b_aggs["c_500"] or 0,
-            "url": "/search/?max_price=500",
-            "samples": [p for p in cycle_candidates if p.selling_price and p.selling_price <= 500 and p.primary_image_url][:3],
-        },
-        {
-            "title": "Under ₹1,500",
-            "count": b_aggs["c_1500"] or 0,
-            "url": "/search/?min_price=501&max_price=1500",
-            "samples": [p for p in cycle_candidates if p.selling_price and 500 < p.selling_price <= 1500 and p.primary_image_url][:3],
-        },
-        {
-            "title": "Under ₹5,000",
-            "count": b_aggs["c_5000"] or 0,
-            "url": "/search/?min_price=1501&max_price=5000",
-            "samples": [p for p in cycle_candidates if p.selling_price and 1500 < p.selling_price <= 5000 and p.primary_image_url][:3],
-        },
-        {
-            "title": "Premium Grade",
-            "count": b_aggs["c_prem"] or 0,
-            "url": "/search/?min_price=5001",
-            "samples": [p for p in cycle_candidates if p.selling_price and p.selling_price > 5000 and p.primary_image_url][:3],
-        },
-    ]
+    # Brands
+    brands = get_editorial_brands(max_brands=35)
 
     context = {
         "hero": hero_res,
@@ -165,17 +202,25 @@ def home(request: HttpRequest) -> HttpResponse:
         "total_listings": total_listings,
         "total_categories": total_categories,
         "min_price": min_price,
+        "vault_coupons": vault_coupons,
+        "vault_deals": vault_deals,
+        "duel_a": duel_a,
+        "duel_b": duel_b,
+        "duel_specs": duel_specs,
+        "plate_rail_products": plate_rail_products,
         "categories_rail": categories_rail,
-        "index_rows": index_list,
-        "chapters": chapters,
-        "curated_stories": curated_stories,
-        "budget_ladder": budget_ladder,
+        "bundle_audio_items": bundle_audio_items,
+        "bundle_device_items": bundle_device_items,
+        "bundle_accessory_items": bundle_accessory_items,
+        "delivery_estimate": delivery_estimate,
+        "remembered_pincode": remembered_pincode,
         "free_shipping_threshold": free_shipping_threshold,
         "standard_shipping_fee": standard_shipping_fee,
         "shipping_fee_confirmed": shipping_fee_confirmed,
         "is_bill_of_supply": is_bill_of_supply,
         "razorpay_enabled": razorpay_enabled,
         "brands": brands,
+        "telemetry_coords": "23.0225° N, 72.5714° E · Dispatched from Ahmedabad, Gujarat",
     }
     return render(request, "catalog/home.html", context)
 

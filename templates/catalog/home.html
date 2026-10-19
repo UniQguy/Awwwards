@@ -14,9 +14,14 @@
 
 {% block content %}
 <div class="container home-shop-floor">
-  <!-- 1. HERO SECTION (WP3) -->
-  <section class="hero-composition" aria-labelledby="hero-heading">
+  <!-- CHAPTER 01: KINETIC MONOGRAPH HERO & WEBGL STAGE -->
+  <section class="hero-composition" id="hero-stage-chapter" aria-labelledby="hero-heading">
     <div class="hero-text-col">
+      <div class="hero-telemetry-badge">
+        <span class="hero-telemetry-dot" aria-hidden="true"></span>
+        <span>{{ telemetry_coords }}</span>
+      </div>
+
       <div class="hero-label-line">
         <span class="hero-listings-label">ELECTROCART &middot; EST. 2024 &middot; AHMEDABAD</span>
       </div>
@@ -34,8 +39,8 @@
       </p>
 
       <div class="hero-actions">
-        <a href="#chapters" class="btn btn-primary">Browse catalogue &rarr;</a>
-        <a href="#buying" class="btn btn-secondary">How we choose</a>
+        <a href="#flagship-anatomy-chapter" class="btn btn-primary">Explore Flagship &rarr;</a>
+        <a href="#plate-rail-chapter" class="btn btn-secondary">Enter Exhibition</a>
       </div>
     </div>
 
@@ -82,153 +87,219 @@
     {% endif %}
   </section>
 
-  <!-- 2. CATEGORIES SNAP-RAIL (WP3) -->
-  <section class="section section-snap-rail" aria-labelledby="categories-rail-heading">
-    <div class="flex justify-between items-baseline mb-4">
-      <div>
-        <span class="label text-muted">Catalogue Index</span>
-        <h2 id="categories-rail-heading" class="display-s">The categories</h2>
+  <!-- CHAPTER 02: PINNED FLAGSHIP ANATOMY (SCROLLTRIGGER SCRUBBED) -->
+  {% if hero_plate_product %}
+    <section class="section anatomy-chapter-section" id="flagship-anatomy-chapter" aria-labelledby="anatomy-heading">
+      <div class="anatomy-header">
+        <span class="label text-muted font-mono text-2xs uppercase">Chapter 02 / 09 &middot; Engineering Anatomy</span>
+        <h2 id="anatomy-heading" class="display-m">Flagship Engineering Anatomy</h2>
+        <p class="caption text-muted">Layered internal architecture and industrial assembly for {{ hero_plate_product.display_name }}.</p>
       </div>
-      <div class="snap-rail-arrows" aria-hidden="true">
-        <button type="button" class="btn btn-secondary btn-sm snap-rail-btn" id="snap-rail-prev" aria-label="Previous categories">&larr;</button>
-        <button type="button" class="btn btn-secondary btn-sm snap-rail-btn" id="snap-rail-next" aria-label="Next categories">&rarr;</button>
-      </div>
-    </div>
 
-    <div class="category-snap-rail" id="category-snap-rail" tabindex="0" role="region" aria-label="Categories horizontal rail">
-      {% for cr in categories_rail %}
-        {% if cr.slug %}
-          <a href="{% url 'category_detail' slug=cr.slug %}" class="snap-rail-tile" data-world="{{ cr.accent_key }}">
-            <div class="snap-rail-tile-plate thumbnail-slot">
-              {% if cr.cutout_url %}
-                <img src="{{ cr.cutout_url }}" alt="" class="snap-rail-thumb" loading="lazy" width="48" height="48">
-              {% else %}
-                <span class="snap-rail-fallback-dot" style="background-color: var(--world-accent);"></span>
-              {% endif %}
-            </div>
-            <div class="snap-rail-tile-body">
-              <div class="snap-rail-tile-title">{{ cr.name }}</div>
-              <div class="snap-rail-tile-meta">
-                <span class="snap-rail-count">{{ cr.product_count|default:"0" }} item{{ cr.product_count|default:"0"|pluralize }}</span>
-                <span class="snap-rail-price">from {{ cr.price_from|inr }}</span>
-              </div>
-            </div>
-          </a>
-        {% endif %}
-      {% endfor %}
-    </div>
-  </section>
-
-  <!-- 3. CHAPTERS: TOP 3 CATEGORIES (WP3) -->
-  <div id="chapters">
-    {% for chapter in chapters|slice:":3" %}
-      <section class="section chapter-shelf-monograph" data-world="{{ chapter.category.accent_key }}" aria-labelledby="chapter-{{ chapter.category.id }}">
-        <div class="chapter-shelf-header flex justify-between items-baseline mb-4">
-          <div>
-            <span class="label text-muted font-mono text-2xs uppercase">Chapter {{ forloop.counter|stringformat:"02d" }} / 03 &middot; {{ chapter.category.name }}</span>
-            <h2 class="display-m" id="chapter-{{ chapter.category.id }}">{{ chapter.category.name }}</h2>
-            {% if chapter.category.chapter_intro %}
-              <p class="caption text-muted mt-1">{{ chapter.category.chapter_intro }}</p>
-            {% endif %}
-          </div>
-          {% if chapter.category.slug %}
-            <a href="{% url 'category_detail' slug=chapter.category.slug %}" class="link-subtle font-semibold body-sm">
-              Explore all {{ chapter.product_count }} in {{ chapter.category.name }} &rarr;
-            </a>
+      <div class="anatomy-grid">
+        <div class="anatomy-visual-stage">
+          <span class="anatomy-layer-badge">LAYER 01 OF 04</span>
+          {% if hero_plate_product.primary_image_url %}
+            <img src="{{ hero_plate_product.primary_image_url }}" alt="{{ hero_plate_product.display_name }}" class="anatomy-stage-img">
           {% endif %}
         </div>
 
-        <div class="chapter-composed-shelf">
-          {% for pick in chapter.picks|slice:":4" %}
-            {% if forloop.first %}
-              <div class="shelf-lead-card">
-                <a href="{% url 'product_detail' slug=pick.slug %}" class="block h-full text-none">
-                  <div class="shelf-lead-plate">
-                    {% if pick.primary_image_url %}
-                      <img src="{{ pick.primary_image_url }}" alt="{{ pick.display_name }}" class="shelf-lead-img" loading="lazy">
-                    {% endif %}
-                  </div>
-                  <div class="shelf-lead-details">
-                    <div class="label text-accent mb-1">{{ pick.parsed_brand }}</div>
-                    <h3 class="shelf-lead-title">{{ pick.display_name }}</h3>
-                    <p class="shelf-curator-note caption text-muted line-clamp-2">
-                      {% if chapter.category.chapter_intro %}
-                        {{ chapter.category.chapter_intro }}
-                      {% else %}
-                        Reference selection verified for industrial build and consistent technical fidelity.
-                      {% endif %}
-                    </p>
-                    <div class="shelf-lead-price mt-2">{{ pick.selling_price|inr }}</div>
-                  </div>
-                </a>
-              </div>
-            {% else %}
-              <div class="shelf-standard-card">
-                <a href="{% url 'product_detail' slug=pick.slug %}" class="block h-full text-none">
-                  <div class="shelf-standard-plate">
-                    {% if pick.primary_image_url %}
-                      <img src="{{ pick.primary_image_url }}" alt="{{ pick.display_name }}" class="shelf-standard-img" loading="lazy">
-                    {% endif %}
-                  </div>
-                  <div class="shelf-standard-details">
-                    <div class="label text-accent">{{ pick.parsed_brand }}</div>
-                    <h3 class="shelf-standard-title">{{ pick.display_name }}</h3>
-                    <div class="shelf-standard-price">{{ pick.selling_price|inr }}</div>
-                  </div>
-                </a>
-              </div>
+        <div class="anatomy-controller">
+          <button type="button" class="anatomy-layer-tab is-active" aria-selected="true">
+            <span class="anatomy-tab-num">01 / TRANSDUCER &amp; OPTICS</span>
+            <h3 class="anatomy-tab-title">Acoustic and Optical Core</h3>
+            <p class="anatomy-tab-desc">High-transmittance optical elements and acoustic transducers engineered for balanced frequency response and low total harmonic distortion.</p>
+          </button>
+
+          <button type="button" class="anatomy-layer-tab" aria-selected="false">
+            <span class="anatomy-tab-num">02 / COMPUTE MATRIX</span>
+            <h3 class="anatomy-tab-title">Silicon and Thermal Matrix</h3>
+            <p class="anatomy-tab-desc">Vapor-chamber thermal dissipation paths paired with high-efficiency multi-core processing architecture for continuous heavy throughput.</p>
+          </button>
+
+          <button type="button" class="anatomy-layer-tab" aria-selected="false">
+            <span class="anatomy-tab-num">03 / STRUCTURAL FRAME</span>
+            <h3 class="anatomy-tab-title">Anodized Chassis Assembly</h3>
+            <p class="anatomy-tab-desc">Milled unibody enclosure with ceramic blast surface finishing and reinforced corner structural rigidity to resist everyday flexure.</p>
+          </button>
+
+          <button type="button" class="anatomy-layer-tab" aria-selected="false">
+            <span class="anatomy-tab-num">04 / INTEGRATED HARDWARE</span>
+            <h3 class="anatomy-tab-title">Production Spec Sheet</h3>
+            <p class="anatomy-tab-desc">Validated dimensional tolerances, dynamic display matrix, and direct order fulfillment from our Ahmedabad fulfillment center.</p>
+          </button>
+
+          <div class="anatomy-actions">
+            <div>
+              <span class="font-mono text-xs text-muted block uppercase">Current Unit Price</span>
+              <span class="display-s font-semibold">{{ hero_plate_product.selling_price|inr }}</span>
+            </div>
+            <form action="{% url 'cart_add' product_id=hero_plate_product.id %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="quantity" value="1">
+              <button type="submit" class="btn btn-primary">Add Flagship to Bag &rarr;</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- CHAPTER 03: THE MONOGRAPH VAULT (LIVE DEALS & PROMO CODES) -->
+  <section class="section vault-chapter-section" id="vault-deals-chapter" aria-labelledby="vault-heading">
+    <div class="hairline-bottom pb-2 mb-4 flex justify-between items-baseline">
+      <div>
+        <span class="label text-muted font-mono text-2xs uppercase">Chapter 03 / 09 &middot; Storefront Vault</span>
+        <h2 id="vault-heading" class="display-m">The Vault: Active Coupons and Value Offers</h2>
+      </div>
+      <span class="caption text-muted">Click any coupon code to copy directly to clipboard</span>
+    </div>
+
+    {% if vault_coupons %}
+      <div class="coupons-banner-grid">
+        {% for c in vault_coupons %}
+          <div class="coupon-ticket-card">
+            <div>
+              <span class="badge badge-accent mb-2 inline-block">Active Promotion</span>
+              <div class="font-semibold body-m">{{ c.description|default:c.code }}</div>
+              <p class="caption text-muted mt-1">
+                {% if c.discount_type == "percent" %}
+                  {{ c.discount_value|floatformat:0 }}% deduction on eligible items.
+                {% else %}
+                  Flat {{ c.discount_value|inr }} savings on orders over {{ c.min_purchase_amount|inr }}.
+                {% endif %}
+              </p>
+            </div>
+            <button type="button" class="coupon-code-pill" data-code="{{ c.code }}" aria-label="Copy coupon code {{ c.code }}">
+              <span>{{ c.code }}</span>
+              <span class="text-2xs uppercase">Copy Code &rarr;</span>
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if vault_deals %}
+      <div class="deals-grid">
+        {% for vd in vault_deals %}
+          <div class="deal-card">
+            <span class="deal-badge">-{{ vd.discount_pct }}% OFF</span>
+            <div class="deal-thumb-frame">
+              {% if vd.product.primary_image_url %}
+                <img src="{{ vd.product.primary_image_url }}" alt="{{ vd.product.display_name }}" class="deal-thumb-img" loading="lazy">
+              {% endif %}
+            </div>
+            <span class="caption text-accent font-mono text-2xs uppercase">{{ vd.product.parsed_brand }}</span>
+            <h3 class="body-sm font-semibold line-clamp-2 mt-1 mb-2">
+              <a href="{% url 'product_detail' slug=vd.product.slug %}" class="text-none">{{ vd.product.display_name }}</a>
+            </h3>
+            <div class="deal-price-row">
+              <span class="deal-price-current">{{ vd.product.selling_price|inr }}</span>
+              <span class="deal-price-mrp">{{ vd.product.mrp|inr }}</span>
+              <span class="deal-savings-tag">Save {{ vd.savings|inr }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- CHAPTER 04: INTERACTIVE HEAD-TO-HEAD SPEC DUEL -->
+  {% if duel_a and duel_b %}
+    <section class="section duel-chapter-section" id="spec-duel-chapter" aria-labelledby="duel-heading">
+      <div class="hairline-bottom pb-2 mb-4 text-center">
+        <span class="label text-muted font-mono text-2xs uppercase">Chapter 04 / 09 &middot; Technical Head-to-Head</span>
+        <h2 id="duel-heading" class="display-m">Direct Hardware Comparison</h2>
+        <p class="caption text-muted">Side-by-side metric evaluation between flagship and reference devices.</p>
+      </div>
+
+      <div class="duel-grid-container">
+        <div class="duel-head-row">
+          <div class="duel-contender duel-contender-a">
+            {% if duel_a.primary_image_url %}
+              <img src="{{ duel_a.primary_image_url }}" alt="{{ duel_a.display_name }}" class="duel-contender-thumb">
             {% endif %}
+            <div>
+              <span class="badge badge-accent mb-1 inline-block">Flagship Tier</span>
+              <h3 class="body-sm font-semibold line-clamp-1">{{ duel_a.display_name }}</h3>
+              <span class="display-s font-semibold text-accent">{{ duel_a.selling_price|inr }}</span>
+            </div>
+          </div>
+
+          <div class="duel-vs-circle">VS</div>
+
+          <div class="duel-contender duel-contender-b">
+            {% if duel_b.primary_image_url %}
+              <img src="{{ duel_b.primary_image_url }}" alt="{{ duel_b.display_name }}" class="duel-contender-thumb">
+            {% endif %}
+            <div>
+              <span class="badge mb-1 inline-block">Reference Tier</span>
+              <h3 class="body-sm font-semibold line-clamp-1">{{ duel_b.display_name }}</h3>
+              <span class="display-s font-semibold">{{ duel_b.selling_price|inr }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="duel-specs-table">
+          {% for spec in duel_specs %}
+            <div class="duel-spec-item">
+              <div class="duel-spec-meta">
+                <span class="font-semibold body-sm text-left">{{ spec.val_a }}</span>
+                <span class="duel-spec-label">{{ spec.label }}</span>
+                <span class="body-sm text-muted text-right">{{ spec.val_b }}</span>
+              </div>
+              <div class="duel-spec-bar-wrapper">
+                <div class="duel-bar-left">
+                  <div class="duel-bar-left-fill" data-width="{{ spec.bar_a|default:80 }}%" style="width: 50%;"></div>
+                </div>
+                <div class="duel-bar-right">
+                  <div class="duel-bar-right-fill" data-width="{{ spec.bar_b|default:40 }}%" style="width: 30%;"></div>
+                </div>
+              </div>
+            </div>
           {% endfor %}
         </div>
 
-        {% if chapter.is_auto %}
-          <p class="caption text-muted mt-2 text-right">Selected by number of ratings on Amazon</p>
-        {% endif %}
-      </section>
-    {% endfor %}
-  </div>
+        <div class="duel-action-row">
+          <a href="{% url 'compare_tray' %}?a={{ duel_a.slug }}&b={{ duel_b.slug }}" class="btn btn-secondary">
+            Launch Full Comparison &rarr;
+          </a>
+        </div>
+      </div>
+    </section>
+  {% endif %}
 
-  <!-- 4. CURATED STORIES (WP3) -->
-  {% if curated_stories %}
-    <section class="section curated-stories-section" aria-labelledby="stories-heading">
+  <!-- CHAPTER 05: HORIZONTAL COLLECTOR'S PLATE RAIL -->
+  {% if plate_rail_products %}
+    <section class="section plate-rail-chapter-section" id="plate-rail-chapter" aria-labelledby="rail-heading">
       <div class="hairline-bottom pb-2 mb-4 flex justify-between items-baseline">
         <div>
-          <span class="label text-muted font-mono text-2xs uppercase">Curated Narratives</span>
-          <h2 id="stories-heading" class="display-m">Curated Collections</h2>
+          <span class="label text-muted font-mono text-2xs uppercase">Chapter 05 / 09 &middot; Collector Exhibition</span>
+          <h2 id="rail-heading" class="display-m">Horizontal Hardware Plate Rail</h2>
         </div>
-        <span class="caption text-muted">Specialist themes &amp; reference selections</span>
+        <span class="caption text-muted">Scroll horizontally to explore 6 category highlights</span>
       </div>
 
-      <div class="curated-stories-grid">
-        {% for story in curated_stories %}
-          <div class="curated-story-card">
-            <div class="curated-story-header">
-              <span class="badge badge-accent mb-1 inline-block">Curated</span>
-              <h3 class="display-s">{{ story.title }}</h3>
-              {% if story.intro %}
-                <p class="caption text-muted mt-1">{{ story.intro }}</p>
-              {% elif story.description %}
-                <p class="caption text-muted mt-1">{{ story.description }}</p>
+      <div class="plate-rail-container" tabindex="0" role="region" aria-label="Horizontal plate gallery">
+        {% for prod in plate_rail_products %}
+          <div class="collector-plate-item">
+            <span class="plate-badge-num">PLATE 0{{ forloop.counter }} / 06 &middot; {{ prod.category.name }}</span>
+            <div class="plate-img-slot">
+              {% if prod.primary_image_url %}
+                <img src="{{ prod.primary_image_url }}" alt="{{ prod.display_name }}" loading="lazy">
               {% endif %}
             </div>
-
-            <div class="curated-story-thumbs-row">
-              {% for fp in story.featured_items.all|slice:":3" %}
-                <a href="{% url 'product_detail' slug=fp.product.slug %}" class="curated-story-thumb-card text-none">
-                  <div class="curated-story-thumb-plate thumbnail-slot">
-                    {% if fp.product.primary_image_url %}
-                      <img src="{{ fp.product.primary_image_url }}" alt="{{ fp.product.display_name }}" class="curated-story-thumb-img" loading="lazy">
-                    {% endif %}
-                  </div>
-                  <span class="caption text-accent line-clamp-1 font-mono text-2xs">{{ fp.product.parsed_brand }}</span>
-                  <h4 class="curated-story-thumb-title">{{ fp.product.display_name }}</h4>
-                  <span class="curated-story-thumb-price">{{ fp.product.selling_price|inr }}</span>
-                </a>
-              {% endfor %}
-            </div>
-
-            <div class="curated-story-footer mt-2">
-              <a href="{% url 'category_list' %}" class="link-subtle font-semibold body-sm">Read chapter &rarr;</a>
+            <span class="caption text-accent font-mono text-2xs uppercase">{{ prod.parsed_brand }}</span>
+            <h3 class="body-sm font-semibold line-clamp-2 mt-1 mb-2">
+              <a href="{% url 'product_detail' slug=prod.slug %}" class="text-none">{{ prod.display_name }}</a>
+            </h3>
+            <div class="flex justify-between items-center mt-auto pt-3 border-top">
+              <span class="font-semibold body-m">{{ prod.selling_price|inr }}</span>
+              <form action="{% url 'cart_add' product_id=prod.id %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-sm btn-secondary" aria-label="Add {{ prod.display_name }} to bag">Add &rarr;</button>
+              </form>
             </div>
           </div>
         {% endfor %}
@@ -236,83 +307,175 @@
     </section>
   {% endif %}
 
-  <!-- 5. BUDGET LADDER (WP3) -->
-  <section class="section budget-ladder-section" aria-labelledby="budget-heading">
+  <!-- CHAPTER 06: THE 10 CATEGORY WORLDS (ASYMMETRIC BENTO MATRIX) -->
+  <section class="section bento-matrix-chapter-section" id="categories-matrix-chapter" aria-labelledby="bento-heading">
     <div class="hairline-bottom pb-2 mb-4 flex justify-between items-baseline">
       <div>
-        <span class="label text-muted font-mono text-2xs uppercase">Price Hierarchy</span>
-        <h2 id="budget-heading" class="display-m">Budget Ladder</h2>
+        <span class="label text-muted font-mono text-2xs uppercase">Chapter 06 / 09 &middot; Department Matrix</span>
+        <h2 id="bento-heading" class="display-m">The 10 Category Worlds</h2>
       </div>
-      <span class="caption text-muted">Indexed across 4 expenditure brackets</span>
+      <a href="{% url 'category_list' %}" class="link-subtle font-semibold body-sm">View full directory &rarr;</a>
     </div>
 
-    <div class="budget-ladder-grid">
-      {% for tier in budget_ladder %}
-        <a href="{{ tier.url }}" class="budget-ladder-card">
-          <div class="budget-ladder-head">
-            <h3 class="budget-ladder-title">{{ tier.title }}</h3>
-            <span class="budget-ladder-count">{{ tier.count }} listing{{ tier.count|pluralize }}</span>
+    <div class="bento-matrix-grid">
+      {% for cr in categories_rail %}
+        <a href="{% url 'category_detail' slug=cr.slug %}" class="bento-cat-card" data-world="{{ cr.accent_key }}">
+          <div>
+            <span class="label text-muted font-mono text-2xs uppercase block mb-1">{{ cr.product_count|default:"0" }} items listed</span>
+            <h3 class="display-s mb-1">{{ cr.name }}</h3>
+            <span class="caption text-accent font-mono">Priced from {{ cr.price_from|inr }}</span>
           </div>
-          <div class="budget-thumb-stack">
-            {% for samp in tier.samples %}
-              <div class="budget-thumb-plate thumbnail-slot" style="--thumb-idx: {{ forloop.counter0 }};">
-                <img src="{{ samp.primary_image_url }}" alt="" class="budget-thumb-img" loading="lazy">
-              </div>
-            {% endfor %}
-          </div>
-          <div class="budget-ladder-link">
-            <span>Explore Bracket</span> &rarr;
-          </div>
+
+          {% if cr.top_brands %}
+            <div class="bento-brand-pills">
+              {% for b in cr.top_brands|slice:":3" %}
+                <span class="bento-brand-pill">{{ b }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if cr.cutout_url %}
+            <img src="{{ cr.cutout_url }}" alt="" class="bento-thumb-bg" loading="lazy">
+          {% endif %}
         </a>
       {% endfor %}
     </div>
   </section>
 
-  <!-- 6. HOW BUYING WORKS HERE (WP3) -->
-  <section class="how-buying-section section" id="buying" aria-labelledby="buying-heading">
+  <!-- CHAPTER 07: CURATE YOUR DESK SETUP BUNDLE BUILDER -->
+  {% if bundle_audio_items and bundle_device_items and bundle_accessory_items %}
+    <section class="section bundle-chapter-section" id="desk-bundle-chapter" aria-labelledby="bundle-heading">
+      <div class="hairline-bottom pb-2 mb-4 flex justify-between items-baseline">
+        <div>
+          <span class="label text-muted font-mono text-2xs uppercase">Chapter 07 / 09 &middot; Setup Configurator</span>
+          <h2 id="bundle-heading" class="display-m">Curate Your Workstation Setup</h2>
+        </div>
+        <span class="caption text-muted">Select 1 Audio + 1 Device + 1 Accessory for combined dispatch</span>
+      </div>
+
+      <div class="bundle-builder-container">
+        <!-- Column 1: Audio -->
+        <div class="bundle-column" data-col="audio">
+          <span class="bundle-column-title">01 / Audio Foundation</span>
+          {% for item in bundle_audio_items %}
+            <div class="bundle-picker-card {% if forloop.first %}is-selected{% endif %}" data-id="{{ item.id }}" data-price="{{ item.selling_price }}">
+              {% if item.primary_image_url %}
+                <img src="{{ item.primary_image_url }}" alt="{{ item.display_name }}" class="bundle-picker-thumb">
+              {% endif %}
+              <div class="flex-1">
+                <span class="caption text-accent font-mono text-2xs uppercase">{{ item.parsed_brand }}</span>
+                <h3 class="body-xs font-semibold line-clamp-1">{{ item.display_name }}</h3>
+                <span class="body-sm font-semibold">{{ item.selling_price|inr }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Column 2: Device -->
+        <div class="bundle-column" data-col="device">
+          <span class="bundle-column-title">02 / Primary Device</span>
+          {% for item in bundle_device_items %}
+            <div class="bundle-picker-card {% if forloop.first %}is-selected{% endif %}" data-id="{{ item.id }}" data-price="{{ item.selling_price }}">
+              {% if item.primary_image_url %}
+                <img src="{{ item.primary_image_url }}" alt="{{ item.display_name }}" class="bundle-picker-thumb">
+              {% endif %}
+              <div class="flex-1">
+                <span class="caption text-accent font-mono text-2xs uppercase">{{ item.parsed_brand }}</span>
+                <h3 class="body-xs font-semibold line-clamp-1">{{ item.display_name }}</h3>
+                <span class="body-sm font-semibold">{{ item.selling_price|inr }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Column 3: Accessory -->
+        <div class="bundle-column" data-col="accessory">
+          <span class="bundle-column-title">03 / Workstation Accessory</span>
+          {% for item in bundle_accessory_items %}
+            <div class="bundle-picker-card {% if forloop.first %}is-selected{% endif %}" data-id="{{ item.id }}" data-price="{{ item.selling_price }}">
+              {% if item.primary_image_url %}
+                <img src="{{ item.primary_image_url }}" alt="{{ item.display_name }}" class="bundle-picker-thumb">
+              {% endif %}
+              <div class="flex-1">
+                <span class="caption text-accent font-mono text-2xs uppercase">{{ item.parsed_brand }}</span>
+                <h3 class="body-xs font-semibold line-clamp-1">{{ item.display_name }}</h3>
+                <span class="body-sm font-semibold">{{ item.selling_price|inr }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="bundle-checkout-bar">
+        <div>
+          <span class="caption text-muted font-mono uppercase block">Combined Workstation Total</span>
+          <span class="bundle-summary-price">₹0</span>
+        </div>
+        <form action="{% url 'cart_add_bundle' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="product_ids" id="bundle-product-ids" value="">
+          <button type="submit" class="btn btn-primary">Add Setup to Bag &rarr;</button>
+        </form>
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- CHAPTER 08: LIVE PINCODE DELIVERY ESTIMATOR & TRUST MANIFESTO -->
+  <section class="section trust-chapter-section" id="trust-manifesto-chapter" aria-labelledby="trust-heading">
     <div class="hairline-bottom pb-2 mb-4">
-      <span class="label text-muted font-mono text-2xs uppercase">Purchase Integrity</span>
-      <h2 id="buying-heading" class="display-s">How buying works</h2>
+      <span class="label text-muted font-mono text-2xs uppercase">Chapter 08 / 09 &middot; Logistics and Integrity</span>
+      <h2 id="trust-heading" class="display-m">Delivery Timeline and Order Protections</h2>
+      <p class="caption text-muted">Transparent dispatch from Ahmedabad and clear order policies.</p>
     </div>
-    <div class="how-buying-three-cols">
-      <div class="how-buying-card">
-        <span class="how-buying-step-num font-mono">01</span>
-        <h3 class="how-buying-card-title">Curated from verified batches</h3>
-        <p class="caption text-muted">Every unit is sourced and inspected against strict catalog specifications before intake.</p>
+
+    <div class="pincode-inline-box">
+      <span class="font-mono text-xs text-muted uppercase">Estimate Transit to Delivery PIN:</span>
+      <form action="{% url 'shipping_check' %}" method="get" class="flex gap-2 items-center">
+        <input type="text" name="pincode" value="{{ remembered_pincode }}" maxlength="6" class="form-input form-input-sm" style="width: 110px;" aria-label="Enter 6-digit delivery pincode">
+        <button type="submit" class="btn btn-secondary btn-sm">Check PIN</button>
+      </form>
+      {% if delivery_estimate %}
+        <span class="caption text-muted ml-auto">
+          Zone {{ delivery_estimate.zone|upper }}: Estimated transit {{ delivery_estimate.min_days }}&ndash;{{ delivery_estimate.max_days }} business days. Free shipping on orders over {{ free_shipping_threshold|inr }}.
+        </span>
+      {% endif %}
+    </div>
+
+    <div class="trust-pillars-grid">
+      <div class="trust-pillar-card">
+        <span class="trust-pillar-num">01 / PROTECTION</span>
+        <h3 class="display-s mb-2">Verified COD Protection</h3>
+        <p class="caption text-muted">A six-digit verification OTP secures guest cash on delivery orders. Defined order ceilings apply at ₹15,000 for guest orders and ₹35,000 for registered members.</p>
       </div>
-      <div class="how-buying-card">
-        <span class="how-buying-step-num font-mono">02</span>
-        <h3 class="how-buying-card-title">Direct dispatch from Ahmedabad</h3>
-        <p class="caption text-muted">Orders ship securely packaged from our Gujarat hub with end-to-end tracked transit.</p>
+
+      <div class="trust-pillar-card">
+        <span class="trust-pillar-num">02 / CONTROL</span>
+        <h3 class="display-s mb-2">Self-Serve Order Control</h3>
+        <p class="caption text-muted">Manage unfulfilled orders directly through the guest tracking timeline. Cancel anytime prior to parcel dispatch with immediate inventory restoration.</p>
       </div>
-      <div class="how-buying-card">
-        <span class="how-buying-step-num font-mono">03</span>
-        <h3 class="how-buying-card-title">7-day transit damage replacement</h3>
-        <p class="caption text-muted">Damaged or defective parcels are covered with expedited pickup and immediate replacement.</p>
+
+      <div class="trust-pillar-card">
+        <span class="trust-pillar-num">03 / COMPLIANCE</span>
+        <h3 class="display-s mb-2">Itemized Tax Invoices</h3>
+        <p class="caption text-muted">All orders receive itemized tax invoices with full HSN code mapping and state tax apportionment. Downloadable anytime from your tracking timeline.</p>
       </div>
     </div>
   </section>
 
-  <!-- 7. ALLOW-LISTED BRANDS FLOW (WP3) -->
-  {% if brands %}
-    <section class="brands-flow-section section" aria-labelledby="brands-heading">
-      <div class="hairline-bottom pb-2 mb-3 flex items-baseline justify-between">
-        <div>
-          <span class="label text-muted font-mono text-2xs uppercase">Directory</span>
-          <h2 id="brands-heading" class="label">The brands</h2>
-        </div>
-        <a href="{% url 'brand_list' %}" class="link-subtle font-semibold body-sm">View full directory &rarr;</a>
-      </div>
-      <div class="brands-flow-wrap tag-list dense-list">
-        {% for b in brands|slice:":30" %}
-          <a href="{% url 'search_results' %}?brand={{ b.name|urlencode }}" class="brand-chip">
-            <span class="brand-chip-name">{{ b.name }}</span>
-            <span class="brand-chip-count">{{ b.product_count }}</span>
-          </a>
-        {% endfor %}
-      </div>
-    </section>
-  {% endif %}
+  <!-- CHAPTER 09: MONUMENTAL MONOGRAPH SIGN-OFF -->
+  <section class="monumental-footer-signoff" id="monograph-footer-chapter" aria-labelledby="monumental-heading">
+    <span class="label text-muted font-mono text-2xs uppercase block mb-2">Chapter 09 / 09 &middot; Storefront Colophon</span>
+    <span class="monumental-wordmark" id="monumental-heading">ELECTROCART</span>
+    <p class="monumental-sub">
+      Curated consumer electronics catalog. Dispatched directly from Ahmedabad, Gujarat. Honest commercial specifications and transparent technical provenance.
+    </p>
+
+    <div class="monumental-nav-deck">
+      <a href="{% url 'order_track_lookup' %}" class="btn btn-secondary">Track or Cancel Order &rarr;</a>
+      <a href="{% url 'support_concierge' %}" class="btn btn-secondary">Customer Support &amp; Concierge &rarr;</a>
+      <a href="/outbox/" class="btn btn-secondary">Demonstration Outbox &rarr;</a>
+    </div>
+  </section>
 </div>
 
 {{ cutout_cycle_data|json_script:"hero-cutouts-data" }}

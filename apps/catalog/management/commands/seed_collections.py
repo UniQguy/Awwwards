@@ -2,6 +2,7 @@
 Management command to seed curated editorial collections and featured product slots.
 """
 
+from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -54,14 +55,24 @@ class Command(BaseCommand):
                     },
                 )
 
-                # Assign 4 products per collection
+                # Assign 4 products per collection prioritizing flagship hardware
                 matching_prods = list(
                     Product.objects.filter(
                         category__slug__in=c_data["cat_slugs"],
                         is_available=True,
-                        selling_price__gt=0,
-                    ).order_by("-source_rating_count")[:4]
+                        selling_price__gte=Decimal("15000.00") if idx == 0 else Decimal("3000.00"),
+                        media__media_type="image",
+                    ).order_by("-selling_price", "-source_rating_count")[:4]
                 )
+                if len(matching_prods) < 4:
+                    matching_prods = list(
+                        Product.objects.filter(
+                            category__slug__in=c_data["cat_slugs"],
+                            is_available=True,
+                            selling_price__gt=Decimal("0.00"),
+                            media__media_type="image",
+                        ).order_by("-selling_price", "-source_rating_count")[:4]
+                    )
 
                 col.featured_items.all().delete()
                 for p_idx, prod in enumerate(matching_prods):

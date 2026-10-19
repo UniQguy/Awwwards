@@ -9,6 +9,7 @@ from . import views
 urlpatterns = [
     path("", views.cart_detail, name="cart_detail"),
     path("add/<int:product_id>/", views.cart_add, name="cart_add"),
+    path("add-bundle/", views.cart_add_bundle, name="cart_add_bundle"),
     path("update/<int:product_id>/", views.cart_update, name="cart_update"),
     path("remove/<int:product_id>/", views.cart_remove, name="cart_remove"),
     path("save-for-later/<int:product_id>/", views.cart_save_for_later, name="cart_save_for_later"),
