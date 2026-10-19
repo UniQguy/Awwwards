@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Support &amp; Concierge — ELECTROCART{% endblock %}
+{% block meta_description %}Official hardware support, 7-day replacement assistance, and self-serve customer concierge.{% endblock %}
+
+{% block content %}
+<div class="container section max-w-4xl">
+  {% include "includes/breadcrumbs.html" %}
+
+  <header class="page-shell-header mb-6">
+    <h1 class="page-shell-heading">Customer Support &amp; Concierge</h1>
+    <p class="caption text-muted">Hardware support, verified return tickets, and technical warranty assistance</p>
+  </header>
+
+  {% if success and ticket_id %}
+    <div class="alert alert-success mb-6 p-4 bg-surface border-rule" role="status">
+      <h2 class="heading text-success mb-1">Support Ticket Registered: #{{ ticket_id }}</h2>
+      <p class="body-sm mb-2">
+        Your inquiry has been logged in our customer care queue and a confirmation copy has been sent to your email.
+      </p>
+      <p class="caption text-muted mb-0">
+        Our concierge engineering team in Ahmedabad will review your request and reply within 24 hours.
+      </p>
+    </div>
+  {% endif %}
+
+  <div class="grid-2 gap-8 mb-8">
+    <!-- Ticket Form -->
+    <section aria-labelledby="ticket-form-heading">
+      <h2 id="ticket-form-heading" class="heading mb-4">Submit a Support or Return Ticket</h2>
+
+      <form method="post" action="{% url 'support_concierge' %}" class="flex flex-col gap-4">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="id-order-number" class="form-label">
+            <span>Order Number (Optional)</span>
+          </label>
+          <input
+            type="text"
+            id="id-order-number"
+            name="order_number"
+            class="form-control"
+            placeholder="e.g. EC-20261006-XXXX"
+            autocomplete="off"
+          >
+          <p class="caption text-muted mt-1">If your inquiry relates to an existing order.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="id-support-email" class="form-label">
+            <span>Email Address</span>
+            <span class="text-danger">*</span>
+          </label>
+          <input
+            type="email"
+            id="id-support-email"
+            name="email"
+            class="form-control"
+            value="{{ user.email|default:'' }}"
+            placeholder="you@example.com"
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="id-issue-category" class="form-label">
+            <span>Issue Category</span>
+            <span class="text-danger">*</span>
+          </label>
+          <select id="id-issue-category" name="issue_category" class="form-control" required>
+            <option value="Technical Assistance">Technical Assistance</option>
+            <option value="7-Day Dead on Arrival (DOA) Claim">7-Day Dead on Arrival (DOA) Claim</option>
+            <option value="Order Cancellation / Return">Order Cancellation / Return</option>
+            <option value="Billing &amp; Tax Invoice Inquiry">Billing &amp; Tax Invoice Inquiry</option>
+            <option value="Shipment / Delivery Delay">Shipment / Delivery Delay</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="id-support-message" class="form-label">
+            <span>Details of Request</span>
+            <span class="text-danger">*</span>
+          </label>
+          <textarea
+            id="id-support-message"
+            name="message"
+            rows="5"
+            class="form-control"
+            placeholder="Please detail your hardware concern, serial number, or return request."
+            required
+          ></textarea>
+        </div>
+
+        <div>
+          <button type="submit" class="btn btn-primary">Register Support Ticket &rarr;</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Concierge Hub Details -->
+    <aside aria-label="Concierge Information" class="p-6 bg-surface border-rule flex flex-col gap-5 self-start">
+      <div>
+        <h3 class="label text-accent mb-2">Support Operations</h3>
+        <p class="body-sm mb-3">
+          Dedicated hardware assistance managed by technical specialists in Ahmedabad.
+        </p>
+        <dl class="body-sm flex flex-col gap-3">
+          <div>
+            <dt class="label text-muted">Direct Email</dt>
+            <dd><a href="mailto:support@electrocart.local" class="text-accent">support@electrocart.local</a></dd>
+          </div>
+          <div>
+            <dt class="label text-muted">Fulfillment &amp; Support Hub</dt>
+            <dd>Electronic City, Ahmedabad, Gujarat 380001</dd>
+          </div>
+          <div>
+            <dt class="label text-muted">Operating Hours</dt>
+            <dd>Monday &ndash; Saturday, 09:30 &ndash; 18:30 IST</dd>
+          </div>
+          <div>
+            <dt class="label text-muted">Response Window</dt>
+            <dd>Within 24 hours</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="hairline-top pt-4">
+        <h4 class="label mb-2">Self-Serve Tracking &amp; Cancellation</h4>
+        <p class="caption text-muted mb-3">
+          Looking to monitor real-time shipment status or cancel an undelivered order?
+        </p>
+        <a href="{% url 'order_track_lookup' %}" class="btn btn-secondary btn-sm">Track / Cancel Order &rarr;</a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 7-Day DOA Replacement & Warranty Policy Matrix -->
+  <section class="checkout-card mb-8" aria-labelledby="doa-policy-heading">
+    <h2 id="doa-policy-heading" class="heading hairline-bottom pb-2 mb-4">7-Day DOA Hardware Replacement &amp; Warranty Policy</h2>
+    <div class="spec-table-wrapper">
+      <table class="spec-table">
+        <caption class="sr-only">Hardware warranty and replacement matrix</caption>
+        <thead>
+          <tr>
+            <th scope="col">Service Dimension</th>
+            <th scope="col">Policy Coverage</th>
+            <th scope="col">SLA &amp; Fulfillment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="font-medium">Dead on Arrival (DOA)</td>
+            <td class="body-sm">Complete replacement for hardware defective upon unboxing within 7 calendar days of delivery.</td>
+            <td class="caption">Free reverse pickup arranged; replacement dispatched within 48 hours of inspection.</td>
+          </tr>
+          <tr>
+            <td class="font-medium">Transit Damage</td>
+            <td class="body-sm">Zero-liability replacement for parcels showing transit damage reported within 48 hours of receipt.</td>
+            <td class="caption">Immediate claim filing and prioritized courier re-dispatch.</td>
+          </tr>
+          <tr>
+            <td class="font-medium">Manufacturer Warranty</td>
+            <td class="body-sm">Standard 1-Year brand warranty honored at authorized service hubs across Gujarat and pan-India.</td>
+            <td class="caption">Official brand service center walk-in or facilitated return support.</td>
+          </tr>
+          <tr>
+            <td class="font-medium">Order Cancellation</td>
+            <td class="body-sm">Self-serve cancellation available prior to dispatch with full refund or credit note issuance.</td>
+            <td class="caption">Immediate stock restoration and automatic refund workflow.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Interactive FAQ Accordion -->
+  <section class="checkout-card" aria-labelledby="faq-heading">
+    <h2 id="faq-heading" class="heading hairline-bottom pb-2 mb-4">Frequently Asked Questions</h2>
+    <div class="flex flex-col gap-3">
+      <details class="border-rule p-4 bg-surface">
+        <summary class="font-medium cursor-pointer">What are the Cash on Delivery (COD) rules and limits?</summary>
+        <p class="body-sm mt-3 text-muted">
+          Guest orders placed via Cash on Delivery are capped at ₹15,000 and require a 6-digit verification OTP sent to your contact email during checkout. Registered account members can place COD orders up to ₹35,000. To prevent automated spam, a maximum of 2 active COD orders are permitted per customer within 24 hours.
+        </p>
+      </details>
+
+      <details class="border-rule p-4 bg-surface">
+        <summary class="font-medium cursor-pointer">How do I cancel an order before it has shipped?</summary>
+        <p class="body-sm mt-3 text-muted">
+          Navigate to the Track / Cancel Order page using your order number and billing email or phone. If your order is in Pending or Confirmed status, select your cancellation reason from the dropdown and submit. Reserved inventory is restored instantly, and an official cancellation notice and credit note are generated.
+        </p>
+      </details>
+
+      <details class="border-rule p-4 bg-surface">
+        <summary class="font-medium cursor-pointer">Are prices inclusive of GST? How do I get an invoice?</summary>
+        <p class="body-sm mt-3 text-muted">
+          All catalog prices are inclusive of GST. An official GST Tax Invoice or Bill of Supply with appropriate HSN codes and tax breakdown is generated upon order placement and can be downloaded anytime as a PDF from your order tracking timeline.
+        </p>
+      </details>
+
+      <details class="border-rule p-4 bg-surface">
+        <summary class="font-medium cursor-pointer">What are the delivery timelines from the Ahmedabad fulfillment center?</summary>
+        <p class="body-sm mt-3 text-muted">
+          Orders are dispatched from our Ahmedabad fulfillment center. Standard delivery is 2 to 3 business days within Gujarat and 4 to 6 business days across other states in India via surface logistics with real-time tracking scans.
+        </p>
+      </details>
+    </div>
+  </section>
+</div>
+{% endblock %}

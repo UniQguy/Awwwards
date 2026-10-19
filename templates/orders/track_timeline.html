@@ -2,19 +2,34 @@
 {% load core_tags %}
 
 {% block title %}Shipment Tracking #{{ order.order_number }} — ELECTROCART{% endblock %}
-{% block meta_description %}Milestone progress and carrier tracking details for shipment #{{ order.order_number }}.{% endblock %}
+{% block meta_description %}Milestone progress, GST breakdown, and carrier tracking details for shipment #{{ order.order_number }}.{% endblock %}
 {% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
 
 {% block content %}
 <div class="container section">
   {% include "includes/breadcrumbs.html" %}
 
-  <div class="max-w-md mx-auto">
-    <header class="mb-6">
-      <h1 class="display-l">Shipment Progress</h1>
-      <p class="caption mt-1">
-        Order <strong>#{{ order.order_number }}</strong> &bull; Carrier: <strong>{{ tracking_info.carrier }}</strong> &bull; Tracking ID: <strong>{{ tracking_info.tracking_number }}</strong>
-      </p>
+  <div class="max-w-2xl mx-auto">
+    <header class="mb-6 flex justify-between items-baseline flex-wrap gap-4">
+      <div>
+        <h1 class="display-l">Shipment Progress</h1>
+        <p class="caption mt-1">
+          Order <strong>#{{ order.order_number }}</strong> &bull; Carrier: <strong>{{ tracking_info.carrier }}</strong> &bull; Tracking ID: <strong>{{ tracking_info.tracking_number }}</strong>
+        </p>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <a href="{% url 'order_invoice' order_number=order.order_number %}" class="btn btn-sm btn-secondary" target="_blank">
+          View Invoice
+        </a>
+        <a href="{% url 'order_invoice_pdf' order_number=order.order_number %}" class="btn btn-sm btn-primary">
+          Download PDF
+        </a>
+        {% if order.status == "cancelled" and order.credit_notes.exists %}
+          <a href="{% url 'order_credit_note_pdf' order_number=order.order_number %}" class="btn btn-sm btn-secondary">
+            Credit Note (PDF)
+          </a>
+        {% endif %}
+      </div>
     </header>
 
     <!-- Tracking Status Banner -->
@@ -32,10 +47,9 @@
             {% endif %}
           </div>
         </div>
-        <div>
-          <a href="{% url 'order_invoice' order_number=order.order_number %}" class="btn btn-sm btn-secondary" target="_blank">
-            View GST Invoice
-          </a>
+        <div class="caption text-muted">
+          Payment: <strong>{{ order.get_payment_method_display|default:order.payment_method|upper }}</strong>
+          {% if order.is_paid %}<span class="badge badge-in-stock ml-1">Paid</span>{% endif %}
         </div>
       </div>
 
@@ -60,35 +74,144 @@
           {% endfor %}
         </ol>
       {% else %}
-        <div class="alert alert-danger">
-          This order was cancelled on {{ order.updated_at|date:"F j, Y" }}. Stock has been returned to inventory.
+        <div class="alert alert-danger p-4 bg-surface border-rule">
+          This order was cancelled on {{ order.updated_at|date:"F j, Y" }}. Reserved stock has been restored to inventory.
         </div>
       {% endif %}
     </div>
+
+    <!-- Self-Serve Cancellation Form (if eligible) -->
+    {% if can_cancel %}
+      <section class="checkout-card mb-6" aria-labelledby="cancel-heading">
+        <h2 id="cancel-heading" class="heading hairline-bottom pb-2 mb-3">Self-Serve Order Cancellation</h2>
+        <p class="body-sm text-muted mb-4">
+          This order has not been dispatched yet. You can cancel it immediately without calling support; inventory will be returned to stock automatically.
+        </p>
+        <form method="post" action="{% url 'order_cancel' order_number=order.order_number %}" class="flex flex-col gap-3">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'order_track_timeline' order_number=order.order_number %}">
+          <div class="form-group">
+            <label for="id-cancellation-reason" class="form-label">
+              <span>Select Cancellation Reason</span>
+              <span class="text-danger">*</span>
+            </label>
+            <select id="id-cancellation-reason" name="reason" class="form-control" required>
+              <option value="Changed mind">Changed mind</option>
+              <option value="Ordered wrong model">Ordered wrong model</option>
+              <option value="Found better price">Found better price</option>
+              <option value="Delivery time too long">Delivery time too long</option>
+            </select>
+          </div>
+          <div>
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this order? This action will restock reserved items.');">
+              Cancel Order
+            </button>
+          </div>
+        </form>
+      </section>
+    {% endif %}
+
+    <!-- Itemized GST Breakdown Table -->
+    <section class="checkout-card mb-6" aria-labelledby="gst-breakdown-heading">
+      <h2 id="gst-breakdown-heading" class="heading hairline-bottom pb-2 mb-4">Itemized GST Breakdown &amp; Order Items</h2>
+      <div class="spec-table-wrapper mb-4">
+        <table class="spec-table">
+          <caption class="sr-only">Order items and tax breakdown</caption>
+          <thead>
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col" class="text-right">Qty</th>
+              <th scope="col" class="text-right">Unit Price</th>
+              <th scope="col" class="text-right">Tax Rate</th>
+              <th scope="col" class="text-right">Tax (₹)</th>
+              <th scope="col" class="text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order.items.all %}
+              <tr>
+                <td>
+                  <div class="font-medium">{{ item.product_title }}</div>
+                  <div class="caption text-muted">SKU: {{ item.sku }}</div>
+                </td>
+                <td class="text-right">{{ item.quantity }}</td>
+                <td class="text-right">{{ item.unit_price|inr }}</td>
+                <td class="text-right">{{ item.tax_rate|default:"18.00" }}%</td>
+                <td class="text-right">{{ item.total_tax|inr }}</td>
+                <td class="text-right font-medium">{{ item.line_total|inr }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex flex-col gap-2 pt-3 hairline-top body-sm">
+        <div class="flex justify-between">
+          <span class="text-muted">Subtotal (Excl. Tax)</span>
+          <span>{{ order.subtotal_amount|inr }}</span>
+        </div>
+        {% if order.discount_amount > 0 %}
+          <div class="flex justify-between text-success">
+            <span>Promotion Discount</span>
+            <span>&minus;{{ order.discount_amount|inr }}</span>
+          </div>
+        {% endif %}
+        {% if order.cgst_amount > 0 or order.sgst_amount > 0 %}
+          <div class="flex justify-between text-muted">
+            <span>CGST (Central Tax)</span>
+            <span>{{ order.cgst_amount|inr }}</span>
+          </div>
+          <div class="flex justify-between text-muted">
+            <span>SGST (Gujarat State Tax)</span>
+            <span>{{ order.sgst_amount|inr }}</span>
+          </div>
+        {% elif order.igst_amount > 0 %}
+          <div class="flex justify-between text-muted">
+            <span>IGST (Integrated Tax)</span>
+            <span>{{ order.igst_amount|inr }}</span>
+          </div>
+        {% else %}
+          <div class="flex justify-between text-muted">
+            <span>Total GST</span>
+            <span>{{ order.tax_amount|inr }}</span>
+          </div>
+        {% endif %}
+        <div class="flex justify-between text-muted">
+          <span>Shipping Fee</span>
+          <span>{% if order.shipping_amount > 0 %}{{ order.shipping_amount|inr }}{% else %}Free{% endif %}</span>
+        </div>
+        <div class="flex justify-between font-medium hairline-top pt-2 heading">
+          <span>Grand Total</span>
+          <span class="text-accent">{{ order.total_amount|inr }}</span>
+        </div>
+      </div>
+    </section>
 
     <!-- Audit Event Log -->
     {% if status_history %}
       <section class="checkout-card mb-6" aria-labelledby="history-heading">
         <h2 id="history-heading" class="heading hairline-bottom pb-2 mb-4">Tracking Event History</h2>
-        <table class="spec-table">
-          <caption class="sr-only">Chronological shipment events</caption>
-          <thead>
-            <tr>
-              <th scope="col">Timestamp</th>
-              <th scope="col">Status</th>
-              <th scope="col">Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for evt in status_history %}
+        <div class="spec-table-wrapper">
+          <table class="spec-table">
+            <caption class="sr-only">Chronological shipment events</caption>
+            <thead>
               <tr>
-                <td class="caption">{{ evt.created_at|date:"d M Y, H:i" }}</td>
-                <td class="body-sm"><strong>{{ evt.to_status|title }}</strong></td>
-                <td class="body-sm">{{ evt.notes|default:"Milestone recorded." }}</td>
+                <th scope="col">Timestamp</th>
+                <th scope="col">Status</th>
+                <th scope="col">Notes</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for evt in status_history %}
+                <tr>
+                  <td class="caption">{{ evt.created_at|date:"d M Y, H:i" }}</td>
+                  <td class="body-sm"><strong>{{ evt.to_status|title }}</strong></td>
+                  <td class="body-sm">{{ evt.notes|default:"Milestone recorded." }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </section>
     {% endif %}
 

@@ -27,8 +27,10 @@
         <div class="footer-col">
           <h2 class="footer-col-title">Customer Care</h2>
           <ul class="footer-links footer-links-list dense-list">
+            <li><a href="{% url 'order_track_lookup' %}">Track / Cancel Order</a></li>
+            <li><a href="{% url 'support_concierge' %}">Support &amp; Concierge</a></li>
             <li><a href="{% url 'contact' %}">Contact Us</a></li>
-            <li><a href="{% url 'order_track_lookup' %}">Track Your Order</a></li>
+            <li><a href="/outbox/">Local Outbox (Demo)</a></li>
             <li><a href="{% url 'legal_shipping' %}">Shipping &amp; Delivery</a></li>
             <li><a href="{% url 'legal_refunds' %}">Returns &amp; Refunds</a></li>
           </ul>

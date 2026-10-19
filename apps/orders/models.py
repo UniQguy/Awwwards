@@ -113,6 +113,18 @@ class Order(TimeStampedModel):
     def is_paid(self) -> bool:
         return self.payment_status == self.PAYMENT_STATUS_CAPTURED
 
+    @property
+    def cgst_amount(self) -> Decimal:
+        return sum((item.cgst_amount for item in self.items.all()), Decimal("0.00"))
+
+    @property
+    def sgst_amount(self) -> Decimal:
+        return sum((item.sgst_amount for item in self.items.all()), Decimal("0.00"))
+
+    @property
+    def igst_amount(self) -> Decimal:
+        return sum((item.igst_amount for item in self.items.all()), Decimal("0.00"))
+
 
 class OrderItem(models.Model):
     """
@@ -146,6 +158,10 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product_title} x {self.quantity}"
+
+    @property
+    def total_tax(self) -> Decimal:
+        return (self.cgst_amount or Decimal("0.00")) + (self.sgst_amount or Decimal("0.00")) + (self.igst_amount or Decimal("0.00"))
 
 
 class OrderStatusHistory(models.Model):

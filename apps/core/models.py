@@ -53,3 +53,24 @@ class ContactMessage(TimeStampedModel):
     def __str__(self):
         return f"{self.subject} ({self.email})"
 
+
+class SupportTicket(TimeStampedModel):
+    """
+    Customer support and return ticket submitted via concierge portal (Phase R8).
+    """
+
+    ticket_id = models.CharField(max_length=30, unique=True, db_index=True)
+    order_number = models.CharField(max_length=40, blank=True)
+    email = models.EmailField()
+    issue_category = models.CharField(max_length=50)
+    message = models.TextField()
+    resolved = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Support Ticket"
+        verbose_name_plural = "Support Tickets"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.ticket_id} ({self.issue_category}) - {self.email}"
+

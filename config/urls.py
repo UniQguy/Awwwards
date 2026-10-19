@@ -24,6 +24,7 @@ from apps.core.views import (
     legal_shipping,
     legal_terms,
     robots_txt,
+    support_concierge,
 )
 
 ADMIN_URL = os.environ.get("ADMIN_URL", "admin/").strip("/")
@@ -56,6 +57,7 @@ urlpatterns = [
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
     path("about/", about, name="about"),
     path("contact/", contact_us, name="contact"),
+    path("support/", support_concierge, name="support_concierge"),
     path("health/", health_check, name="health_check"),
 
     # Customer Authentication & Accounts

@@ -107,6 +107,78 @@ def contact_us(request):
     return render(request, "pages/contact.html")
 
 
+def support_concierge(request):
+    """
+    Dedicated Customer Service & Support Concierge portal (Phase R8).
+    Includes Support Ticket Form, 7-Day DOA Matrix, and Interactive FAQs.
+    """
+    import secrets
+    from django.contrib import messages
+    from django.core.mail import EmailMultiAlternatives
+    from .models import SupportTicket
+
+    ticket_id = None
+    success = False
+
+    if request.method == "POST":
+        order_number = request.POST.get("order_number", "").strip().upper()
+        email = request.POST.get("email", "").strip()
+        issue_category = request.POST.get("issue_category", "Technical Support").strip()
+        message = request.POST.get("message", "").strip()
+
+        if not email or not message:
+            messages.error(request, "Please enter a valid email address and inquiry description.")
+        else:
+            ticket_id = f"TKT-2026-{secrets.token_hex(3).upper()}"
+            ticket = SupportTicket.objects.create(
+                ticket_id=ticket_id,
+                order_number=order_number,
+                email=email,
+                issue_category=issue_category,
+                message=message,
+            )
+            success = True
+
+            # Send email confirmation
+            from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "support@electrocart.local")
+            subject = f"Support Ticket Logged: #{ticket_id}"
+            body_text = (
+                f"Your support inquiry #{ticket_id} has been registered.\n\n"
+                f"Category: {issue_category}\n"
+                f"Order Number: {order_number or 'N/A'}\n"
+                f"Message: {message}\n\n"
+                f"Our engineering support team in Ahmedabad will review and reply within 24 hours.\n\n"
+                f"ElectroCart Customer Concierge"
+            )
+            html_text = (
+                f"<div style='font-family: sans-serif; max-width: 600px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px;'>"
+                f"<h2 style='color: #0f172a; margin-top: 0;'>Support Ticket #{ticket_id} Registered</h2>"
+                f"<p style='color: #475569;'>We have received your support request regarding <strong>{issue_category}</strong>.</p>"
+                f"<p style='color: #475569;'>Order Number: <strong>{order_number or 'Not Specified'}</strong></p>"
+                f"<p style='color: #475569;'>Our engineering and concierge team in Ahmedabad will investigate and follow up promptly.</p>"
+                f"<p style='color: #94a3b8; font-size: 12px; margin-bottom: 0;'>ElectroCart Ahmedabad &middot; Honest Hardware Support</p>"
+                f"</div>"
+            )
+            try:
+                msg = EmailMultiAlternatives(
+                    subject=subject,
+                    body=body_text,
+                    from_email=from_email,
+                    to=[email],
+                )
+                msg.attach_alternative(html_text, "text/html")
+                msg.send(fail_silently=False)
+            except Exception:
+                pass
+
+    context = {
+        "ticket_id": ticket_id,
+        "success": success,
+        "breadcrumbs": [{"title": "Support Concierge", "url": "/support/"}],
+    }
+    return render(request, "pages/support.html", context)
+
+
 
 def robots_txt(request):
     site_url = getattr(settings, "SITE_URL", "http://localhost:8000").rstrip("/")

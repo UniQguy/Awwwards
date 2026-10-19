@@ -20,6 +20,8 @@
               <div class="shop-panel-header">
                 <a href="{% url 'category_list' %}" class="shop-panel-hub-link">All Categories &rarr;</a>
                 <a href="{% url 'brand_list' %}" class="shop-panel-hub-link">Brands Directory &rarr;</a>
+                <a href="{% url 'order_track_lookup' %}" class="shop-panel-hub-link">Track / Cancel Order &rarr;</a>
+                <a href="{% url 'support_concierge' %}" class="shop-panel-hub-link">Support &amp; Concierge &rarr;</a>
               </div>
               <div class="mega-menu-cat-list" role="list">
                 {% for cat in nav_categories %}
@@ -127,6 +129,9 @@
     </form>
 
     <nav class="header-nav" aria-label="Account and bag navigation">
+      <a href="{% url 'order_track_lookup' %}" class="header-nav-link text-xs uppercase tracking-wider" aria-label="Track or cancel order">Track</a>
+      <a href="{% url 'support_concierge' %}" class="header-nav-link text-xs uppercase tracking-wider" aria-label="Customer support">Support</a>
+
       <a href="{% url 'wishlist_detail' %}" class="header-nav-link" aria-label="Wishlist ({{ wishlist_count }} items)">
         <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-heart"></use></svg>
         <span class="sr-only">Wishlist</span>

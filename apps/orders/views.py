@@ -547,13 +547,16 @@ def order_cancel(request: HttpRequest, order_number: str) -> HttpResponse:
 
     if not can_transition(order.status, Order.STATUS_CANCELLED):
         messages.error(request, f"Order #{order.order_number} cannot be cancelled in status '{order.get_status_display()}'.")
+        if request.session.get(f"track_grant_{order.order_number}"):
+            return redirect("order_track_timeline", order_number=order.order_number)
         return redirect("order_success", order_number=order.order_number)
 
     user = request.user if request.user.is_authenticated else None
+    reason = request.POST.get("reason", "Changed mind").strip()
     transition_order_status(
         order,
         Order.STATUS_CANCELLED,
-        notes="Customer cancelled order via web interface.",
+        notes=f"Cancellation reason: {reason}",
         changed_by=user,
     )
 
@@ -564,11 +567,16 @@ def order_cancel(request: HttpRequest, order_number: str) -> HttpResponse:
         order,
         credit_note=cn,
         refund_amount=refund_amt,
-        reason="Customer cancelled order via web interface.",
+        reason=f"Customer cancelled order: {reason}",
         guest_token=token if not user else None,
     )
 
     messages.success(request, f"Order #{order.order_number} has been cancelled successfully. Inventory restored.")
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
+    if request.session.get(f"track_grant_{order.order_number}"):
+        return redirect("order_track_timeline", order_number=order.order_number)
     return redirect("order_success", order_number=order.order_number)
 
 
@@ -680,6 +688,12 @@ def order_track_lookup(request: HttpRequest) -> HttpResponse:
                 matches = True
             elif order.shipping_address_snapshot.get("phone") == clean_digits and clean_digits:
                 matches = True
+            elif order.billing_address_snapshot.get("phone") == clean_digits and clean_digits:
+                matches = True
+            elif order.billing_address_snapshot.get("email") and order.billing_address_snapshot.get("email").lower() == contact:
+                matches = True
+            elif order.shipping_address_snapshot.get("email") and order.shipping_address_snapshot.get("email").lower() == contact:
+                matches = True
 
             if matches:
                 request.session[f"track_grant_{order.order_number}"] = True
@@ -694,23 +708,29 @@ def order_track_lookup(request: HttpRequest) -> HttpResponse:
 @require_GET
 def order_track_timeline(request: HttpRequest, order_number: str) -> HttpResponse:
     """
-    Displays shipment milestones and live tracking progress.
+    Displays shipment milestones, itemized GST breakdown, and live tracking progress.
     """
-    order = get_object_or_404(Order.objects.prefetch_related("status_history"), order_number=order_number)
+    order = get_object_or_404(
+        Order.objects.prefetch_related("status_history", "items__product", "credit_notes"),
+        order_number=order_number,
+    )
 
     if not _validate_order_access(request, order):
         messages.warning(request, "Please enter your contact details to view shipment tracking.")
         return redirect("order_track_lookup")
 
     tracking_info = get_tracking_info(order)
+    can_cancel = order.status in [Order.STATUS_PENDING, Order.STATUS_CONFIRMED, "placed"]
 
     context = {
         "order": order,
         "tracking_info": tracking_info,
         "status_history": order.status_history.all(),
+        "can_cancel": can_cancel,
         "breadcrumbs": [
             {"title": "Track Order", "url": "/orders/track/"},
             {"title": f"Shipment #{order.order_number}", "url": f"/orders/track/{order.order_number}/verify/"},
         ],
     }
     return render(request, "orders/track_timeline.html", context)
+
