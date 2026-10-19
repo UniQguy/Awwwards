@@ -97,7 +97,7 @@ class EndToEndCommerceLifecycleTests(TestCase):
         self.assertEqual(guest_cart.items.count(), 1)
         self.assertEqual(guest_cart.total_quantity, 2)
 
-        # 2. Check delivery estimate for Bengaluru pincode
+        # 2. Check delivery estimate for Ahmedabad pincode
         estimate = estimate_delivery("560038")
         self.assertEqual(estimate.est_days_min, 2)
         self.assertEqual(estimate.est_days_max, 3)
@@ -121,7 +121,7 @@ class EndToEndCommerceLifecycleTests(TestCase):
         # 5. Place COD order
         shipping_addr = {
             "street": "100 Feet Road, HAL 2nd Stage",
-            "city": "Bengaluru",
+            "city": "Ahmedabad",
             "state": "KA",
             "pincode": "560038",
             "phone": "9876543210",

@@ -115,7 +115,7 @@ class SecurityHardeningTests(TestCase):
         addr = {
             "full_name": "Alice Customer",
             "line1": "100 MG Road",
-            "city": "Bengaluru",
+            "city": "Ahmedabad",
             "state_code": "KA",
             "pincode": "560001",
             "phone": "9876543210",
@@ -140,7 +140,7 @@ class SecurityHardeningTests(TestCase):
         addr = {
             "full_name": "Tamper Test",
             "line1": "100 MG Road",
-            "city": "Bengaluru",
+            "city": "Ahmedabad",
             "state_code": "KA",
             "pincode": "560001",
             "phone": "9876543210",

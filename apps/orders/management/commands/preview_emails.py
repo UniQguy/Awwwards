@@ -44,8 +44,8 @@ class Command(BaseCommand):
                 "full_name": "Aarav Sharma",
                 "line1": "Flat 402, Shanti Heights",
                 "line2": "14th Main, Indiranagar",
-                "city": "Bengaluru",
-                "state": "Karnataka",
+                "city": "Ahmedabad",
+                "state": "Gujarat",
                 "pincode": "560038",
                 "phone": "+91 98765 43210",
             }

@@ -72,8 +72,8 @@ class PDFInvoiceTests(TestCase):
                 "phone": "9876543210",
                 "line1": "Flat 402, Shanti Nilayam",
                 "line2": "12th Main, Indiranagar",
-                "city": "Bengaluru",
-                "state": "Karnataka",
+                "city": "Ahmedabad",
+                "state": "Gujarat",
                 "pincode": "560038",
             },
             status=Order.STATUS_CONFIRMED,
@@ -142,8 +142,8 @@ class PDFInvoiceTests(TestCase):
         self.assertIn(self.order.order_number, extracted_text)
         self.assertIn(self.invoice.invoice_number, extracted_text)
         self.assertIn("Arun Kumar", extracted_text)
-        self.assertIn("Bengaluru", extracted_text)
-        self.assertIn("Karnataka", extracted_text)
+        self.assertIn("Ahmedabad", extracted_text)
+        self.assertIn("Gujarat", extracted_text)
         self.assertIn("Sony WH-1000XM5", extracted_text)
         self.assertIn("8518", extracted_text)
         self.assertIn("8544", extracted_text)

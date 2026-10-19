@@ -41,7 +41,7 @@ Copy-Item .env.example .env
 ### Step 6: Configure Required Values in `.env`
 Open `.env` in Notepad and set three values:
 1. `SECRET_KEY`: Set to any long random string (e.g. `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`).
-2. `SELLER_STATE`: Set your dispatch origin state, such as `Karnataka` or `Maharashtra` (required for Indian GST split).
+2. `SELLER_STATE`: Set your dispatch origin state, such as `Gujarat` or `Maharashtra` (required for Indian GST split).
 3. `DATABASE_URL`: Defaults to `sqlite:///db.sqlite3` for effortless local setup.
 
 ### Step 7: Run Database Migrations
@@ -122,9 +122,9 @@ To print statutory GST Tax Invoices instead of a Bill of Supply:
 2. Populate the following seller variables:
    ```env
    SELLER_STATE=Gujarat
-   SELLER_GSTIN=29ABCDE1234F1Z5
+   SELLER_GSTIN=24ABCDE1234F1Z5
    SELLER_LEGAL_NAME=Electrocart Retail Private Limited
-   SELLER_ADDRESS=100 MG Road, Bengaluru, Karnataka 560001
+   SELLER_ADDRESS=100 Ashram Road, Ahmedabad, Gujarat 380009
    ```
 3. Restart `runserver`. Invoices will immediately render with statutory CGST, SGST, IGST, HSN tables, and sequential gap-free numbering.
 

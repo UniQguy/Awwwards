@@ -22,16 +22,16 @@ Currently, the application runs with mock Razorpay payment workflows and test we
 - [ ] **Payment Methods**: Enable UPI (Google Pay, PhonePe, Paytm), Netbanking, Credit/Debit Cards, and EMI in payment gateway settings.
 
 ### B. Statutory Tax & GST Configuration
-All invoices and credit notes currently print educational demonstration registration numbers (`GSTIN: 29AAAAA0000A1Z5` - Karnataka demo format).
+All invoices and credit notes currently print educational demonstration registration numbers (`GSTIN: 24AAAAA0000A1Z5` - Gujarat demo format).
 - [ ] **Legal Business Name**: Set registered entity name (e.g., `ELECTROCART RETAIL PRIVATE LIMITED`).
-- [ ] **State of Registration**: Verify home state (default: Karnataka, State Code `29`) for CGST + SGST vs. IGST intra-state / inter-state calculation.
+- [ ] **State of Registration**: Verify home state (default: Gujarat, State Code `24`) for CGST + SGST vs. IGST intra-state / inter-state calculation.
 - [ ] **Live GSTIN**: Enter official 15-character Goods and Services Tax Identification Number.
 - [ ] **HSN / SAC Codes**: Verify catalog product HSN codes (e.g., `8518` for audio equipment, `8517` for phones, `8544` for cables) with accounting counsel.
 - [ ] **Invoice Sequencing**: Configure state-compliant sequential fiscal year numbering format (e.g., `EC/2026-27/00001`).
 
 ### C. Legal & Regulatory Identity
 All legal pages (`/legal/terms/`, `/legal/privacy/`, `/legal/shipping/`, `/legal/refunds/`) contain university evaluation disclaimers that must be updated with corporate particulars.
-- [ ] **Registered Office Address**: Replace Bengaluru demonstration address with corporate registered office.
+- [ ] **Registered Office Address**: Replace Ahmedabad demonstration address with corporate registered office.
 - [ ] **Statutory Grievance Officer**: Nominate a designated Grievance Officer per the Indian *Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021* and *Consumer Protection (E-Commerce) Rules, 2020*.
   - Name, Designation, Physical Address, Direct Email, Escalation Phone.
 - [ ] **Customer Care Contacts**: Replace `care@electrocart.in` and `+91 (080) 2345-6789` with verified corporate helpdesk channels.

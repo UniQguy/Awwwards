@@ -229,7 +229,7 @@ It evaluates 8 key storefront templates:
 ### F-22: Footer Colophon
 - **Issue**: Developer jargon ("Crafted with semantic HTML"), misaligned reduce motion button, missing sample data notice.
 - **Fix**:
-  - Rewrote colophon: *"Electrocart is a demonstration store. Catalogue prices come from an older dataset and stock levels are sample data. Prices in Indian Rupee (₹). Dispatched from Karnataka."*
+  - Rewrote colophon: *"Electrocart is a demonstration store. Catalogue prices come from an older dataset and stock levels are sample data. Prices in Indian Rupee (₹). Dispatched from Gujarat."*
   - Aligned reduced motion toggle button to the exact baseline of the copyright notice on the right column.
 
 ### F-23: Typographic Error Pages

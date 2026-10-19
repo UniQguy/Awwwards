@@ -100,12 +100,12 @@ class AddressModelTests(TestCase):
             line1="Flat 402, Green Heights",
             line2="100 Feet Road, Indiranagar",
             landmark="Near Metro Station",
-            city="Bengaluru",
-            state=IndianState.KARNATAKA,
+            city="Ahmedabad",
+            state=IndianState.GUJARAT,
             pincode="560038",
             is_default=True,
         )
-        self.assertEqual(address.state, "Karnataka")
+        self.assertEqual(address.state, "Gujarat")
         self.assertTrue(address.is_default)
         self.assertIsNotNone(address.uuid)
         self.assertIn("560038", str(address))
@@ -119,8 +119,8 @@ class AddressModelTests(TestCase):
                 full_name="Priya Patel",
                 phone="9876543210",
                 line1="Some street",
-                city="Bengaluru",
-                state=IndianState.KARNATAKA,
+                city="Ahmedabad",
+                state=IndianState.GUJARAT,
                 pincode=pin,
             )
             with self.assertRaises(ValidationError, msg=f"Pincode '{pin}' should fail validation"):
@@ -135,8 +135,8 @@ class AddressModelTests(TestCase):
                 full_name="Priya Patel",
                 phone=ph,
                 line1="Some street",
-                city="Bengaluru",
-                state=IndianState.KARNATAKA,
+                city="Ahmedabad",
+                state=IndianState.GUJARAT,
                 pincode="560038",
             )
             with self.assertRaises(ValidationError, msg=f"Phone '{ph}' should fail validation"):
@@ -149,8 +149,8 @@ class AddressModelTests(TestCase):
             full_name="Priya Patel",
             phone="9876543210",
             line1="Address 1",
-            city="Bengaluru",
-            state=IndianState.KARNATAKA,
+            city="Ahmedabad",
+            state=IndianState.GUJARAT,
             pincode="560038",
             is_default=True,
         )
@@ -180,8 +180,8 @@ class AddressModelTests(TestCase):
             full_name="Priya Patel",
             phone="9876543210",
             line1="Office 1",
-            city="Bengaluru",
-            state=IndianState.KARNATAKA,
+            city="Ahmedabad",
+            state=IndianState.GUJARAT,
             pincode="560038",
             is_default=False,
         )
@@ -190,8 +190,8 @@ class AddressModelTests(TestCase):
             full_name="Priya Patel",
             phone="9876543210",
             line1="Office 2",
-            city="Bengaluru",
-            state=IndianState.KARNATAKA,
+            city="Ahmedabad",
+            state=IndianState.GUJARAT,
             pincode="560001",
             is_default=False,
         )

@@ -57,8 +57,8 @@ class OrderViewsTests(TestCase):
                 "full_name": "Buyer Test",
                 "phone": "9876543210",
                 "line1": "Flat 101, Brigade Towers",
-                "city": "Bengaluru",
-                "state": "Karnataka",
+                "city": "Ahmedabad",
+                "state": "Gujarat",
                 "pincode": "560001",
             },
         )

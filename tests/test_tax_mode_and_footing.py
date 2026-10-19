@@ -165,15 +165,15 @@ class TaxModeAndCartFootingTestCase(TestCase):
             "full_name": "Test Buyer",
             "phone": "9876543210",
             "line1": "123 Main St",
-            "city": "Bengaluru",
-            "state": "KA",
+            "city": "Ahmedabad",
+            "state": "GJ",
             "pincode": "560001",
         }
         session.save()
 
         summary = calculate_cart_summary(
             cart=self.cart,
-            buyer_state="KA",
+            buyer_state="GJ",
             payment_method="cod",
         )
         self.assertEqual(summary["subtotal"], Decimal("399.00"))

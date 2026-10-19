@@ -39,7 +39,7 @@ class CheckoutViewsTests(TestCase):
         # Serviceable PIN code
         PincodeServiceability.objects.create(
             pincode="560001",
-            state="Karnataka",
+            state="Gujarat",
             is_serviceable=True,
             est_days_min=2,
             est_days_max=3,
@@ -98,7 +98,7 @@ class CheckoutViewsTests(TestCase):
             "phone": "9876543210",
             "line1": "Flat 402, Highrise",
             "city": "Remote City",
-            "state": "Karnataka",
+            "state": "Gujarat",
             "pincode": "999999",  # unserviceable
         }
         resp = self.client.post(reverse("checkout_address"), invalid_addr_data)
@@ -121,8 +121,8 @@ class CheckoutViewsTests(TestCase):
             "full_name": "Deepa Rao",
             "phone": "9845098450",
             "line1": "12 Residency Road",
-            "city": "Bengaluru",
-            "state": "Karnataka",
+            "city": "Ahmedabad",
+            "state": "Gujarat",
             "pincode": "560001",
         }
         resp_addr = self.client.post(reverse("checkout_address"), valid_addr_data)
@@ -200,8 +200,8 @@ class CheckoutViewsTests(TestCase):
             "full_name": "Arun Kumar",
             "phone": "9876543210",
             "line1": "Flat 101, Palm Avenue",
-            "city": "Bengaluru",
-            "state": "Karnataka",
+            "city": "Ahmedabad",
+            "state": "Gujarat",
             "pincode": "560001",
             "csrfmiddlewaretoken": csrf_token,
         }

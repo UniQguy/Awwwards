@@ -60,9 +60,9 @@ class BusinessFlowAndSecurityTests(TestCase):
         cls.valid_address = {
             "full_name": "Alice Flow",
             "line1": "42 Electronic City",
-            "city": "Bengaluru",
+            "city": "Ahmedabad",
             "state_code": "KA",
-            "state": "Karnataka",
+            "state": "Gujarat",
             "pincode": "560100",
             "phone": "9876543210",
         }

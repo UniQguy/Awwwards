@@ -270,7 +270,7 @@
   3. *Composed Chapter Shelves (3 Chapters)*: Replaced the giant pinned stage scroll trap with exactly 3 chapters for the top categories. Each chapter features a chapter numeral (`Chapter 01 / 03 · Audio & Sound`), editorial category intro, a 2-column lead product card with curator fidelity note, and three 1-column satellite cards with right-aligned tabular INR prices.
   4. *Curated Stories (2 Collections Side-by-Side)*: 2 editorial collections presented in a 2-column desktop grid, each featuring collection intro, 3 product thumbnails with brand, title, and right-aligned INR prices, and a "Read chapter →" link.
   5. *Budget Ladder (4 Brackets)*: 4 expenditure tiers (Under ₹500, Under ₹1,500, Under ₹5,000, Premium Grade) with real aggregate listing counts, sample thumbnail previews, and direct bracket query links.
-  6. *How Buying Works (3 Equal Columns)*: Clean, neutral-surface 3-column section outlining Curated verified batches, Direct dispatch from Bengaluru, and 7-day transit damage replacement.
+  6. *How Buying Works (3 Equal Columns)*: Clean, neutral-surface 3-column section outlining Curated verified batches, Direct dispatch from Ahmedabad, and 7-day transit damage replacement.
   7. *Verified Brand Flow*: Quiet horizontal flow of allow-listed brand marks with count chips and link to the brands directory.
   8. *Height Gate Compliance*: Total document scroll height measured at 1456x820 desktop is 4474px, strictly passing the <=4608px 6-viewport gate.
   9. *Audits Clean*: `overlap_audit.py` passes with 0 defects across all viewports; `void_audit.py` passes with 0 defects across all viewports; hero plate is visible above the fold on all 4 viewports.

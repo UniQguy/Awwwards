@@ -160,16 +160,16 @@ def setup_qa_fixtures() -> Dict[str, str]:
             "shipping_address_snapshot": {
                 "name": "QA Shopper",
                 "line1": "123 Test Avenue",
-                "city": "Bengaluru",
-                "state": "Karnataka",
+                "city": "Ahmedabad",
+                "state": "Gujarat",
                 "pincode": "560001",
                 "phone": "9876543210",
             },
             "billing_address_snapshot": {
                 "name": "QA Shopper",
                 "line1": "123 Test Avenue",
-                "city": "Bengaluru",
-                "state": "Karnataka",
+                "city": "Ahmedabad",
+                "state": "Gujarat",
                 "pincode": "560001",
                 "phone": "9876543210",
             },
@@ -344,13 +344,13 @@ def run_keyboard_purchase_walkthrough(base_url: str, fixtures: Dict[str, str], r
             # landmark
             press("Tab")
             # city
-            page.keyboard.type("Bengaluru")
+            page.keyboard.type("Ahmedabad")
             press("Tab")
             # pincode
             page.keyboard.type("560038")
             press("Tab")
             # state
-            page.select_option("#id-state", "Karnataka")
+            page.select_option("#id-state", "Gujarat")
 
             submit_addr = page.locator("button[type='submit']:has-text('Review Order')").first
             submit_addr.focus()

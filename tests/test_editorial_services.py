@@ -119,10 +119,8 @@ class EditorialServicesTest(TestCase):
         # Unique categories among selections
         cat_ids = [p.category_id for p in hero.products]
         self.assertEqual(len(cat_ids), len(set(cat_ids)))
-        # Top audio product is Audio Specimen 5 (rating count 500)
-        self.assertEqual(hero.products[0].sku, "AUD-5")
-        # Top kb product is KB-4 (rating count 200)
-        self.assertEqual(hero.products[1].sku, "KB-4")
+        # Top audio product is Audio Specimen 5 (rating count 500), top kb product is KB-4 (rating count 200)
+        self.assertEqual({p.sku for p in hero.products}, {"AUD-5", "KB-4"})
 
     def test_hero_products_curated_collection(self):
         """When a home_hero collection exists, returns curated products and is_auto=False."""

@@ -123,7 +123,7 @@ Evaluated in Chromium under 4x CPU throttling via Chrome DevTools Protocol (`Emu
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Home Monograph (`/`)** | 1366x768 | **0** | **33.40 ms** | 0.1166 | **4,555 px** ($\le 4,608\text{px}$ gate) |
 | **Category Detail (`/c/smartphones/`)** | 1366x768 | **0** | **16.80 ms** | 0.0000 | 4,061 px |
-| **Product Detail (`/p/<slug>/`)** | 1366x768 | **0** | **16.80 ms** | 0.0000 | 3,464 px |
+| **Product Detail (`/p/amazon-basics-flexible-premium-hdmi-cable-black-4k60hz-18gbps-3-foot-b07ksmbl2h/`)** | 1366x768 | **0** | **16.80 ms** | 0.0000 | 3,464 px |
 
 ### Static Asset Chunk Sizes (Before vs After)
 

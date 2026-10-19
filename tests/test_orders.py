@@ -77,7 +77,7 @@ class OrderPlacementAndLifecycleTests(TestCase):
 
         shipping_addr = {
             "street": "123 Indiranagar 100ft Road",
-            "city": "Bengaluru",
+            "city": "Ahmedabad",
             "state": "KA",
             "pincode": "560038",
             "phone": "9876543210",

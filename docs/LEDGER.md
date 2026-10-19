@@ -109,7 +109,7 @@
 - `DATABASE_URL`: Database connection string (`sqlite:///db.sqlite3` for local).
 - `ALLOWED_HOSTS`: Comma-separated list of permitted host headers.
 - `CSRF_TRUSTED_ORIGINS`: Comma-separated trusted origins for CSRF POST requests.
-- `SELLER_STATE`: Indian State of seller origin (`Karnataka`), determines CGST+SGST vs IGST split.
+- `SELLER_STATE`: Indian State of seller origin (`Gujarat`), determines CGST+SGST vs IGST split.
 - `SELLER_GSTIN`: Seller GST identification number (blank activates Bill of Supply mode).
 - `RAZORPAY_KEY_ID`: Razorpay public key ID.
 - `RAZORPAY_KEY_SECRET`: Razorpay secret key.

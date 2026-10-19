@@ -69,17 +69,17 @@ class TaxEngineUnitTests(SimpleTestCase):
             normalize_state_name("")
 
     def test_resolve_supply(self):
-        is_intra, delivery, seller = resolve_supply("Karnataka", "Karnataka")
+        is_intra, delivery, seller = resolve_supply("Gujarat", "Gujarat")
         self.assertTrue(is_intra)
-        self.assertEqual(delivery, "Karnataka")
-        self.assertEqual(seller, "Karnataka")
+        self.assertEqual(delivery, "Gujarat")
+        self.assertEqual(seller, "Gujarat")
 
-        is_intra, delivery, seller = resolve_supply("Maharashtra", "Karnataka")
+        is_intra, delivery, seller = resolve_supply("Maharashtra", "Gujarat")
         self.assertFalse(is_intra)
 
     def test_missing_seller_state_raises_error(self):
         with self.assertRaises(MissingSellerStateError):
-            resolve_supply("Karnataka", "")
+            resolve_supply("Gujarat", "")
 
 
 class LineAllocatorTests(SimpleTestCase):

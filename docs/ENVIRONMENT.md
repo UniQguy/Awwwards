@@ -11,10 +11,10 @@
 | `CSRF_TRUSTED_ORIGINS` | **Required** | No | `""` | `https://electrocart.in,https://www.electrocart.in` | Trusted origins for state-mutating CSRF requests. |
 | `SITE_URL` | Optional | No | `http://localhost:8000` | `https://electrocart.in` | Canonical base URL used for sitemap, emails, and full link generation. |
 | `ADMIN_URL` | Optional | No | `admin/` | `management-k9x/` | Custom URL prefix for Django admin to prevent automated bot scanning. |
-| `SELLER_STATE` | **Required** | No | `""` (raises error in prod) | `Karnataka` | Origin state for Indian GST split (IGST vs CGST/SGST). |
+| `SELLER_STATE` | **Required** | No | `""` (raises error in prod) | `Gujarat` | Origin state for Indian GST split (IGST vs CGST/SGST). |
 | `SELLER_GSTIN` | Optional | No | `""` | `29ABCDE1234F1Z5` | 15-digit GST identification number. When omitted, invoices issue as Bill of Supply. |
 | `SELLER_LEGAL_NAME` | Optional | No | `""` | `Electrocart Retail LLP` | Statutory company name printed on invoices and legal documents. |
-| `SELLER_ADDRESS` | Optional | No | `""` | `100 MG Road, Bengaluru 560001` | Statutory registered company address. |
+| `SELLER_ADDRESS` | Optional | No | `""` | `100 Ashram Road, Ahmedabad 380009` | Statutory registered company address. |
 | `RAZORPAY_KEY_ID` | Optional | No | `""` | `rzp_live_abcdef1234` | Razorpay public API key for modal checkout. |
 | `RAZORPAY_KEY_SECRET` | Optional | **YES** | `""` | `live_secret_key_9876` | Razorpay secret key for payment capture and signature verification. |
 | `RAZORPAY_WEBHOOK_SECRET` | Optional | **YES** | `""` | `wh_secret_xyz123` | Secret token used to verify inbound Razorpay webhook HMAC signatures. |

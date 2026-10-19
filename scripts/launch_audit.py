@@ -65,7 +65,7 @@ def main():
     deploy_env = {
         "SECRET_KEY": "strictly-random-production-secret-key-of-at-least-50-characters-here!",
         "DATABASE_URL": f"sqlite:///{BASE_DIR}/db.sqlite3",
-        "SELLER_STATE": "Karnataka",
+        "SELLER_STATE": "Gujarat",
         "ALLOWED_HOSTS": "electrocart.example.com",
         "CSRF_TRUSTED_ORIGINS": "https://electrocart.example.com",
         "SITE_URL": "https://electrocart.example.com",

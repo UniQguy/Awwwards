@@ -97,7 +97,7 @@ class DeliveryEstimatorTests(TestCase):
             is_active=True,
             source="sample",
         )
-        # 3-digit city zone (Bengaluru)
+        # 3-digit city zone (Metro)
         ShippingZone.objects.create(
             name="Zone 560 Metro",
             pin_prefix="560",
@@ -131,7 +131,7 @@ class DeliveryEstimatorTests(TestCase):
         """Exact PincodeServiceability record takes absolute precedence over zones."""
         PincodeServiceability.objects.create(
             pincode="560038",
-            state="Karnataka",
+            state="Gujarat",
             is_serviceable=True,
             est_days_min=1,
             est_days_max=1,
@@ -150,7 +150,7 @@ class DeliveryEstimatorTests(TestCase):
         """Suspended PIN code returns serviceable=False and never a date."""
         PincodeServiceability.objects.create(
             pincode="560099",
-            state="Karnataka",
+            state="Gujarat",
             is_serviceable=False,
             source="imported",
         )

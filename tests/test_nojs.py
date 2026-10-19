@@ -49,7 +49,7 @@ class NoJavaScriptCommerceFlowTests(TestCase):
 
         PincodeServiceability.objects.create(
             pincode="560025",
-            state="Karnataka",
+            state="Gujarat",
             is_serviceable=True,
             est_days_min=1,
             est_days_max=3,
@@ -99,8 +99,8 @@ class NoJavaScriptCommerceFlowTests(TestCase):
             "full_name": "Kavita Rao",
             "phone": "9812345678",
             "line1": "Flat 304, Richmond Plaza",
-            "city": "Bengaluru",
-            "state": "Karnataka",
+            "city": "Ahmedabad",
+            "state": "Gujarat",
             "pincode": "560025",
         }, follow=True)
         self.assertEqual(resp.status_code, 200)

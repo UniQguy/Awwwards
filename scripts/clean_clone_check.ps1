@@ -36,7 +36,7 @@ try {
     # Configure required env vars in temporary .env
     $envContent = Get-Content "$tempBase\.env"
     $envContent = $envContent -replace '^SECRET_KEY=.*', 'SECRET_KEY=clean-clone-reproducibility-key-50-characters-long-minimum!'
-    $envContent = $envContent -replace '^SELLER_STATE=.*', 'SELLER_STATE=Karnataka'
+    $envContent = $envContent -replace '^SELLER_STATE=.*', 'SELLER_STATE=Gujarat'
     $envContent = $envContent -replace '^DATABASE_URL=.*', "DATABASE_URL=sqlite:///$($tempBase.Replace('\', '/'))/clean_db.sqlite3"
     $envContent | Set-Content "$tempBase\.env"
 

@@ -55,8 +55,8 @@ Before inviting the evaluation committee:
 ### Q3: How is Goods and Services Tax (GST) calculated across state lines?
 > **Answer**:  
 > Per statutory Indian tax law, GST calculation depends on the **Place of Supply**:
-> - If the shipping address is within Karnataka (home state code `29`), the system computes **Intra-State GST**: splitting the tax equally into **CGST (9%)** and **SGST (9%)**.
-> - If the shipping address is outside Karnataka (e.g., Maharashtra `27` or Delhi `07`), the system computes **Inter-State GST**: charging **IGST (18%)**.  
+> - If the shipping address is within Gujarat (home state code `24`), the system computes **Intra-State GST**: splitting the tax equally into **CGST (9%)** and **SGST (9%)**.
+> - If the shipping address is outside Gujarat (e.g., Maharashtra `27` or Delhi `07`), the system computes **Inter-State GST**: charging **IGST (18%)**.  
 > All calculations use Python `Decimal` with `ROUND_HALF_UP` to prevent financial penny rounding errors.
 
 ### Q4: Why are there no countdown timers, flash banners, or aggressive popups?

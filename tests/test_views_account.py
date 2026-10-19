@@ -26,7 +26,7 @@ class AccountViewsTests(TestCase):
 
         PincodeServiceability.objects.create(
             pincode="560001",
-            state="Karnataka",
+            state="Gujarat",
             is_serviceable=True,
             cod_allowed=True,
         )
@@ -36,8 +36,8 @@ class AccountViewsTests(TestCase):
             full_name="Meera Sen",
             phone="9876543210",
             line1="45 M.G. Road",
-            city="Bengaluru",
-            state="Karnataka",
+            city="Ahmedabad",
+            state="Gujarat",
             pincode="560001",
             is_default=True,
         )
@@ -74,8 +74,8 @@ class AccountViewsTests(TestCase):
             "full_name": "Meera Sen Office",
             "phone": "9876543210",
             "line1": "Level 6, Tech Park",
-            "city": "Bengaluru",
-            "state": "Karnataka",
+            "city": "Ahmedabad",
+            "state": "Gujarat",
             "pincode": "560001",
             "is_default": "0",
         }
