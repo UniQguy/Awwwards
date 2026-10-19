@@ -158,13 +158,12 @@ def hero_products(n: int = 3) -> HeroResult:
         curated_prods = [
             fp.product
             for fp in curated_col.featured_items.all()
-            if fp.product.is_purchasable
-            and fp.product.primary_image_url
-            and fp.product.selling_price
-            and fp.product.selling_price >= Decimal("15000.00")
+            if fp.product.is_purchasable and fp.product.primary_image_url and fp.product.selling_price
         ]
-        if curated_prods:
-            return HeroResult(products=curated_prods[:n], is_auto=False)
+        flagship_curated = [p for p in curated_prods if p.selling_price >= Decimal("15000.00")]
+        selected = flagship_curated if flagship_curated else curated_prods
+        if selected:
+            return HeroResult(products=selected[:n], is_auto=False)
 
     # 2. Fallback auto-select: prioritize flagship hardware (>= 15,000) across primary categories
     day_of_year = date.today().timetuple().tm_yday
@@ -175,21 +174,14 @@ def hero_products(n: int = 3) -> HeroResult:
         for offset in range(num_cats)
     }
 
-    flagship_qs = Product.objects.filter(
-        selling_price__gte=Decimal("15000.00"),
-        is_available=True,
-        media__media_type="image",
-    ).exclude(category__slug__in=["cables-chargers-powerbanks", "cases-protectors", "other"])
-
-    if not flagship_qs.exists():
-        flagship_qs = Product.objects.filter(
+    prods = (
+        Product.objects.filter(
             selling_price__gt=Decimal("0.00"),
             is_available=True,
             media__media_type="image",
-        ).exclude(category__slug__in=["cables-chargers-powerbanks", "cases-protectors", "other"])
-
-    prods = (
-        flagship_qs.select_related("category")
+        )
+        .exclude(category__slug__in=["cables-chargers-powerbanks", "cases-protectors", "other"])
+        .select_related("category")
         .prefetch_related("media", "specifications")
         .order_by("-selling_price", "-source_rating_count", "id")
     )

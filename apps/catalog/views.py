@@ -187,13 +187,15 @@ def home(request: HttpRequest) -> HttpResponse:
             if len(cutout_cycle_data) >= 10:
                 break
 
-    # Brands
+    # Brands & Curated Chapters
     brands = get_editorial_brands(max_brands=35)
+    chapters = home_chapters(max_chapters=3)
 
     context = {
         "hero": hero_res,
         "hero_plate_product": hero_plate_product,
         "hero_picker_products": hero_picker_products,
+        "chapters": chapters,
         "cutout_cable": cutout_cable,
         "cutout_watch": cutout_watch,
         "cutout_earphones": cutout_earphones,
@@ -541,12 +543,12 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
             })
 
     # Customer Reviews & Ratings Distribution (Phase R8)
-    reviews = list(product.reviews.all().order_by("-created_at"))
+    reviews = sorted(product.reviews.all(), key=lambda r: getattr(r, "created_at", None) or timezone.now(), reverse=True)
     total_reviews = len(reviews)
     if total_reviews > 0:
         avg_rating = round(sum(r.rating for r in reviews) / total_reviews, 1)
     else:
-        avg_rating = float(product.amazon_rating or 4.5)
+        avg_rating = float(getattr(product, "source_rating", None) or getattr(product, "amazon_rating", None) or 4.5)
 
     rating_counts = {i: 0 for i in range(1, 6)}
     for r in reviews:

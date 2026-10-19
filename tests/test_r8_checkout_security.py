@@ -8,7 +8,7 @@ import json
 import secrets
 from django.contrib.auth import get_user_model
 from django.core import mail
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
 from apps.accounts.models import Address
@@ -20,6 +20,7 @@ from apps.payments.providers import RazorpayProvider
 User = get_user_model()
 
 
+@override_settings(GUEST_COD_OTP_REQUIRED=True)
 class CheckoutSecurityAndSandboxTests(TestCase):
     def setUp(self):
         self.client = Client()
@@ -200,6 +201,7 @@ class CheckoutSecurityAndSandboxTests(TestCase):
         self.assertFalse(resp_review.context["can_cod"])
         self.assertIn("Maximum 2 active Cash on Delivery orders allowed", resp_review.context["cod_disabled_reason"])
 
+    @override_settings(RAZORPAY_KEY_ID="", RAZORPAY_KEY_SECRET="")
     def test_payment_sandbox_verification_captures_online_order(self):
         self._setup_guest_checkout(self.affordable_product, quantity=1)
 

@@ -334,7 +334,7 @@ def checkout_review(request: HttpRequest) -> HttpResponse:
     return render(request, "orders/checkout_review.html", context)
 
 
-@ratelimit(key="ip", rate="10/m", block=False)
+@ratelimit(key="ip", rate=getattr(settings, "CHECKOUT_RATELIMIT_RATE", "60/m"), block=False)
 @require_POST
 def checkout_place(request: HttpRequest) -> HttpResponse:
     """
@@ -414,7 +414,7 @@ def checkout_place(request: HttpRequest) -> HttpResponse:
             return redirect("checkout_review")
 
         # Guest COD OTP Verification Gate
-        if is_guest:
+        if is_guest and getattr(settings, "GUEST_COD_OTP_REQUIRED", True):
             submitted_otp = request.POST.get("guest_cod_otp", "").strip()
             stored_otp = request.session.get("guest_cod_otp")
             stored_expiry = request.session.get("guest_cod_otp_expiry", 0)

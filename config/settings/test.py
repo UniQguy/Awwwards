@@ -53,3 +53,9 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
+
+# Explicit test environment marker
+TESTING = True
+
+# Guest COD OTP default in test environment (explicitly overridden in R8 security test suite)
+GUEST_COD_OTP_REQUIRED = False

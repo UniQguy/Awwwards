@@ -5,6 +5,7 @@ Includes product counts, starting prices, top 5 brands, and representative thumb
 
 from decimal import Decimal
 from typing import List
+from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Count, Min, Q
 

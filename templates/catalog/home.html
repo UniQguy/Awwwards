@@ -312,7 +312,7 @@
     <div class="hairline-bottom pb-2 mb-4 flex justify-between items-baseline">
       <div>
         <span class="label text-muted font-mono text-2xs uppercase">Chapter 06 / 09 &middot; Department Matrix</span>
-        <h2 id="bento-heading" class="display-m">The 10 Category Worlds</h2>
+        <h2 id="bento-heading" class="display-m">The categories: 10 Curated Worlds</h2>
       </div>
       <a href="{% url 'category_list' %}" class="link-subtle font-semibold body-sm">View full directory &rarr;</a>
     </div>
@@ -323,6 +323,9 @@
           <div>
             <span class="label text-muted font-mono text-2xs uppercase block mb-1">{{ cr.product_count|default:"0" }} items listed</span>
             <h3 class="display-s mb-1">{{ cr.name }}</h3>
+            {% if cr.chapter_intro %}
+              <p class="caption text-muted mt-1 line-clamp-2">{{ cr.chapter_intro }}</p>
+            {% endif %}
             <span class="caption text-accent font-mono">Priced from {{ cr.price_from|inr }}</span>
           </div>
 
@@ -340,6 +343,25 @@
         </a>
       {% endfor %}
     </div>
+
+    {% if chapters %}
+      <div id="chapters" class="mt-8">
+        {% for chapter in chapters %}
+          <div class="mb-4 pt-4 hairline-top">
+            <span class="label text-muted font-mono text-2xs uppercase">Department Spotlight &middot; {{ chapter.category.name }}</span>
+            <h3 class="display-s mt-1 mb-1">{{ chapter.category.name }}</h3>
+            {% if chapter.category.chapter_intro %}
+              <p class="caption text-muted mt-1 mb-2">{{ chapter.category.chapter_intro }}</p>
+            {% endif %}
+            <div class="dense-list mt-2 flex flex-wrap gap-2">
+              {% for pick in chapter.picks|slice:":4" %}
+                <a href="{% url 'product_detail' slug=pick.slug %}" class="btn btn-secondary btn-sm">{{ pick.display_name }} &rarr;</a>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
   </section>
 
   <!-- CHAPTER 07: CURATE YOUR DESK SETUP BUNDLE BUILDER -->

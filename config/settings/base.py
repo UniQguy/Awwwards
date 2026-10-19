@@ -396,4 +396,7 @@ LOGGING = {
 # Media slot placeholder labels (True in local, False in production)
 SHOW_PLACEHOLDER_LABELS = False
 
+# Guest COD OTP Verification Gate (Phase R8)
+GUEST_COD_OTP_REQUIRED = os.environ.get("GUEST_COD_OTP_REQUIRED", "1").lower() in ("1", "true", "yes")
+
 

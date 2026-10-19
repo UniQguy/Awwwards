@@ -473,8 +473,8 @@
           {% for b in rating_bars %}
             <div class="flex items-center gap-3 body-sm">
               <span class="font-medium" style="width: 50px;">{{ b.stars }} Stars</span>
-              <div class="flex-1 rounded overflow-hidden" style="height: 8px; background: #e2e8f0;">
-                <div style="width: {{ b.percentage }}%; height: 100%; background: #0f766e;"></div>
+              <div class="flex-1 rounded overflow-hidden" style="height: 8px; background: var(--surface-2);">
+                <div style="width: {{ b.percentage }}%; height: 100%; background: var(--accent);"></div>
               </div>
               <span class="caption text-muted text-right" style="width: 40px;">{{ b.count }}</span>
             </div>

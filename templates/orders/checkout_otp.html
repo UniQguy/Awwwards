@@ -35,17 +35,17 @@
     </header>
 
     <!-- Faculty / University Demo Mode Outbox Bridge Badge -->
-    <div class="alert alert-info mb-6 flex justify-between items-center" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 12px 16px;">
-      <div class="caption" style="color: #1e40af;">
+    <div class="alert alert-info mb-6 flex justify-between items-center">
+      <div class="caption">
         <strong>University Demo Mode:</strong> Check verification code in the developer outbox.
       </div>
-      <a href="/outbox/" target="_blank" class="btn btn-sm btn-secondary" style="font-size: 12px; white-space: nowrap;">
+      <a href="/outbox/" target="_blank" class="btn btn-sm btn-secondary font-mono">
         View OTP in Local Outbox &nearr;
       </a>
     </div>
 
     {% if error %}
-      <div class="alert alert-danger mb-6" style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 6px;">
+      <div class="alert alert-danger mb-6">
         {{ error }}
       </div>
     {% endif %}
@@ -64,8 +64,7 @@
             type="text"
             id="id-guest-cod-otp"
             name="guest_cod_otp"
-            class="form-control text-center font-mono"
-            style="font-size: 24px; letter-spacing: 8px; font-weight: bold;"
+            class="form-control text-center font-mono display-s"
             placeholder="000000"
             maxlength="6"
             pattern="[0-9]{6}"
