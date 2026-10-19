@@ -39,6 +39,20 @@ class Command(BaseCommand):
         self.stdout.write(f"  EMAIL_BACKEND: {backend}")
         self.stdout.write(f"  From:         {from_email}")
 
+        if mode == "smtp":
+            host_user = getattr(settings, "EMAIL_HOST_USER", "").strip()
+            host_password = getattr(settings, "EMAIL_HOST_PASSWORD", "").strip()
+            if not host_user or not host_password:
+                self.stderr.write(
+                    self.style.ERROR(
+                        "ERROR: SMTP credentials missing. Please configure EMAIL_HOST_USER and EMAIL_HOST_PASSWORD "
+                        "in your .env file (e.g. Gmail App Password per docs/EMAIL_SETUP.md)."
+                    )
+                )
+                raise CommandError(
+                    "SMTP credentials missing: set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD in .env"
+                )
+
         now_str = timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z")
         text_content = (
             f"ELECTROCART Email Subsystem Diagnostic\n"

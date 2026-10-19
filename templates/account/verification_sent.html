@@ -6,13 +6,27 @@
 <div class="container section">
   <div class="checkout-card max-w-md mx-auto text-center">
     <h1 class="display-l mb-2">Verification Email Sent</h1>
-    <p class="body-sm mb-6">We have sent a verification link to your email address. Please click the link inside to activate your account.</p>
-    {% if debug %}
-    <div class="alert alert-info mb-6">
-      Local inspection: <a href="{% url 'dev_outbox' %}" class="text-accent">Open Developer Outbox &rarr;</a> to view the message and click the confirmation link immediately.
+    <p class="body-sm mb-6" id="verification-sent-message">
+      We sent a confirmation link to <strong>{{ masked_email|default:"your email address" }}</strong>. If it does not arrive, check spam or use Resend.
+    </p>
+
+    <form method="post" action="{% url 'account_resend_verification_email' %}" class="mb-6 inline-block" id="resend-form">
+      {% csrf_token %}
+      <input type="hidden" name="email" value="{{ signup_email|default:'' }}">
+      <button type="submit" class="btn btn-secondary btn-sm" id="resend-confirmation-btn">
+        Resend confirmation
+      </button>
+    </form>
+
+    {% if debug or demo_email_fallback %}
+    <div class="alert alert-info mb-6 text-left">
+      Local grading inspection: <a href="{% url 'dev_outbox' %}" class="text-accent underline font-semibold">Open Developer Outbox &rarr;</a> to view the message and click the confirmation link in the browser.
     </div>
     {% endif %}
-    <a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a>
+
+    <div>
+      <a href="{% url 'home' %}" class="btn btn-ghost text-sm">Return to Homepage</a>
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 
+from apps.accounts.views import email_verification_sent_view, resend_verification_email
 from apps.core.sitemaps import sitemaps
 from apps.core.views import (
     about,
@@ -90,6 +91,8 @@ urlpatterns = [
     path("health/", health_check, name="health_check"),
 
     # Customer Authentication & Accounts
+    path("accounts/confirm-email/resend/", resend_verification_email, name="account_resend_verification_email"),
+    path("accounts/confirm-email/", email_verification_sent_view, name="account_email_verification_sent"),
     path("accounts/", include("allauth.urls")),
     path("account/", include("apps.accounts.urls")),
 

@@ -161,6 +161,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Electrocart] "
+ACCOUNT_ADAPTER = "apps.accounts.adapter.CustomAccountAdapter"
 
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "/"
@@ -224,16 +225,21 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 EMAIL_MODE = os.environ.get("EMAIL_MODE", "file").strip().lower()
 EMAIL_FILE_PATH = BASE_DIR / ".emails"
+DEMO_EMAIL_FALLBACK = os.environ.get("DEMO_EMAIL_FALLBACK", "0").strip() in ("1", "true", "True")
 
 if EMAIL_MODE == "console":
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 elif EMAIL_MODE == "smtp":
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
+    EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com").strip()
     EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
     EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() == "true"
-    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+    EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() == "true"
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "").strip()
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "").strip()
+    if DEMO_EMAIL_FALLBACK:
+        EMAIL_BACKEND = "apps.core.email_backends.FallbackSmtpFileEmailBackend"
+    else:
+        EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 else:
     # Default 'file' mode for faculty grading and offline inspection
     EMAIL_BACKEND = "apps.core.email_backends.InspectableFileEmailBackend"

@@ -249,3 +249,68 @@ def account_profile(request: HttpRequest) -> HttpResponse:
         ],
     }
     return render(request, "account/profile.html", context)
+
+
+def mask_email(email: str) -> str:
+    """Masks local part of email: john.doe@example.com -> jo***e@example.com."""
+    if not email or "@" not in email:
+        return email or ""
+    parts = email.split("@", 1)
+    user_part = parts[0]
+    domain_part = parts[1]
+    if len(user_part) <= 2:
+        masked_user = user_part[0] + "***"
+    else:
+        masked_user = user_part[:2] + "***" + user_part[-1]
+    return f"{masked_user}@{domain_part}"
+
+
+@require_GET
+def email_verification_sent_view(request: HttpRequest) -> HttpResponse:
+    """
+    Renders verification sent notice displaying the masked recipient email
+    and providing a functional Resend confirmation button.
+    """
+    from django.conf import settings
+    signup_email = request.session.get("account_verification_email", "")
+    masked = mask_email(signup_email) if signup_email else ""
+    context = {
+        "signup_email": signup_email,
+        "masked_email": masked,
+        "demo_email_fallback": getattr(settings, "DEMO_EMAIL_FALLBACK", False),
+    }
+    return render(request, "account/verification_sent.html", context)
+
+
+@require_POST
+def resend_verification_email(request: HttpRequest) -> HttpResponse:
+    """
+    Resends account verification email for an unverified user.
+    """
+    email = request.POST.get("email", "").strip() or request.session.get("account_verification_email", "").strip()
+    if email:
+        from allauth.account.models import EmailAddress
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            email_addr = EmailAddress.objects.filter(user=user, email__iexact=email).first()
+            if not email_addr:
+                email_addr = EmailAddress.objects.create(
+                    user=user,
+                    email=user.email,
+                    primary=True,
+                    verified=False,
+                )
+            if not email_addr.verified:
+                email_addr.send_confirmation(request, signup=False)
+                masked = mask_email(email)
+                messages.success(request, f"A new confirmation link has been sent to {masked}.")
+            else:
+                messages.info(request, "This email address is already verified.")
+        else:
+            messages.info(request, "If an unverified account exists with that email, a confirmation link has been sent.")
+    else:
+        messages.error(request, "Could not determine email address to resend confirmation.")
+    return redirect("account_email_verification_sent")
+
