@@ -29,6 +29,9 @@
 
       <div class="card-stock-note">
         {% include "includes/stock_badge.html" %}
+        {% if product.option_count and product.option_count > 1 %}
+          <span class="card-options-badge font-mono text-muted text-xs">({{ product.option_count }} options)</span>
+        {% endif %}
       </div>
 
       <span class="card-arrow-glyph" aria-hidden="true">&rarr;</span>

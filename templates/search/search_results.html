@@ -11,17 +11,25 @@
 
   <header class="mb-6">
     <h1 class="display-l">
-      {% if query %}
+      {% if is_fallback %}
+        {{ fallback_label|safe }}
+      {% elif query %}
         Search Results for &ldquo;{{ query }}&rdquo;
       {% else %}
         Catalog Search
       {% endif %}
     </h1>
-    <p class="caption mt-1">{{ total_count }} product{{ total_count|pluralize }} found</p>
+    <p class="caption mt-1">
+      {% if is_fallback %}
+        No exact matches found. Showing {{ total_count }} closest product{{ total_count|pluralize }}.
+      {% else %}
+        {{ total_count }} product{{ total_count|pluralize }} found
+      {% endif %}
+    </p>
 
     {% if did_you_mean %}
-      <div class="alert alert-info mt-3">
-        Did you mean: <a href="{% url 'search_results' %}?q={{ did_you_mean|urlencode }}"><strong>{{ did_you_mean }}</strong></a>?
+      <div class="alert alert-info mt-3" id="did-you-mean-notice">
+        Did you mean: <a href="{% url 'search_results' %}?q={{ did_you_mean|urlencode }}" class="underline font-semibold"><strong>{{ did_you_mean }}</strong></a>?
       </div>
     {% endif %}
   </header>

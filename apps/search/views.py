@@ -61,7 +61,7 @@ def search_view(request: HttpRequest) -> HttpResponse:
         sort_by=sort_by,
     )
 
-    products_qs = search_result["products"].select_related("inventory").prefetch_related("media")
+    products_qs = search_result["products"]
 
     paginator = Paginator(products_qs, 24)
     page_number = request.GET.get("page", 1)
@@ -78,6 +78,8 @@ def search_view(request: HttpRequest) -> HttpResponse:
         "total_count": search_result["total_count"],
         "facets": search_result["facets"],
         "did_you_mean": search_result["did_you_mean"],
+        "is_fallback": search_result.get("is_fallback", False),
+        "fallback_label": search_result.get("fallback_label", ""),
         "selected_filters": {
             "category": category_slug,
             "brand": brand,
@@ -131,15 +133,10 @@ def search_suggest(request: HttpRequest) -> JsonResponse:
             "count": b_count,
         })
 
-    # 3. Matching products (up to max 5) with thumbnail and Fraunces price
+    # 3. Matching products using ranked search (up to max 5)
     remaining_slots = min(5, max(1, 8 - len(categories) - len(brand_items)))
-    product_objs = (
-        Product.objects.filter(
-            is_available=True, selling_price__gt=0, search_text__icontains=query
-        )
-        .prefetch_related("media")
-        .order_by("-source_rating_count", "-source_rating")[:remaining_slots]
-    )
+    search_res = execute_catalog_search(query=query, collapsed=True)
+    product_objs = search_res["products"][:remaining_slots]
     products = [
         {
             "id": p.id,
@@ -149,6 +146,7 @@ def search_suggest(request: HttpRequest) -> JsonResponse:
             "parsed_brand": p.parsed_brand or "",
             "image_url": p.primary_image_url,
             "url": f"/p/{p.slug}/",
+            "option_count": getattr(p, "option_count", 1),
         }
         for p in product_objs
     ]
