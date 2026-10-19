@@ -72,7 +72,7 @@ def storefront_context(request):
     seller_gstin = getattr(settings, "SELLER_GSTIN", "").strip()
     is_bill_of_supply = not bool(seller_gstin)
     mode_str = "gst" if bool(seller_gstin) else "bill_of_supply"
-    seller_state = getattr(settings, "SELLER_STATE", "Karnataka")
+    seller_state = getattr(settings, "SELLER_STATE", "Gujarat")
     seller_legal_name = getattr(settings, "SELLER_LEGAL_NAME", "ELECTROCART RETAIL PRIVATE LIMITED")
     seller_address = getattr(settings, "SELLER_ADDRESS", "")
 

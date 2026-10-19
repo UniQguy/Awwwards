@@ -121,7 +121,7 @@ To print statutory GST Tax Invoices instead of a Bill of Supply:
 1. Open `.env`.
 2. Populate the following seller variables:
    ```env
-   SELLER_STATE=Karnataka
+   SELLER_STATE=Gujarat
    SELLER_GSTIN=29ABCDE1234F1Z5
    SELLER_LEGAL_NAME=Electrocart Retail Private Limited
    SELLER_ADDRESS=100 MG Road, Bengaluru, Karnataka 560001
