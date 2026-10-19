@@ -6,6 +6,8 @@ from django.conf import settings
 from django.db import DatabaseError, connections
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 
 def health_check(request):
@@ -243,3 +245,31 @@ def error_429(request, exception=None):
     HTTP 429 Too Many Requests rate-limit failure view.
     """
     return render(request, "429.html", status=429)
+
+
+@require_POST
+@csrf_exempt
+def assistant_chat_api(request: HttpResponse) -> JsonResponse:
+    """
+    JSON API endpoint for ElectroCart AI Concierge & Technical Assistant (Phase R10, Pillar 6).
+    Supports smart product recommendations, order tracking/cancellation,
+    pincode deliverability check, coupon discovery, and policy assistance.
+    """
+    import json
+    from apps.core.services.ai_concierge import process_concierge_message
+
+    try:
+        data = json.loads(request.body.decode("utf-8")) if request.body else {}
+    except (ValueError, UnicodeDecodeError):
+        data = request.POST.dict()
+
+    message = (data.get("message") or "").strip()
+    if not message:
+        return JsonResponse({"error": "Empty message parameter."}, status=400)
+
+    res = process_concierge_message(
+        user_message=message,
+        user=request.user if getattr(request, "user", None) and request.user.is_authenticated else None,
+        session=request.session,
+    )
+    return JsonResponse(res, status=200)

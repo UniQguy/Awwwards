@@ -57,32 +57,13 @@
           <p class="hero-marginalia">Selected by number of ratings on Amazon</p>
         {% endif %}
 
-        {% if hero_picker_products %}
+        {% if hero_flagships %}
           <div class="hero-thumb-picker" aria-label="Featured item picker">
-            <button
-              type="button"
-              class="hero-thumb-btn is-active picker-thumb thumbnail-slot"
-              data-title="{{ hero_plate_product.display_name|strip_brand:hero_plate_product.parsed_brand }}"
-              data-brand="{{ hero_plate_product.parsed_brand|default:'' }}"
-              data-price="{{ hero_plate_product.selling_price|inr }}"
-              data-mrp="{% if hero_plate_product.mrp and hero_plate_product.mrp > hero_plate_product.selling_price %}{{ hero_plate_product.mrp|inr }}{% endif %}"
-              data-savings="{% if hero_plate_product.mrp and hero_plate_product.mrp > hero_plate_product.selling_price %}Save {{ hero_plate_product.mrp|subtract:hero_plate_product.selling_price|inr }}{% endif %}"
-              data-image="{{ hero_plate_product.primary_image_url }}"
-              data-url="{% url 'product_detail' slug=hero_plate_product.slug %}"
-              data-subtitle="{{ hero_plate_product.highlight_spec_summary|default:hero_plate_product.category.name }}"
-              data-hero-title="{{ hero_plate_product.display_name }}"
-              data-hero-url="{% url 'product_detail' slug=hero_plate_product.slug %}"
-              data-hero-price="{{ hero_plate_product.selling_price|inr }}"
-              data-hero-img="{{ hero_plate_product.primary_image_url }}"
-              data-hero-category="{{ hero_plate_product.category.name }}"
-              aria-label="Current: {{ hero_plate_product.display_name }}"
-            >
-              <img src="{{ hero_plate_product.primary_image_url }}" alt="" class="hero-thumb-img" loading="eager">
-            </button>
-            {% for hp in hero_picker_products %}
+            {% for hp in hero_flagships %}
               <button
                 type="button"
-                class="hero-thumb-btn picker-thumb thumbnail-slot"
+                class="hero-thumb-btn picker-thumb thumbnail-slot{% if forloop.first %} is-active{% endif %}"
+                data-index="{{ forloop.counter0 }}"
                 data-title="{{ hp.display_name|strip_brand:hp.parsed_brand }}"
                 data-brand="{{ hp.parsed_brand|default:'' }}"
                 data-price="{{ hp.selling_price|inr }}"
@@ -98,7 +79,7 @@
                 data-hero-category="{{ hp.category.name }}"
                 aria-label="Switch hero featured item to {{ hp.display_name }}"
               >
-                <img src="{{ hp.primary_image_url }}" alt="" class="hero-thumb-img" loading="lazy">
+                <img src="{{ hp.primary_image_url }}" alt="" class="hero-thumb-img" width="64" height="64" {% if forloop.first %}loading="eager"{% else %}loading="lazy"{% endif %}>
               </button>
             {% endfor %}
           </div>
@@ -113,48 +94,65 @@
       <div class="anatomy-header">
         <span class="label text-muted font-mono text-2xs uppercase">Chapter 02 / 09 &middot; Engineering Anatomy</span>
         <h2 id="anatomy-heading" class="display-m">Flagship Engineering Anatomy</h2>
-        <p class="caption text-muted">Layered internal architecture and industrial assembly for {{ hero_plate_product.display_name }}.</p>
+        <p class="caption text-muted">Layered internal architecture and industrial assembly for <span class="anatomy-product-name">{{ hero_plate_product.display_name }}</span>.</p>
+
+        {% if hero_flagships %}
+          <div class="anatomy-product-picker flex gap-2 flex-wrap mt-3 mb-4" aria-label="Flagship model selector">
+            {% for f in hero_flagships %}
+              <button
+                type="button"
+                class="anatomy-flagship-btn btn btn-sm {% if forloop.first %}btn-primary is-active{% else %}btn-secondary{% endif %}"
+                data-index="{{ forloop.counter0 }}"
+                aria-label="View engineering layers for {{ f.display_name }}"
+              >
+                {{ f.display_name|slice:":30" }}
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
 
       <div class="anatomy-grid">
         <div class="anatomy-visual-stage">
           <span class="anatomy-layer-badge">LAYER 01 OF 04</span>
           {% if hero_plate_product.primary_image_url %}
-            <img src="{{ hero_plate_product.primary_image_url }}" alt="{{ hero_plate_product.display_name }}" class="anatomy-stage-img">
+            <img src="{{ hero_plate_product.primary_image_url }}" alt="{{ hero_plate_product.display_name }}" class="anatomy-stage-img" width="560" height="420">
           {% endif %}
         </div>
 
         <div class="anatomy-controller">
-          <button type="button" class="anatomy-layer-tab is-active" aria-selected="true">
-            <span class="anatomy-tab-num">01 / TRANSDUCER &amp; OPTICS</span>
-            <h3 class="anatomy-tab-title">Acoustic and Optical Core</h3>
-            <p class="anatomy-tab-desc">High-transmittance optical elements and acoustic transducers engineered for balanced frequency response and low total harmonic distortion.</p>
-          </button>
+          {% with layers=hero_plate_product.anatomy_layers %}
+            <button type="button" class="anatomy-layer-tab is-active" id="anatomy-tab-0" aria-selected="true" data-layer-idx="0">
+              <span class="anatomy-tab-num">{{ layers.0.num|default:"01 / TRANSDUCER & OPTICS" }}</span>
+              <h3 class="anatomy-tab-title">{{ layers.0.title|default:"Acoustic and Optical Core" }}</h3>
+              <p class="anatomy-tab-desc">{{ layers.0.desc|default:"High-transmittance optical elements and acoustic transducers engineered for balanced frequency response." }}</p>
+            </button>
 
-          <button type="button" class="anatomy-layer-tab" aria-selected="false">
-            <span class="anatomy-tab-num">02 / COMPUTE MATRIX</span>
-            <h3 class="anatomy-tab-title">Silicon and Thermal Matrix</h3>
-            <p class="anatomy-tab-desc">Vapor-chamber thermal dissipation paths paired with high-efficiency multi-core processing architecture for continuous heavy throughput.</p>
-          </button>
+            <button type="button" class="anatomy-layer-tab" id="anatomy-tab-1" aria-selected="false" data-layer-idx="1">
+              <span class="anatomy-tab-num">{{ layers.1.num|default:"02 / COMPUTE MATRIX" }}</span>
+              <h3 class="anatomy-tab-title">{{ layers.1.title|default:"Silicon and Thermal Matrix" }}</h3>
+              <p class="anatomy-tab-desc">{{ layers.1.desc|default:"Vapor-chamber thermal dissipation paths paired with high-efficiency multi-core processing architecture." }}</p>
+            </button>
 
-          <button type="button" class="anatomy-layer-tab" aria-selected="false">
-            <span class="anatomy-tab-num">03 / STRUCTURAL FRAME</span>
-            <h3 class="anatomy-tab-title">Anodized Chassis Assembly</h3>
-            <p class="anatomy-tab-desc">Milled unibody enclosure with ceramic blast surface finishing and reinforced corner structural rigidity to resist everyday flexure.</p>
-          </button>
+            <button type="button" class="anatomy-layer-tab" id="anatomy-tab-2" aria-selected="false" data-layer-idx="2">
+              <span class="anatomy-tab-num">{{ layers.2.num|default:"03 / STRUCTURAL FRAME" }}</span>
+              <h3 class="anatomy-tab-title">{{ layers.2.title|default:"Anodized Chassis Assembly" }}</h3>
+              <p class="anatomy-tab-desc">{{ layers.2.desc|default:"Milled unibody enclosure with ceramic blast surface finishing and reinforced corner structural rigidity." }}</p>
+            </button>
 
-          <button type="button" class="anatomy-layer-tab" aria-selected="false">
-            <span class="anatomy-tab-num">04 / INTEGRATED HARDWARE</span>
-            <h3 class="anatomy-tab-title">Production Spec Sheet</h3>
-            <p class="anatomy-tab-desc">Validated dimensional tolerances, dynamic display matrix, and direct order fulfillment from our Ahmedabad fulfillment center.</p>
-          </button>
+            <button type="button" class="anatomy-layer-tab" id="anatomy-tab-3" aria-selected="false" data-layer-idx="3">
+              <span class="anatomy-tab-num">{{ layers.3.num|default:"04 / INTEGRATED HARDWARE" }}</span>
+              <h3 class="anatomy-tab-title">{{ layers.3.title|default:"Production Spec Sheet" }}</h3>
+              <p class="anatomy-tab-desc">{{ layers.3.desc|default:"Validated dimensional tolerances, dynamic display matrix, and direct order fulfillment from our Ahmedabad fulfillment center." }}</p>
+            </button>
+          {% endwith %}
 
           <div class="anatomy-actions">
             <div>
               <span class="font-mono text-xs text-muted block uppercase">Current Unit Price</span>
-              <span class="display-s font-semibold">{{ hero_plate_product.selling_price|inr }}</span>
+              <span class="display-s font-semibold anatomy-price-val">{{ hero_plate_product.selling_price|inr }}</span>
             </div>
-            <form action="{% url 'cart_add' product_id=hero_plate_product.id %}" method="post">
+            <form id="anatomy-add-form" action="{% url 'cart_add' product_id=hero_plate_product.id %}" method="post">
               {% csrf_token %}
               <input type="hidden" name="quantity" value="1">
               <button type="submit" class="btn btn-primary">Add Flagship to Bag &rarr;</button>
@@ -163,6 +161,10 @@
         </div>
       </div>
     </section>
+
+    {% if hero_flagships_json %}
+      <script id="hero-flagships-data" type="application/json">{{ hero_flagships_json|safe }}</script>
+    {% endif %}
   {% endif %}
 
   <!-- CHAPTER 03: THE MONOGRAPH VAULT (LIVE DEALS & PROMO CODES) -->
@@ -206,7 +208,7 @@
             <span class="deal-badge">-{{ vd.discount_pct }}% OFF</span>
             <div class="deal-thumb-frame">
               {% if vd.product.primary_image_url %}
-                <img src="{{ vd.product.primary_image_url }}" alt="{{ vd.product.display_name }}" class="deal-thumb-img" loading="lazy">
+                <img src="{{ vd.product.primary_image_url }}" alt="{{ vd.product.display_name }}" class="deal-thumb-img" width="160" height="160" loading="lazy">
               {% endif %}
             </div>
             <span class="caption text-accent font-mono text-2xs uppercase">{{ vd.product.parsed_brand }}</span>
@@ -237,7 +239,7 @@
         <div class="duel-head-row">
           <div class="duel-contender duel-contender-a">
             {% if duel_a.primary_image_url %}
-              <img src="{{ duel_a.primary_image_url }}" alt="{{ duel_a.display_name }}" class="duel-contender-thumb">
+              <img src="{{ duel_a.primary_image_url }}" alt="{{ duel_a.display_name }}" class="duel-contender-thumb" width="96" height="96">
             {% endif %}
             <div>
               <span class="badge badge-accent mb-1 inline-block">Flagship Tier</span>
@@ -250,7 +252,7 @@
 
           <div class="duel-contender duel-contender-b">
             {% if duel_b.primary_image_url %}
-              <img src="{{ duel_b.primary_image_url }}" alt="{{ duel_b.display_name }}" class="duel-contender-thumb">
+              <img src="{{ duel_b.primary_image_url }}" alt="{{ duel_b.display_name }}" class="duel-contender-thumb" width="96" height="96">
             {% endif %}
             <div>
               <span class="badge mb-1 inline-block">Reference Tier</span>
@@ -306,7 +308,7 @@
             <span class="plate-badge-num">PLATE 0{{ forloop.counter }} / 06 &middot; {{ prod.category.name }}</span>
             <div class="plate-img-slot">
               {% if prod.primary_image_url %}
-                <img src="{{ prod.primary_image_url }}" alt="{{ prod.display_name }}" loading="lazy">
+                <img src="{{ prod.primary_image_url }}" alt="{{ prod.display_name }}" class="plate-img" width="220" height="220" loading="lazy">
               {% endif %}
             </div>
             <span class="caption text-accent font-mono text-2xs uppercase">{{ prod.parsed_brand }}</span>
@@ -358,14 +360,14 @@
           {% endif %}
 
           {% if cr.cutout_url %}
-            <img src="{{ cr.cutout_url }}" alt="" class="bento-thumb-bg" loading="lazy">
+            <img src="{{ cr.cutout_url }}" alt="" class="bento-thumb-bg" width="180" height="180" loading="lazy">
           {% endif %}
         </a>
       {% endfor %}
     </div>
 
     {% if chapters %}
-      <div id="chapters" style="margin-top: 5rem; padding-top: 4rem; border-top: 1px solid var(--border-subtle); clear: both; overflow: hidden;">
+      <div id="chapters" class="department-spotlight-wrapper">
         <div class="flex justify-between items-baseline mb-6">
           <div>
             <span class="label text-muted font-mono text-2xs uppercase">Curated Portfolios &middot; Editorial Selection</span>
@@ -402,9 +404,9 @@
                       {% endif %}
                     </div>
 
-                    <div class="spotlight-card-media flex items-center justify-center p-4 bg-plate-surface rounded mb-3" style="min-height: 160px; max-height: 180px;">
+                    <div class="spotlight-card-media flex items-center justify-center p-4 bg-plate-surface rounded mb-3">
                       {% if pick.primary_image_url %}
-                        <img src="{{ pick.primary_image_url }}" alt="{{ pick.display_name }}" class="object-contain max-h-36 transition-transform group-hover:scale-105" loading="lazy" style="max-height: 130px; width: auto; object-fit: contain;">
+                        <img src="{{ pick.primary_image_url }}" alt="{{ pick.display_name }}" class="spotlight-pick-img object-contain transition-transform group-hover:scale-105" width="140" height="140" loading="lazy">
                       {% else %}
                         {% include "includes/product_image.html" with product=pick %}
                       {% endif %}
@@ -474,9 +476,9 @@
                   data-slot="{{ slot.num }}"
                   aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
                 >
-                  <div class="bundle-card-img-wrap flex items-center justify-center p-1 bg-plate-surface rounded" style="width: 52px; height: 52px; flex-shrink: 0;">
+                  <div class="bundle-card-img-wrap flex items-center justify-center p-1 bg-plate-surface rounded">
                     {% if item.primary_image_url %}
-                      <img src="{{ item.primary_image_url }}" alt="{{ item.display_name }}" class="object-contain max-h-12 max-w-12" loading="lazy">
+                      <img src="{{ item.primary_image_url }}" alt="{{ item.display_name }}" class="object-contain max-h-12 max-w-12" width="48" height="48" loading="lazy">
                     {% else %}
                       {% include "includes/product_image.html" with product=item %}
                     {% endif %}
@@ -512,7 +514,7 @@
             <span class="caption text-muted font-mono uppercase block text-2xs">Configured Items</span>
             <span class="setup-summary-count body-m font-bold font-mono text-ink">6 Components</span>
           </div>
-          <div class="hairline-right pr-6" style="border-right: 1px solid var(--border-subtle);">
+          <div class="hairline-right pr-6">
             <span class="caption text-muted font-mono uppercase block text-2xs">Live Setup Total</span>
             <span class="bundle-summary-price display-s font-bold text-accent">₹0</span>
           </div>
@@ -552,8 +554,7 @@
             id="home-pincode-input"
             value="{{ remembered_pincode }}"
             maxlength="6"
-            class="form-input form-input-sm font-mono pincode-live-input"
-            style="width: 110px;"
+            class="form-input form-input-sm font-mono pincode-live-input form-input-pincode"
             aria-label="Enter 6-digit delivery pincode"
             placeholder="380001"
           >
@@ -613,4 +614,5 @@
 </div>
 
 {{ cutout_cycle_data|json_script:"hero-cutouts-data" }}
+{{ hero_flagships_data|json_script:"hero-flagships-data" }}
 {% endblock %}

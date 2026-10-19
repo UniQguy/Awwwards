@@ -16,7 +16,7 @@ Features:
 from decimal import Decimal
 import difflib
 import re
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from django.db.models import Count, Q, QuerySet
 
@@ -24,6 +24,78 @@ from apps.catalog.models import Category, Product
 from apps.catalog.services.brands import get_known_brands
 from apps.catalog.services.families import family_key
 from apps.catalog.services.price_distribution import calculate_price_distribution
+from apps.search.services.vector_search import vector_rank_products
+
+
+def extract_natural_price_bounds(query: str) -> Tuple[str, Optional[Decimal], Optional[Decimal]]:
+    """
+    Detects natural language price constraints in queries:
+    - "under 20000", "below 15k", "less than ₹25,000"
+    - "between 10k and 25k", "between 10000 to 25000"
+    - "above 50000", "over 30k", "more than 40000"
+    - "around 50000", "approx 20k"
+    Returns (cleaned_query, min_price, max_price).
+    """
+    if not query:
+        return query, None, None
+
+    cleaned = query
+    min_p, max_p = None, None
+
+    def _parse_num(val_str: str, is_k: bool) -> Decimal:
+        val = float(val_str.replace(",", ""))
+        if is_k:
+            val *= 1000
+        return Decimal(str(int(val)))
+
+    # 1. Between X and Y
+    m = re.search(
+        r"\bbetween\s+(?:₹|rs\.?|inr)?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k)?\s*(?:and|to|-)\s*(?:₹|rs\.?|inr)?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k)?\b",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        min_p = _parse_num(m.group(1), bool(m.group(2)))
+        max_p = _parse_num(m.group(3), bool(m.group(4)))
+        cleaned = (cleaned[: m.start()] + " " + cleaned[m.end() :]).strip()
+        return cleaned, min_p, max_p
+
+    # 2. Under / Below / Less than X
+    m = re.search(
+        r"\b(?:under|below|less\s+than)\s+(?:₹|rs\.?|inr)?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k)?\b",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        max_p = _parse_num(m.group(1), bool(m.group(2)))
+        cleaned = (cleaned[: m.start()] + " " + cleaned[m.end() :]).strip()
+        return cleaned, min_p, max_p
+
+    # 3. Above / Over / More than X
+    m = re.search(
+        r"\b(?:above|over|more\s+than)\s+(?:₹|rs\.?|inr)?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k)?\b",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        min_p = _parse_num(m.group(1), bool(m.group(2)))
+        cleaned = (cleaned[: m.start()] + " " + cleaned[m.end() :]).strip()
+        return cleaned, min_p, max_p
+
+    # 4. Around / Approx X
+    m = re.search(
+        r"\b(?:around|approx|approximately)\s+(?:₹|rs\.?|inr)?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k)?\b",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        target = _parse_num(m.group(1), bool(m.group(2)))
+        min_p = Decimal(str(int(target * Decimal("0.8"))))
+        max_p = Decimal(str(int(target * Decimal("1.2"))))
+        cleaned = (cleaned[: m.start()] + " " + cleaned[m.end() :]).strip()
+        return cleaned, min_p, max_p
+
+    return cleaned, min_p, max_p
 
 
 SYNONYM_GROUPS = [
@@ -78,6 +150,7 @@ def calculate_match_score(
     product: Product,
     query_clean: str,
     tokens: List[str],
+    vector_score: float = 0.0,
 ) -> int:
     """
     Ranks product candidate against clean query and tokens:
@@ -149,10 +222,25 @@ def calculate_match_score(
                         fuzzy_score = int(max(title_ratio, avg_token_ratio) * 100)
                         base_score = 200 + fuzzy_score
 
+    # If a specific phone brand is queried, disqualify non-matching phone brand products
+    queried_phone_brands = [b for b in PHONE_BRANDS if b in query_clean or any(t == b for t in tokens)]
+    if queried_phone_brands:
+        brand_matched = (
+            any(b in p_brand for b in queried_phone_brands)
+            or (any(b in ("apple", "iphone") for b in queried_phone_brands) and ("apple" in p_brand or "iphone" in p_title))
+        )
+        if not brand_matched:
+            return 0
+
     if base_score <= 0:
-        return 0
+        if vector_score >= 0.55:
+            base_score = int(vector_score * 350)
+        else:
+            return 0
 
     score = base_score
+    if vector_score > 0.0 and base_score >= 400:
+        score += int(vector_score * 200)
 
     # Only apply domain boosts/penalties to direct matches (base_score >= 400)
     # This ensures fuzzy typo queries (e.g. "aplle") stay in the fuzzy score range (< 400)
@@ -178,22 +266,14 @@ def calculate_match_score(
         # Phase R9: Phone query boost & phone brand prioritization
         query_has_phone = (
             any(w in query_clean for w in ("phone", "smartphone", "mobile"))
-            or any(b in query_clean for b in PHONE_BRANDS)
+            or bool(queried_phone_brands)
         )
         if query_has_phone:
             if cat_slug == "smartphones" and not is_accessory_product:
                 score += 800
 
-            queried_phone_brands = [b for b in PHONE_BRANDS if b in query_clean or any(t == b for t in tokens)]
             if queried_phone_brands:
-                brand_matched = (
-                    any(b in p_brand for b in queried_phone_brands)
-                    or (any(b in ("apple", "iphone") for b in queried_phone_brands) and ("apple" in p_brand or "iphone" in p_title))
-                )
-                if brand_matched:
-                    score += 500
-                else:
-                    score -= 600
+                score += 500
 
         # Phase R9: 2. Exact Model Match Priority (e.g., "iphone 14" vs "iphone 14 pro max")
         query_modifiers = {m for m in TIER_MODIFIERS if m in tokens or m in query_clean}
@@ -234,6 +314,16 @@ def execute_catalog_search(
         .prefetch_related("media", "specifications")
     )
 
+    clean_query = query.strip()
+    # Phase R10, Pillar 5: Natural language price intent parser
+    parsed_query, natural_min, natural_max = extract_natural_price_bounds(clean_query)
+    if natural_min is not None and min_price is None:
+        min_price = natural_min
+    if natural_max is not None and max_price is None:
+        max_price = natural_max
+    if natural_min is not None or natural_max is not None:
+        clean_query = parsed_query
+
     # Apply faceted filters
     if category_slug:
         base_qs = base_qs.filter(category__slug=category_slug)
@@ -246,7 +336,6 @@ def execute_catalog_search(
     if min_rating is not None:
         base_qs = base_qs.filter(source_rating__gte=min_rating)
 
-    clean_query = query.strip()
     is_fallback = False
     fallback_label = ""
     did_you_mean = None
@@ -277,8 +366,8 @@ def execute_catalog_search(
         candidate_qs = base_qs.filter(token_q)
         candidates = list(candidate_qs[:300])
 
-        # If strict token match yields fewer than 5 items, pull broad candidates for fuzzy analysis
-        if len(candidates) < 5:
+        # If strict token match yields fewer than 10 items, pull broad candidates and vector semantic candidates
+        if len(candidates) < 10:
             broad_q = Q()
             for t in tokens:
                 broad_q |= Q(search_text__icontains=t[:3]) if len(t) >= 3 else Q(search_text__icontains=t)
@@ -289,14 +378,29 @@ def execute_catalog_search(
                     candidates.append(p)
                     seen_ids.add(p.id)
 
+            # Vector semantic candidates augmentation
+            vec_candidates_dict = vector_rank_products(clean_query, top_k=60)
+            if vec_candidates_dict:
+                vec_pids = list(vec_candidates_dict.keys())
+                extra_vec_prods = list(base_qs.filter(id__in=vec_pids))
+                for p in extra_vec_prods:
+                    if p.id not in seen_ids:
+                        candidates.append(p)
+                        seen_ids.add(p.id)
+
         # If candidates pool is still empty, pull top popular products as fallback pool
         if not candidates:
             candidates = list(base_qs.order_by("-source_rating_count")[:100])
 
+        # Compute vector scores for all candidates
+        candidate_pids = [p.id for p in candidates]
+        vector_scores = vector_rank_products(clean_query, candidate_ids=candidate_pids, top_k=len(candidates))
+
         # Score and rank candidates
         scored_candidates = []
         for p in candidates:
-            score = calculate_match_score(p, query_lower, tokens)
+            vec_score = vector_scores.get(p.id, 0.0)
+            score = calculate_match_score(p, query_lower, tokens, vector_score=vec_score)
             rating_count = p.source_rating_count or 0
             price = p.selling_price or Decimal("999999.00")
             scored_candidates.append((score, rating_count, price, p))

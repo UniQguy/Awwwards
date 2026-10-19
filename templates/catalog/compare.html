@@ -19,9 +19,21 @@
 
     {% if compared_products %}
       <div class="flex gap-2 items-center flex-wrap">
-        <button type="button" id="toggle-diffs-btn" class="btn btn-secondary btn-sm" onclick="toggleOnlyDifferences()">
+        <button type="button" id="toggle-diffs-btn" class="btn btn-secondary btn-sm">
           Show Only Differences
         </button>
+        {% if compared_products|length < 4 and comparable_rivals %}
+          <form id="compare-add-picker-form" action="{% url 'compare_add_form' %}" method="post" class="flex items-center gap-2 m-0">
+            {% csrf_token %}
+            <select id="compare-product-select" name="product_id" class="input input-sm" aria-label="Select product to compare">
+              <option value="">+ Add Product to Compare...</option>
+              {% for r in comparable_rivals %}
+                <option value="{{ r.id }}">{{ r.display_name }} ({{ r.selling_price|inr }})</option>
+              {% endfor %}
+            </select>
+            <button type="submit" id="compare-add-picker-submit" class="btn btn-secondary btn-sm" disabled>Add</button>
+          </form>
+        {% endif %}
         <form action="{% url 'compare_clear' %}" method="post" class="m-0">
           {% csrf_token %}
           <button type="submit" class="btn btn-quiet btn-sm">Clear Tray</button>
@@ -57,10 +69,10 @@
         <caption class="sr-only">Side-by-side technical hardware comparison matrix</caption>
         <thead>
           <tr>
-            <th scope="col" class="text-left p-3 border-rule bg-surface" style="width: 220px;">Specification</th>
+            <th scope="col" class="compare-spec-col text-left p-3 border-rule bg-surface">Specification</th>
             {% for prod in compared_products %}
-              <th scope="col" class="text-center p-4 border-rule bg-surface align-top" style="min-width: 240px;">
-                <div class="mb-3 mx-auto" style="max-width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;">
+              <th scope="col" class="compare-prod-col text-center p-4 border-rule bg-surface align-top">
+                <div class="compare-thumb-box mb-3 mx-auto">
                   {% include "includes/product_image.html" with product=prod %}
                 </div>
                 <div class="heading mb-2 body-sm font-semibold">
@@ -82,7 +94,7 @@
         </thead>
         <tbody>
           <!-- Brand Row -->
-          <tr class="spec-row">
+          <tr class="spec-row {% if all_same_brand %}row-identical{% endif %}">
             <th scope="row" class="text-left p-3 border-rule font-medium bg-surface">Brand</th>
             {% for prod in compared_products %}
               <td class="text-center p-3 border-rule">{{ prod.parsed_brand }}</td>
@@ -90,7 +102,7 @@
           </tr>
 
           <!-- Stock Availability Row -->
-          <tr class="spec-row">
+          <tr class="spec-row {% if all_same_stock %}row-identical{% endif %}">
             <th scope="row" class="text-left p-3 border-rule font-medium bg-surface">Stock Status</th>
             {% for prod in compared_products %}
               <td class="text-center p-3 border-rule">{% include "includes/stock_badge.html" with product=prod %}</td>
@@ -136,7 +148,7 @@
           {% for r in comparable_rivals %}
             <div class="p-3 bg-surface border-rule rounded flex items-center justify-between gap-3">
               <div class="flex items-center gap-3 min-w-0">
-                <div style="width: 48px; height: 48px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                <div class="compare-rival-thumb">
                   {% include "includes/product_image.html" with product=r %}
                 </div>
                 <div class="min-w-0">
@@ -153,33 +165,6 @@
         </div>
       </section>
     {% endif %}
-
-    <style>
-      .compare-table.show-only-diffs tr.row-identical {
-        display: none;
-      }
-      .bg-surface-tint {
-        background-color: rgba(14, 165, 233, 0.08);
-      }
-    </style>
-
-    <script>
-      function toggleOnlyDifferences() {
-        const table = document.getElementById('compare-matrix-table');
-        const btn = document.getElementById('toggle-diffs-btn');
-        if (!table || !btn) return;
-        table.classList.toggle('show-only-diffs');
-        if (table.classList.contains('show-only-diffs')) {
-          btn.textContent = 'Show All Specs';
-          btn.classList.add('btn-primary');
-          btn.classList.remove('btn-secondary');
-        } else {
-          btn.textContent = 'Show Only Differences';
-          btn.classList.add('btn-secondary');
-          btn.classList.remove('btn-primary');
-        }
-      }
-    </script>
   {% else %}
     <div class="alert alert-info p-6 bg-surface border-rule max-w-lg mx-auto text-center">
       <h2 class="heading mb-2">No hardware in comparison tray</h2>

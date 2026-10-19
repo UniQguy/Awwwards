@@ -31,6 +31,40 @@
     color: var(--color-danger);
   }
 
+  .badge-coupon-deal {
+    color: var(--world-accent);
+    background-color: var(--world-surface);
+    border-color: var(--world-accent);
+    font-size: var(--step--2);
+    letter-spacing: 0.02em;
+    text-transform: none;
+    font-weight: 600;
+  }
+
+  .badge-accent {
+    color: var(--world-accent);
+    border-color: var(--world-accent);
+    background-color: var(--world-surface);
+  }
+
+  .badge-secondary {
+    color: var(--world-text);
+    border-color: var(--world-rule);
+    background-color: var(--world-surface);
+  }
+
+  .badge-success {
+    color: var(--color-success);
+    border-color: var(--color-success);
+    background-color: var(--color-success-tint);
+  }
+
+  .badge-danger {
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+    background-color: var(--color-danger-tint);
+  }
+
   /* Filter Chip (with remove button) */
   .chip {
     display: inline-flex;

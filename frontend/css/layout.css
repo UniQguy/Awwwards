@@ -1,6 +1,14 @@
 @layer layout {
   html {
-    scroll-padding-top: var(--header-height, 72px);
+    scroll-padding-top: var(--header-height, 76px);
+  }
+
+  #main-content {
+    padding-top: calc(var(--header-height, 76px) + 2.5rem);
+  }
+
+  body[data-layer="editorial"] #main-content {
+    padding-top: 0;
   }
 
   .container {

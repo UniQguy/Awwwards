@@ -684,3 +684,33 @@
   justify-content: center;
   gap: var(--space-4);
 }
+
+.department-spotlight-wrapper {
+  margin-top: var(--space-10);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--border-subtle);
+  clear: both;
+  overflow: hidden;
+}
+
+.spotlight-card-media {
+  min-height: 160px;
+  max-height: 180px;
+}
+
+.spotlight-pick-img {
+  max-height: 130px;
+  width: auto;
+  object-fit: contain;
+}
+
+.bundle-card-img-wrap {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.form-input-pincode {
+  width: 110px;
+}
+

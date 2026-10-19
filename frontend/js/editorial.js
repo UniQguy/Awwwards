@@ -152,32 +152,68 @@ export function initChapterEntrances() {
 export function initHeroThumbnailPicker() {
   const pickerBtns = document.querySelectorAll(".hero-thumb-btn");
   const plateSlot = document.getElementById("hero-plate-slot");
-  if (!pickerBtns.length || !plateSlot) return;
+  const anatomyPillBtns = document.querySelectorAll(".anatomy-flagship-btn");
+  const anatomyChapter = document.getElementById("flagship-anatomy-chapter");
 
-  const mainImg = plateSlot.querySelector(".plate-mat-img") || plateSlot.querySelector(".plate-img");
-  const mainLink = plateSlot.querySelector("a.stretched-link") || plateSlot.querySelector("a[href*='/p/']");
+  let flagshipsData = [];
+  const scriptDataEl = document.getElementById("hero-flagships-data");
+  if (scriptDataEl) {
+    try {
+      flagshipsData = JSON.parse(scriptDataEl.textContent);
+    } catch (_) {}
+  }
+
+  const mainImg = plateSlot ? (plateSlot.querySelector(".plate-mat-img") || plateSlot.querySelector(".plate-img")) : null;
+  const mainLink = plateSlot ? (plateSlot.querySelector("a.stretched-link") || plateSlot.querySelector("a[href*='/p/']")) : null;
   const exploreBtn = document.getElementById("hero-explore-btn");
-  const titleEl = plateSlot.querySelector(".plate-title") || plateSlot.querySelector(".card-title");
-  const brandEl = plateSlot.querySelector(".plate-meta-line span");
-  const priceEl = plateSlot.querySelector(".price-current") || plateSlot.querySelector(".plate-price");
-  const mrpWrapper = plateSlot.querySelector(".price-mrp-wrapper");
-  const mrpEl = plateSlot.querySelector(".price-mrp-struck");
-  const savingsEl = plateSlot.querySelector(".badge-savings");
-  const captionEl = plateSlot.querySelector(".plate-caption");
+  const titleEl = plateSlot ? (plateSlot.querySelector(".plate-title") || plateSlot.querySelector(".card-title")) : null;
+  const brandEl = plateSlot ? plateSlot.querySelector(".plate-meta-line span") : null;
+  const priceEl = plateSlot ? (plateSlot.querySelector(".price-current") || plateSlot.querySelector(".plate-price")) : null;
+  const mrpWrapper = plateSlot ? plateSlot.querySelector(".price-mrp-wrapper") : null;
+  const mrpEl = plateSlot ? plateSlot.querySelector(".price-mrp-struck") : null;
+  const savingsEl = plateSlot ? plateSlot.querySelector(".badge-savings") : null;
+  const captionEl = plateSlot ? plateSlot.querySelector(".plate-caption") : null;
 
-  function switchHero(btn) {
-    pickerBtns.forEach((b) => b.classList.remove("is-active"));
-    btn.classList.add("is-active");
+  // Anatomy chapter elements
+  const anatomyNameEl = anatomyChapter ? anatomyChapter.querySelector(".anatomy-product-name") : null;
+  const anatomyImgEl = anatomyChapter ? anatomyChapter.querySelector(".anatomy-stage-img") : null;
+  const anatomyPriceEl = anatomyChapter ? anatomyChapter.querySelector(".anatomy-price-val") : null;
+  const anatomyFormEl = anatomyChapter ? document.getElementById("anatomy-add-form") : null;
+  const anatomyTabs = anatomyChapter ? anatomyChapter.querySelectorAll(".anatomy-layer-tab") : [];
 
-    const title = btn.dataset.title || btn.dataset.heroTitle;
-    const brand = btn.dataset.brand;
-    const url = btn.dataset.url || btn.dataset.heroUrl;
-    const price = btn.dataset.price || btn.dataset.heroPrice;
-    const mrp = btn.dataset.mrp;
-    const savings = btn.dataset.savings;
-    const img = btn.dataset.image || btn.dataset.heroImg;
-    const subtitle = btn.dataset.subtitle || btn.dataset.heroCategory;
+  function selectFlagship(idx) {
+    idx = parseInt(idx, 10);
+    if (isNaN(idx) || idx < 0) idx = 0;
 
+    // Update active states on both Chapter 01 thumbnails and Chapter 02 pills
+    pickerBtns.forEach((b, i) => {
+      if (i === idx) b.classList.add("is-active");
+      else b.classList.remove("is-active");
+    });
+
+    anatomyPillBtns.forEach((b, i) => {
+      if (i === idx) {
+        b.classList.add("btn-primary", "is-active");
+        b.classList.remove("btn-secondary");
+      } else {
+        b.classList.remove("btn-primary", "is-active");
+        b.classList.add("btn-secondary");
+      }
+    });
+
+    const data = flagshipsData[idx];
+    const btn = pickerBtns[idx];
+
+    const title = data ? data.title : (btn ? (btn.dataset.title || btn.dataset.heroTitle) : "");
+    const brand = data ? data.brand : (btn ? btn.dataset.brand : "");
+    const url = data ? data.url : (btn ? (btn.dataset.url || btn.dataset.heroUrl) : "");
+    const price = data ? data.selling_price : (btn ? (btn.dataset.price || btn.dataset.heroPrice) : "");
+    const mrp = data ? data.mrp : (btn ? btn.dataset.mrp : "");
+    const savings = data ? data.savings : (btn ? btn.dataset.savings : "");
+    const img = data ? data.image : (btn ? (btn.dataset.image || btn.dataset.heroImg) : "");
+    const subtitle = data ? (data.category_name || "") : (btn ? (btn.dataset.subtitle || btn.dataset.heroCategory) : "");
+
+    // 1. Update Chapter 01 Hero Card
     if (mainImg && img) {
       mainImg.style.transition = "opacity 140ms ease-out, transform 140ms ease-out";
       mainImg.style.opacity = "0.2";
@@ -217,14 +253,64 @@ export function initHeroThumbnailPicker() {
     if (captionEl && subtitle) {
       captionEl.textContent = subtitle;
     }
+
+    // 2. Update Chapter 02 Flagship Engineering Anatomy
+    if (anatomyNameEl && title) {
+      anatomyNameEl.textContent = title;
+    }
+
+    if (anatomyImgEl && img) {
+      anatomyImgEl.style.transition = "opacity 140ms ease-out, transform 140ms ease-out";
+      anatomyImgEl.style.opacity = "0.2";
+      setTimeout(() => {
+        anatomyImgEl.src = img;
+        anatomyImgEl.alt = title || "";
+        anatomyImgEl.style.opacity = "1";
+      }, 140);
+    }
+
+    if (anatomyPriceEl && price) {
+      anatomyPriceEl.textContent = price;
+    }
+
+    if (anatomyFormEl && data && data.add_to_cart_url) {
+      anatomyFormEl.action = data.add_to_cart_url;
+    }
+
+    // Update 4 anatomy layers if present in data
+    if (data && data.layers && data.layers.length) {
+      anatomyTabs.forEach((tab, tIdx) => {
+        const layer = data.layers[tIdx];
+        if (layer) {
+          const numEl = tab.querySelector(".anatomy-tab-num");
+          const titleEl2 = tab.querySelector(".anatomy-tab-title");
+          const descEl = tab.querySelector(".anatomy-tab-desc");
+          if (numEl && layer.num) numEl.textContent = layer.num;
+          if (titleEl2 && layer.title) titleEl2.textContent = layer.title;
+          if (descEl && layer.desc) descEl.textContent = layer.desc;
+        }
+      });
+    }
   }
 
-  pickerBtns.forEach((btn) => {
-    btn.addEventListener("click", () => switchHero(btn));
+  // Bind Chapter 01 thumbnails
+  pickerBtns.forEach((btn, idx) => {
+    btn.addEventListener("click", () => selectFlagship(idx));
     btn.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        switchHero(btn);
+        selectFlagship(idx);
+      }
+    });
+  });
+
+  // Bind Chapter 02 anatomy pills
+  anatomyPillBtns.forEach((btn, idx) => {
+    btn.addEventListener("click", () => selectFlagship(idx));
+    btn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        selectFlagship(idx);
       }
     });
   });

@@ -14,6 +14,7 @@ urlpatterns = [
     path("p/<slug:slug>/", views.product_detail, name="product_detail"),
     path("brands/", views.brand_list, name="brand_list"),
     path("compare/", views.compare_tray, name="compare_tray"),
+    path("compare/add/", views.compare_add, name="compare_add_form"),
     path("compare/add/<int:product_id>/", views.compare_add, name="compare_add"),
     path("compare/remove/<int:product_id>/", views.compare_remove, name="compare_remove"),
     path("compare/clear/", views.compare_clear, name="compare_clear"),

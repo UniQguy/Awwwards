@@ -11,6 +11,7 @@ from apps.accounts.views import email_verification_sent_view, resend_verificatio
 from apps.core.sitemaps import sitemaps
 from apps.core.views import (
     about,
+    assistant_chat_api,
     contact_us,
     csrf_failure,
     error_400,
@@ -59,6 +60,7 @@ urlpatterns = [
     path("contact/", contact_us, name="contact"),
     path("support/", support_concierge, name="support_concierge"),
     path("health/", health_check, name="health_check"),
+    path("api/assistant/chat/", assistant_chat_api, name="assistant_chat_api"),
 
     # Customer Authentication & Accounts
     path("accounts/confirm-email/resend/", resend_verification_email, name="account_resend_verification_email"),

@@ -93,7 +93,7 @@
           {% endfor %}
         </div>
 
-        <div class="flex justify-between items-center mt-6">
+        <div class="flex justify-between items-center mt-6 cart-actions-row">
           <a href="{% url 'category_list' %}" class="btn btn-secondary">&larr; Continue Shopping</a>
           <form action="{% url 'cart_clear' %}" method="post">
             {% csrf_token %}
@@ -103,7 +103,7 @@
 
         <!-- Saved for Later (WP5: two-way item preservation) -->
         {% if saved_for_later_items %}
-          <div class="saved-for-later-section mt-8 pt-6 hairline-top">
+          <div class="saved-for-later-section mt-10 pt-6 hairline-top">
             <h3 class="label mb-4">Saved for Later ({{ saved_for_later_items|length }})</h3>
             <div class="cart-items-list">
               {% for s_item in saved_for_later_items %}
@@ -139,8 +139,8 @@
 
         <!-- Cross-Sell Section (WP7: 4 standard cards from first item category) -->
         {% if cross_sell_products %}
-          <div class="cart-cross-sell mt-8">
-            <div class="hairline-top pt-6 mb-4 flex justify-between items-baseline">
+          <div class="cart-cross-sell mt-12 pt-8 hairline-top">
+            <div class="pb-2 mb-4 flex justify-between items-baseline">
               <h3 class="label">More from {{ cross_sell_category.name }}</h3>
               <a href="{% url 'category_detail' slug=cross_sell_category.slug %}" class="caption text-accent">View all &rarr;</a>
             </div>
@@ -203,6 +203,10 @@
                           <span class="badge badge-in-stock text-2xs">Applied &check;</span>
                         {% elif cp.is_valid %}
                           <span class="badge badge-secondary text-2xs text-success">Saves {{ cp.savings_amount|inr }}</span>
+                        {% elif cp.category_restriction_msg %}
+                          <span class="caption text-muted text-2xs">{{ cp.category_restriction_msg }}</span>
+                        {% elif cp.is_unlocked %}
+                          <span class="caption text-muted text-2xs">{{ cp.reason_message|default:"Eligible with conditions" }}</span>
                         {% else %}
                           <span class="caption text-muted text-2xs">Add {{ cp.needed_amount|inr }} more to unlock</span>
                         {% endif %}

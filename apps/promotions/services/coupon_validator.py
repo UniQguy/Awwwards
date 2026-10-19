@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional
 
+from django.core.cache import cache
 from django.utils import timezone
 
 from apps.cart.models import Cart
@@ -178,19 +179,34 @@ def validate_coupon(
     )
 
 
+def get_cached_active_coupons():
+    """
+    Returns active coupons prefetched with applicable categories, cached for 5 minutes.
+    Avoids N+1 queries across product grids and cart validation.
+    """
+    cached = cache.get("active_coupons_cache_v1")
+    if cached is not None:
+        return cached
+    now = timezone.now()
+    coupons = list(
+        Coupon.objects.filter(
+            is_active=True,
+            valid_from__lte=now,
+            valid_until__gte=now,
+        ).prefetch_related("applicable_categories").order_by("min_order_amount")
+    )
+    cache.set("active_coupons_cache_v1", coupons, timeout=300)
+    return coupons
+
+
 def get_available_coupons_for_cart(cart: Cart, user=None, applied_code: str = "") -> list:
     """
     Returns active coupons with validation state, savings amount, and eligibility status
     for display in shopping bag and checkout review.
+    Evaluates in-memory to prevent N+1 query explosion.
     """
-    now = timezone.now()
-    active_coupons = Coupon.objects.filter(
-        is_active=True,
-        valid_from__lte=now,
-        valid_until__gte=now,
-    ).prefetch_related("applicable_categories").order_by("min_order_amount")
-
-    cart_items = list(cart.items.select_related("product").all())
+    active_coupons = get_cached_active_coupons()
+    cart_items = list(cart.items.select_related("product", "product__category").all())
     cart_subtotal = sum(
         ((item.product.selling_price or Decimal("0.00")) * item.quantity for item in cart_items),
         Decimal("0.00"),
@@ -200,20 +216,52 @@ def get_available_coupons_for_cart(cart: Cart, user=None, applied_code: str = ""
     result = []
 
     for c in active_coupons:
-        val_res = validate_coupon(c.code, cart, user=user)
-        is_applied = (c.code.upper() == clean_applied)
+        restricted_cats = list(c.applicable_categories.all())
+        restricted_cat_ids = {cat.id for cat in restricted_cats} if restricted_cats else set()
+
         meets_min = cart_subtotal >= c.min_order_amount
         needed_amount = max(Decimal("0.00"), c.min_order_amount - cart_subtotal)
+        is_applied = (c.code.upper() == clean_applied)
 
-        if val_res.is_valid:
-            savings = val_res.discount_amount
+        category_mismatch = False
+        eligible_subtotal = cart_subtotal
+        if restricted_cat_ids:
+            eligible_items = [it for it in cart_items if it.product.category_id in restricted_cat_ids]
+            if not eligible_items:
+                category_mismatch = True
+            else:
+                eligible_subtotal = sum(
+                    ((it.product.selling_price or Decimal("0.00")) * it.quantity for it in eligible_items),
+                    Decimal("0.00"),
+                )
+
+        is_valid = bool(cart_items) and meets_min and not category_mismatch
+        category_restriction_msg = ""
+        if restricted_cats and category_mismatch:
+            cat_names = ", ".join([cat.name for cat in restricted_cats])
+            category_restriction_msg = f"Requires {cat_names} item in bag"
+
+        if is_valid:
+            if c.discount_type == Coupon.TYPE_PERCENTAGE:
+                raw_d = (eligible_subtotal * c.discount_value / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                savings = min(raw_d, c.max_discount_amount) if c.max_discount_amount else raw_d
+            else:
+                savings = min(eligible_subtotal, c.discount_value)
         else:
             if c.discount_type == Coupon.TYPE_PERCENTAGE:
                 base = max(cart_subtotal, c.min_order_amount)
-                raw = (base * c.discount_value / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-                savings = min(raw, c.max_discount_amount) if c.max_discount_amount else raw
+                raw_d = (base * c.discount_value / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                savings = min(raw_d, c.max_discount_amount) if c.max_discount_amount else raw_d
             else:
                 savings = c.discount_value
+
+        reason_message = ""
+        if not cart_items:
+            reason_message = "Your cart is empty."
+        elif not meets_min:
+            reason_message = f"Minimum merchandise value of INR {c.min_order_amount} required to apply this code."
+        elif category_mismatch:
+            reason_message = "This coupon is only valid for selected merchandise categories."
 
         result.append({
             "coupon": c,
@@ -223,12 +271,58 @@ def get_available_coupons_for_cart(cart: Cart, user=None, applied_code: str = ""
             "discount_value": c.discount_value,
             "min_order_amount": c.min_order_amount,
             "max_discount_amount": c.max_discount_amount,
-            "is_valid": val_res.is_valid,
+            "is_valid": is_valid,
             "is_applied": is_applied,
             "meets_min": meets_min,
+            "is_unlocked": meets_min,
             "needed_amount": needed_amount,
             "savings_amount": savings,
-            "reason_message": val_res.message if not val_res.is_valid else "",
+            "category_restriction_msg": category_restriction_msg,
+            "reason_message": reason_message,
         })
 
     return result
+
+
+def get_best_coupon_for_product(product) -> Optional[dict]:
+    """
+    Calculates the best applicable active coupon for a single product's selling price.
+    Uses cached active coupons with zero database queries.
+    Returns dict with code, discount_amount, effective_price, or None.
+    """
+    if not product or not getattr(product, "selling_price", None) or product.selling_price <= Decimal("0.00"):
+        return None
+
+    active_coupons = get_cached_active_coupons()
+    best = None
+    best_discount = Decimal("0.00")
+
+    for c in active_coupons:
+        if c.min_order_amount > product.selling_price:
+            continue
+
+        restricted_cats = list(c.applicable_categories.all())
+        if restricted_cats:
+            if getattr(product, "category_id", None) not in {cat.id for cat in restricted_cats}:
+                continue
+
+        if c.discount_type == Coupon.TYPE_PERCENTAGE:
+            raw = (product.selling_price * c.discount_value / Decimal("100")).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+            discount = min(raw, c.max_discount_amount) if c.max_discount_amount else raw
+        else:
+            discount = min(product.selling_price, c.discount_value)
+
+        discount = max(Decimal("0.00"), discount).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if discount > best_discount:
+            best_discount = discount
+            effective = max(Decimal("0.00"), product.selling_price - discount)
+            best = {
+                "coupon": c,
+                "code": c.code,
+                "discount_amount": discount,
+                "effective_price": effective,
+            }
+
+    return best

@@ -18,6 +18,8 @@ import { initMotionTier, initMotionToggleButton } from "./modules/capability.js"
 import { initMediaSlots } from "./modules/media_slot.js";
 import { initRecentlyViewed } from "./modules/recently-viewed.js";
 import { initPincodeChecker } from "./modules/pincode_checker.js";
+import { initComparePage } from "./modules/compare.js";
+import { initAiConcierge } from "./modules/ai_concierge.js";
 
 function initPasswordToggle() {
   document.addEventListener("click", (e) => {
@@ -131,6 +133,8 @@ function bootstrap() {
   initRecentlyViewed();
   initPincodeChecker();
   initHorizontalFilters();
+  initComparePage();
+  initAiConcierge();
 }
 
 if (document.readyState === "loading") {

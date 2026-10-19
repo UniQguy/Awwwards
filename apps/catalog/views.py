@@ -4,7 +4,9 @@ Storefront views for catalog browsing, categorization, product detail, and compa
 
 from collections import defaultdict
 from decimal import Decimal
+import json
 import re
+from typing import Any, Dict, List, Optional
 import urllib.parse
 
 from django.conf import settings
@@ -14,6 +16,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, F, Max, Min, Q
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 
 from django.utils import timezone
@@ -21,16 +24,20 @@ from django.utils import timezone
 from apps.catalog.models import Category, Collection, Product, ProductReview
 from apps.orders.models import Order
 from apps.promotions.models import Coupon
+from apps.promotions.services.coupon_validator import get_best_coupon_for_product
+from apps.core.templatetags.core_tags import inr
 from apps.catalog.services.editorial import (
     brand_list as get_editorial_brands,
     category_spread,
     eligible_cutout_products,
+    get_flagship_anatomy_layers,
     hero_products,
     home_chapters,
     home_headline_cutouts,
     index_rows,
 )
 from apps.catalog.services.price_distribution import PRICE_BRACKETS
+from apps.catalog.services.spec_extractor import classify_product_subtype
 from apps.search.services.search_service import execute_catalog_search
 from apps.shipping.models import ShippingConfig
 from apps.shipping.services.estimator import estimate_delivery
@@ -49,8 +56,38 @@ def home(request: HttpRequest) -> HttpResponse:
     """
     # 1. Hero & Flagship Anatomy
     hero_res = hero_products(n=4)
-    hero_plate_product = hero_res.products[0] if hero_res.products else None
-    hero_picker_products = hero_res.products[1:4] if len(hero_res.products) > 1 else []
+    hero_flagships = hero_res.products[:4]
+    hero_plate_product = hero_flagships[0] if hero_flagships else None
+    hero_picker_products = hero_flagships[1:4] if len(hero_flagships) > 1 else []
+
+    hero_flagships_data = []
+    for p in hero_flagships:
+        layers = getattr(p, "anatomy_layers", None)
+        if not layers:
+            layers = get_flagship_anatomy_layers(p)
+            p.anatomy_layers = layers
+        best_c = get_best_coupon_for_product(p)
+        eff_p = best_c["effective_price"] if best_c else p.selling_price
+        savings_val = (p.mrp - p.selling_price) if (p.mrp and p.mrp > p.selling_price) else Decimal("0.00")
+        hero_flagships_data.append({
+            "id": p.id,
+            "slug": p.slug,
+            "title": p.display_name,
+            "short_title": p.display_name.split("(")[0].strip()[:32],
+            "brand": p.parsed_brand or "",
+            "category_name": p.category.name if p.category else "",
+            "category_slug": p.category.slug if p.category else "",
+            "selling_price": inr(p.selling_price),
+            "mrp": inr(p.mrp) if p.mrp and p.mrp > p.selling_price else "",
+            "savings": f"Save {inr(savings_val)}" if savings_val > 0 else "",
+            "effective_price": inr(eff_p),
+            "coupon_code": best_c["code"] if best_c else "",
+            "image": p.primary_image_url or "",
+            "url": reverse("product_detail", kwargs={"slug": p.slug}),
+            "add_to_cart_url": reverse("cart_add", kwargs={"product_id": p.id}),
+            "layers": layers,
+        })
+
     headline_cutouts = home_headline_cutouts()
     cutout_cable = headline_cutouts.get("cable")
     cutout_watch = headline_cutouts.get("watch")
@@ -231,6 +268,9 @@ def home(request: HttpRequest) -> HttpResponse:
         "hero": hero_res,
         "hero_plate_product": hero_plate_product,
         "hero_picker_products": hero_picker_products,
+        "hero_flagships": hero_flagships,
+        "hero_flagships_data": hero_flagships_data,
+        "hero_flagships_json": json.dumps(hero_flagships_data),
         "chapters": chapters,
         "cutout_cable": cutout_cable,
         "cutout_watch": cutout_watch,
@@ -267,10 +307,12 @@ def home(request: HttpRequest) -> HttpResponse:
 @require_GET
 def category_list(request: HttpRequest) -> HttpResponse:
     """
-    Monograph category index: one tall spread per active category alternating left and right offsets,
-    each with category name in display-l, live stats in marginalia, one pick on a plate, and an Enter link.
+    Monograph category index: compact scannable 24-category visual directory with
+    representative thumbnail cutouts, plus macro category overviews.
     """
-    from apps.catalog.services.category_nav import get_category_clusters
+    from apps.catalog.services.category_nav import get_category_clusters, get_24_granular_categories
+
+    granular_24 = get_24_granular_categories()
 
     categories = list(Category.objects.filter(is_active=True).order_by("display_order", "name"))
     category_spreads = [category_spread(cat) for cat in categories]
@@ -288,6 +330,7 @@ def category_list(request: HttpRequest) -> HttpResponse:
         request,
         "catalog/category_list.html",
         {
+            "granular_categories": granular_24,
             "category_spreads": category_spreads,
             "total_listings": total_listings,
             "total_categories": len(categories),
@@ -310,6 +353,10 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     brand = request.GET.get("brand", "").strip() or None
     sort_by = request.GET.get("sort", "popularity").strip()
     collapsed = request.GET.get("collapsed", "0") == "1"
+    sub = request.GET.get("sub", "").strip()
+
+    from apps.catalog.services.category_nav import get_sub_category_filter
+    sub_info = get_sub_category_filter(sub) if sub else None
 
     min_price_val = None
     max_price_val = None
@@ -348,6 +395,7 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
         or request.GET.get("max_price")
         or (sort_by and sort_by != "popularity")
         or collapsed
+        or sub_info
     )
     show_marquee = is_page_1 and not has_active_filters
 
@@ -364,6 +412,17 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     )
 
     products_qs = search_result["products"]
+    if sub_info:
+        sub_regex = re.compile(sub_info["regex"], re.IGNORECASE)
+        exclude_regex = re.compile(sub_info["exclude_regex"], re.IGNORECASE) if sub_info.get("exclude_regex") else None
+        filtered_products = []
+        for p in products_qs:
+            raw = getattr(p, "raw_name", "") or getattr(p, "display_name", "")
+            if sub_regex.search(raw):
+                if exclude_regex and exclude_regex.search(raw):
+                    continue
+                filtered_products.append(p)
+        products_qs = filtered_products
 
     paginator = Paginator(products_qs, 24)
     page_obj = paginator.get_page(page_param)
@@ -373,6 +432,13 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     if "page" in params:
         del params["page"]
     querystring = params.urlencode()
+
+    breadcrumbs = [
+        {"title": "Categories", "url": "/categories/"},
+        {"title": category.name, "url": f"/c/{category.slug}/"},
+    ]
+    if sub_info:
+        breadcrumbs.append({"title": sub_info["name"], "url": f"/c/{category.slug}/?sub={sub}"})
 
     context = {
         "category": category,
@@ -384,17 +450,16 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
             "min_price": min_price_val,
             "max_price": max_price_val,
             "bracket": bracket_idx,
+            "sub": sub,
         },
+        "active_sub": sub_info,
         "sort_by": sort_by,
         "collapsed": collapsed,
         "price_bars": search_result["facets"]["price_histogram"],
         "querystring": querystring,
         "show_marquee": show_marquee,
         "spread": spread,
-        "breadcrumbs": [
-            {"title": "Categories", "url": "/categories/"},
-            {"title": category.name, "url": f"/c/{category.slug}/"},
-        ],
+        "breadcrumbs": breadcrumbs,
     }
     return render(request, "catalog/category_detail.html", context)
 
@@ -518,13 +583,21 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
     media_items = list(product.media.all())
     specifications = list(product.specifications.all())
 
-    # Related items in category (prefetches media & specifications for comparison table)
-    related_products = list(
-        Product.objects.filter(category=product.category, is_available=True, selling_price__gt=0)
+    base_subtype = classify_product_subtype(product)
+    same_cat_qs = list(
+        Product.objects.filter(
+            category=product.category,
+            is_available=True,
+            selling_price__gt=0,
+        )
         .exclude(id=product.id)
         .select_related("category", "inventory")
-        .prefetch_related("media", "specifications")[:4]
+        .prefetch_related("media", "specifications")
     )
+    same_subtype_qs = [p for p in same_cat_qs if classify_product_subtype(p) == base_subtype]
+
+    # Related items in category (prefetches media & specifications for comparison table)
+    related_products = (same_subtype_qs if same_subtype_qs else same_cat_qs)[:4]
 
     # Variant options: check for same raw_name first, then same brand in category
     same_raw_name = list(
@@ -564,13 +637,31 @@ def product_detail(request: HttpRequest, slug: str) -> HttpResponse:
         .distinct()[:3]
     )
 
-    # 3 Nearest-priced items in the same category for comparison table (WP6)
+    # 3 Nearest-priced items with exact sub-type match and 0.45x-1.85x price band (Pillar 2)
     comparison_products = []
     comp_rows = []
-    if product.selling_price and related_products:
-        candidates = list(related_products)
-        candidates.sort(key=lambda p: abs(p.selling_price - product.selling_price))
-        comparison_products = candidates[:3]
+    if product.selling_price:
+        base_price = product.selling_price
+        min_p = (base_price * Decimal("0.45")).quantize(Decimal("0.01"))
+        max_p = (base_price * Decimal("1.85")).quantize(Decimal("0.01"))
+
+        # 1. Exact sub-type and price band (0.45x to 1.85x)
+        matched_candidates = [
+            p for p in same_subtype_qs
+            if min_p <= p.selling_price <= max_p
+        ]
+
+        # 2. If fewer than 3, expand to same sub-type regardless of strict band
+        if len(matched_candidates) < 3:
+            more_subtype = [
+                p for p in same_subtype_qs
+                if p not in matched_candidates
+            ]
+            more_subtype.sort(key=lambda p: abs(p.selling_price - base_price))
+            matched_candidates.extend(more_subtype)
+
+        matched_candidates.sort(key=lambda p: abs(p.selling_price - base_price))
+        comparison_products = matched_candidates[:3]
 
         prod_spec_dict = {s.key: s.value for s in specifications}
         comp_spec_dicts = [{s.key: s.value for s in cp.specifications.all()} for cp in comparison_products]
@@ -699,22 +790,33 @@ def compare_tray(request: HttpRequest) -> HttpResponse:
 
     if products:
         ref_price = products[0].selling_price or Decimal("0.00")
+        base_subtype = classify_product_subtype(products[0])
         if ref_price > 0:
-            min_r = ref_price * Decimal("0.80")
-            max_r = ref_price * Decimal("1.25")
-            comparable_rivals = list(
+            min_r = (ref_price * Decimal("0.45")).quantize(Decimal("0.01"))
+            max_r = (ref_price * Decimal("1.85")).quantize(Decimal("0.01"))
+            cat_candidates = list(
                 Product.objects.filter(
                     category=common_category,
                     is_available=True,
-                    selling_price__gte=min_r,
-                    selling_price__lte=max_r,
+                    selling_price__gt=0,
                     media__media_type="image",
                 )
                 .exclude(id__in=[p.id for p in products])
                 .select_related("category")
                 .prefetch_related("media")
-                .order_by("-source_rating_count", "-selling_price")[:6]
+                .order_by("-source_rating_count", "-selling_price")
             )
+            # Filter strictly by matching sub-type and price band 0.45x to 1.85x
+            comparable_rivals = [
+                p for p in cat_candidates
+                if classify_product_subtype(p) == base_subtype and min_r <= p.selling_price <= max_r
+            ][:8]
+            if not comparable_rivals:
+                comparable_rivals = [
+                    p for p in cat_candidates if classify_product_subtype(p) == base_subtype
+                ][:8]
+            if not comparable_rivals:
+                comparable_rivals = cat_candidates[:8]
 
     if len(products) >= 2:
         prices = [p.selling_price for p in products if p.selling_price and p.selling_price > 0]
@@ -829,6 +931,9 @@ def compare_tray(request: HttpRequest) -> HttpResponse:
                 "is_identical": is_identical,
             })
 
+    all_same_brand = len(set(p.parsed_brand for p in products)) <= 1 if products else False
+    all_same_stock = len(set(p.is_available for p in products)) <= 1 if products else False
+
     context = {
         "compared_products": products,
         "spec_rows": spec_rows,
@@ -836,20 +941,31 @@ def compare_tray(request: HttpRequest) -> HttpResponse:
         "comparable_rivals": comparable_rivals,
         "price_tier_mismatch_warning": price_tier_mismatch_warning,
         "common_category": common_category,
+        "all_same_brand": all_same_brand,
+        "all_same_stock": all_same_stock,
         "breadcrumbs": [{"title": "Product Comparison", "url": "/compare/"}],
     }
     return render(request, "catalog/compare.html", context)
 
 
 @require_POST
-def compare_add(request: HttpRequest, product_id: int) -> HttpResponseRedirect:
+def compare_add(request: HttpRequest, product_id: Optional[int] = None) -> HttpResponseRedirect:
     """
     Adds a product to the comparison tray, validating limit (3) and category homogeneity.
+    Supports both URL path parameter /compare/add/<id>/ and POST form body product_id.
     """
+    if product_id is None:
+        p_id_str = request.POST.get("product_id")
+        try:
+            product_id = int(p_id_str)
+        except (TypeError, ValueError):
+            messages.warning(request, "Please select a valid product to compare.")
+            return redirect(request.META.get("HTTP_REFERER") or "/compare/")
+
     product = get_object_or_404(Product, id=product_id)
     tray = list(request.session.get("compare_tray", []))
 
-    referrer = request.META.get("HTTP_REFERER") or "/"
+    referrer = request.META.get("HTTP_REFERER") or "/compare/"
 
     if product.id in tray:
         messages.info(request, f"{product.display_name} is already in the comparison tray.")

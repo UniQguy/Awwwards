@@ -171,6 +171,14 @@
           {% endif %}
         </div>
 
+        {% with best_deal=product|best_coupon_offer %}
+          {% if best_deal %}
+            <div class="pdp-best-coupon-offer mb-2">
+              <span class="badge badge-accent font-mono text-xs">Best Offer: Get as low as {{ best_deal.effective_price|inr }} with code {{ best_deal.code }}</span>
+            </div>
+          {% endif %}
+        {% endwith %}
+
         <p class="caption text-muted mb-3">
           Prices are inclusive of applicable GST under Indian tax regulations.
         </p>

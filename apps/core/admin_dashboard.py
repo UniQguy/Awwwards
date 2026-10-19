@@ -62,7 +62,7 @@ def get_admin_dashboard_context(range_days: int = DASHBOARD_RANGE_DAYS, request=
     )
 
     # 1. KPI Calculations in Python Decimal
-    orders_today_list = [o for o in orders_in_range if o["created_at"].date() == today]
+    orders_today_list = [o for o in orders_in_range if timezone.localtime(o["created_at"]).date() == today]
     orders_today_count = len(orders_today_list)
     revenue_today = sum(
         (Decimal(str(o["total_amount"])) for o in orders_today_list if o["status"] != Order.STATUS_CANCELLED),
@@ -93,7 +93,7 @@ def get_admin_dashboard_context(range_days: int = DASHBOARD_RANGE_DAYS, request=
     # --------------------------------------------------------------------------
     day_counts_map = defaultdict(int)
     for o in orders_in_range:
-        day_counts_map[o["created_at"].date()] += 1
+        day_counts_map[timezone.localtime(o["created_at"]).date()] += 1
 
     orders_per_day: List[Dict[str, Any]] = []
     current_d = range_start_date

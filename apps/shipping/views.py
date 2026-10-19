@@ -77,7 +77,6 @@ def shipping_check(request: HttpRequest) -> HttpResponse:
                 "message": err_msg,
                 "error": "Invalid PIN code format. Must be a 6-digit Indian postal code.",
             }, status=200)
-        messages.error(request, "Please enter a valid 6-digit PIN code.")
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
     estimate = estimate_delivery(pincode)
@@ -89,12 +88,10 @@ def shipping_check(request: HttpRequest) -> HttpResponse:
         est_min = 2 if pincode.startswith("380") else estimate.est_days_min
         est_max = 4 if pincode.startswith("380") else estimate.est_days_max
         msg = f"✓ Deliverable to {loc_str} ({pincode}) — Estimated delivery in {est_min}–{est_max} days • COD & Express Available"
-        messages.success(request, msg)
     else:
         est_min = estimate.est_days_min
         est_max = estimate.est_days_max
         msg = f"✕ Service unavailable for PIN {pincode} (Please enter a valid 6-digit Indian pincode)"
-        messages.warning(request, msg)
 
     if is_json:
         return JsonResponse({

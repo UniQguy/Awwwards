@@ -25,6 +25,15 @@ class HeroResult:
     products: List[Product]
     is_auto: bool
 
+    def __iter__(self):
+        return iter(self.products)
+
+    def __len__(self):
+        return len(self.products)
+
+    def __getitem__(self, idx):
+        return self.products[idx]
+
 
 @dataclass(frozen=True)
 class HomeChapter:
@@ -132,6 +141,129 @@ HERO_ELIGIBLE_CATEGORIES = [
 ]
 
 
+def get_flagship_anatomy_layers(product: Product) -> list[dict]:
+    """
+    Returns 4 structured engineering anatomy layers tailored to the product's category.
+    """
+    cat_slug = product.category.slug if (product and product.category) else ""
+
+    if cat_slug == "smartphones":
+        return [
+            {
+                "num": "01 / DYNAMIC MATRIX",
+                "title": "Quad-Curve Dynamic AMOLED Display",
+                "desc": "High-frequency PWM dimming panel layered with Gorilla Glass Victus 2 and ultrasonic fingerprint waveguide array for sub-millimeter biometric capture.",
+            },
+            {
+                "num": "02 / SILICON CORE",
+                "title": "4nm Heterogeneous Compute Die",
+                "desc": "Multi-core processor paired with vapor-chamber liquid heat pipe paths and copper thermal shielding for sustained high-throughput workloads.",
+            },
+            {
+                "num": "03 / STRUCTURAL FRAME",
+                "title": "Armor Aluminum Structural Chassis",
+                "desc": "Milled structural enclosure with reinforced perimeter geometry, laser-welded antenna isolators, and IP68 environmental water ingress barriers.",
+            },
+            {
+                "num": "04 / PERISCOPE ARRAY",
+                "title": "Multi-Sensor Optical Subsystem",
+                "desc": "Multi-element telephoto periscope prism paired with optical image stabilization actuators and custom computational ISP matrix.",
+            },
+        ]
+    elif cat_slug in ("earphones-headphones", "audio"):
+        return [
+            {
+                "num": "01 / TRANSDUCER & OPTICS",
+                "title": "Custom Titanium Acoustic Transducer",
+                "desc": "Precision-damped driver diaphragm with neodymium magnet assembly engineered for minimal harmonic distortion and flat frequency response.",
+            },
+            {
+                "num": "02 / DSP MATRIX",
+                "title": "Dual-Core Audio DSP Architecture",
+                "desc": "Dedicated low-latency digital signal processing unit with real-time adaptive noise cancellation filters and 32-bit audio decoding.",
+            },
+            {
+                "num": "03 / ACOUSTIC CHAMBER",
+                "title": "Vented Acoustic Enclosure & Armature",
+                "desc": "Cast alloy structural yoke with micro-perforated airflow vents designed to balance ear canal back-pressure and eliminate ear fatigue.",
+            },
+            {
+                "num": "04 / HIGH-RES CODEC",
+                "title": "Production Spec & Hi-Res Connectivity",
+                "desc": "Dual-mode wireless interface with low-loss gold-plated contacts, balanced analog bypass, and integrated high-density lithium cell.",
+            },
+        ]
+    elif cat_slug == "cameras":
+        return [
+            {
+                "num": "01 / OPTICAL CORE",
+                "title": "Precision Multi-Coated Lens Assembly",
+                "desc": "Aspherical and extra-low dispersion glass elements coated with nano-dielectric film to suppress chromatic aberration and internal flare.",
+            },
+            {
+                "num": "02 / SILICON SENSOR",
+                "title": "Dual-Pixel CMOS Imaging Array",
+                "desc": "High-sensitivity sensor matrix paired with phase-detection pixels and dedicated image processor for instantaneous autofocus tracking.",
+            },
+            {
+                "num": "03 / SHUTTER & IBIS",
+                "title": "5-Axis Magneto-Mechanical Stabilizer",
+                "desc": "Suspended floating voice-coil motor platform providing compensation for yaw, pitch, and roll angular displacement during exposure.",
+            },
+            {
+                "num": "04 / MAGNESIUM SKELETON",
+                "title": "Weather-Sealed Magnesium Alloy Shell",
+                "desc": "Die-cast skeleton with silicone O-ring gasket seals across all dials and ports to prevent dust and water penetration in harsh conditions.",
+            },
+        ]
+    elif cat_slug == "smartwatches-bands":
+        return [
+            {
+                "num": "01 / SAPPHIRE CRYSTAL",
+                "title": "Edge-to-Edge Sapphire Crystal Face",
+                "desc": "Flat sapphire crystal display face with raised protective bezel lip, engineered to withstand high impact and deep immersion pressure.",
+            },
+            {
+                "num": "02 / BIOMETRIC SENSOR",
+                "title": "Photoplethysmography Sensor Cluster",
+                "desc": "Green, red, and infrared LED array paired with multi-channel optical photodiodes for continuous heart rate and SpO2 monitoring.",
+            },
+            {
+                "num": "03 / TITANIUM CHASSIS",
+                "title": "Aerospace Grade Titanium Case",
+                "desc": "Precision machined titanium enclosure delivering exceptional corrosion resistance, lightweight wrist balance, and MIL-STD 810H durability.",
+            },
+            {
+                "num": "04 / DUAL FREQUENCY",
+                "title": "Precision Dual-Frequency L1/L5 GNSS",
+                "desc": "Integrated dual-band helical satellite antenna with real-time algorithmic dead-reckoning for accurate route and coordinate tracking.",
+            },
+        ]
+    else:
+        return [
+            {
+                "num": "01 / DISPLAY MATRIX",
+                "title": "Quantum Dot 4K Display Panel",
+                "desc": "Direct-lit full-array local dimming matrix with quantum dot nanocrystals delivering broad color gamut and high peak HDR luminance.",
+            },
+            {
+                "num": "02 / COGNITIVE PROCESSOR",
+                "title": "Real-Time AI Vision Processor",
+                "desc": "Hardware neural processing engine that analyzes contrast, motion, and color saturation frame-by-frame for crisp upscaling.",
+            },
+            {
+                "num": "03 / ACOUSTIC SURFACE",
+                "title": "Acoustic Surface Actuators",
+                "desc": "Electromagnetic sound exciters positioned behind the panel that vibrate the screen itself to match dialogue location directly to actors.",
+            },
+            {
+                "num": "04 / CHASSIS & PORTS",
+                "title": "Flush Metal Bezel & HDMI 2.1 Array",
+                "desc": "Seamless aluminum perimeter frame with dedicated high-bandwidth HDMI 2.1 interconnects supporting 4K 120Hz gaming.",
+            },
+        ]
+
+
 def hero_products(n: int = 3) -> HeroResult:
     """
     Returns hero products for the homepage.
@@ -162,9 +294,11 @@ def hero_products(n: int = 3) -> HeroResult:
             if fp.product.is_purchasable and fp.product.selling_price
         ]
         flagship_curated = [p for p in curated_prods if p.selling_price >= Decimal("15000.00")]
-        selected = flagship_curated if flagship_curated else curated_prods
+        selected = (flagship_curated if flagship_curated else curated_prods)[:n]
         if selected:
-            return HeroResult(products=selected[:n], is_auto=False)
+            for p in selected:
+                p.anatomy_layers = get_flagship_anatomy_layers(p)
+            return HeroResult(products=selected, is_auto=False)
 
     # 2. Fallback auto-select: select 1 per category by rating desc
     day_of_year = date.today().timetuple().tm_yday
@@ -175,7 +309,7 @@ def hero_products(n: int = 3) -> HeroResult:
         for offset in range(num_cats)
     }
 
-    prods = (
+    prods = list(
         Product.objects.filter(
             category__slug__in=HERO_ELIGIBLE_CATEGORIES,
             selling_price__gt=Decimal("0.00"),
@@ -187,17 +321,34 @@ def hero_products(n: int = 3) -> HeroResult:
         .order_by("-source_rating_count", "-selling_price", "id")
     )
 
-    best_per_cat = {}
-    for p in prods:
-        if p.category_id not in best_per_cat:
-            best_per_cat[p.category_id] = p
+    # Check if we have >= n categories with genuine flagships (selling_price >= 15000)
+    flagship_candidates = [p for p in prods if (p.selling_price or Decimal("0.00")) >= Decimal("15000.00")]
+    best_flagship_per_cat = {}
+    for p in sorted(flagship_candidates, key=lambda x: (-(x.selling_price or Decimal("0.00")), -(x.source_rating_count or 0), x.id)):
+        if p.category_id not in best_flagship_per_cat:
+            best_flagship_per_cat[p.category_id] = p
 
-    sorted_candidates = sorted(
-        best_per_cat.values(),
-        key=lambda prod: preferred_order.get(prod.category.slug, 999),
-    )
+    if len(best_flagship_per_cat) >= n:
+        sorted_candidates = sorted(
+            best_flagship_per_cat.values(),
+            key=lambda prod: preferred_order.get(prod.category.slug, 999),
+        )
+    else:
+        best_per_cat = {}
+        for p in prods:
+            if p.category_id not in best_per_cat:
+                best_per_cat[p.category_id] = p
 
-    return HeroResult(products=sorted_candidates[:n], is_auto=True)
+        sorted_candidates = sorted(
+            best_per_cat.values(),
+            key=lambda prod: preferred_order.get(prod.category.slug, 999),
+        )
+
+    selected = sorted_candidates[:n]
+    for p in selected:
+        p.anatomy_layers = get_flagship_anatomy_layers(p)
+
+    return HeroResult(products=selected, is_auto=True)
 
 
 WARM_WORLDS = {"earphones-headphones", "speakers", "cameras", "keyboards-mice", "cases-protectors"}

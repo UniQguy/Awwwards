@@ -169,6 +169,10 @@ class Product(TimeStampedModel):
         return self.selling_price is not None and self.selling_price > Decimal("0.00") and self.is_available
 
     @property
+    def is_in_stock(self) -> bool:
+        return self.is_available
+
+    @property
     def primary_image_url(self) -> str:
         """
         Returns the primary image URL (local or external CDN) from preloaded media items.

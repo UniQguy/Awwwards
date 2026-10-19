@@ -1,0 +1,76 @@
+{% load core_tags %}
+
+<!-- AI Concierge Floating Launcher Button -->
+<button
+  type="button"
+  id="concierge-launcher-btn"
+  class="concierge-launcher-btn"
+  aria-expanded="false"
+  aria-controls="concierge-drawer"
+  aria-label="Open ElectroCart AI Concierge"
+>
+  <span class="status-dot-online" aria-hidden="true"></span>
+  <span>Ask Concierge</span>
+</button>
+
+<!-- AI Concierge Slide-up Drawer -->
+<aside
+  id="concierge-drawer"
+  class="concierge-drawer"
+  aria-label="ElectroCart Technical Concierge"
+  aria-hidden="true"
+>
+  <header class="concierge-header">
+    <div class="concierge-header-title">
+      <span class="status-dot-online" aria-hidden="true"></span>
+      <span class="font-semibold body-sm">ElectroCart Concierge</span>
+      <span class="caption text-muted font-mono text-3xs uppercase">Local RAG</span>
+    </div>
+    <button
+      type="button"
+      id="concierge-close-btn"
+      class="concierge-close-btn"
+      aria-label="Close Concierge"
+    >
+      &times;
+    </button>
+  </header>
+
+  <div id="concierge-messages" class="concierge-messages">
+    <!-- Quick-prompt chips row -->
+    <div class="concierge-chips-row" role="group" aria-label="Quick Prompt Suggestions">
+      <button type="button" class="concierge-chip-btn" data-prompt="Recommend a 5G phone under 25000">5G Phone &lt; ₹25k</button>
+      <button type="button" class="concierge-chip-btn" data-prompt="What coupons or offers are available?">Active Coupons</button>
+      <button type="button" class="concierge-chip-btn" data-prompt="Check delivery to 380001">Check Delivery</button>
+      <button type="button" class="concierge-chip-btn" data-prompt="What is your 7-day replacement policy?">Replacement Policy</button>
+    </div>
+
+    <!-- Initial Welcome Message -->
+    <div class="concierge-bubble is-assistant">
+      <p>Hello. I am the ElectroCart Technical Concierge. I can assist with hardware comparisons, product recommendations, order tracking, pincode deliverability, or store policies.</p>
+      <p class="caption text-muted mb-0">Ask a question or tap a quick prompt above to begin.</p>
+    </div>
+
+    <!-- Typing Indicator (Hidden by default) -->
+    <div id="concierge-typing" class="concierge-typing-indicator hidden" aria-hidden="true">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+    </div>
+  </div>
+
+  <form id="concierge-form" class="concierge-footer m-0" autocomplete="off">
+    {% csrf_token %}
+    <input
+      type="text"
+      id="concierge-input"
+      class="concierge-input"
+      placeholder="Ask about specs, orders, or delivery..."
+      aria-label="Type your message to the concierge"
+      maxlength="300"
+    >
+    <button type="submit" id="concierge-send-btn" class="btn btn-primary btn-sm concierge-send-btn">
+      Send
+    </button>
+  </form>
+</aside>

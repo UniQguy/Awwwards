@@ -189,6 +189,9 @@
     --ease-editorial: cubic-bezier(0.25, 1, 0.5, 1);
     --dur-editorial: 400ms;
 
+    /* Layout Geometry */
+    --header-height: 76px;
+
     /* Z-Index Stack */
     --z-deep: -1;
     --z-base: 0;

@@ -7,7 +7,7 @@ from decimal import Decimal
 from typing import List
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Count, Min, Q
+from django.db.models import Count, Max, Min, Q
 
 from apps.catalog.models import Category, Product
 from apps.catalog.services.brands import get_known_brands
@@ -199,3 +199,224 @@ def get_category_clusters(cat_slug: str) -> List[dict]:
             "url": f"/c/{cat_slug}/?q={q_term}",
         })
     return results
+
+
+GRANULAR_24_TAXONOMY = [
+    {
+        "id": "flagship-5g",
+        "name": "5G & Flagship Smartphones",
+        "parent_slug": "smartphones",
+        "regex": r"\b(?:5g|ultra|pro\s+max|fold|flip|flagship)\b",
+    },
+    {
+        "id": "budget-midrange-phones",
+        "name": "Budget & Mid-Range Smartphones",
+        "parent_slug": "smartphones",
+        "regex": r"\b(?:redmi|realme|oppo|vivo|samsung|oneplus|poco|iqoo|motorola|narzo|phone)\b",
+        "exclude_regex": r"\b(?:tablet|tablets|ipad|tab|pad|kindle|ereader)\b",
+    },
+    {
+        "id": "tablets-ipads",
+        "name": "Tablets, iPads & eReaders",
+        "parent_slug": "smartphones",
+        "regex": r"\b(?:tablet|tablets|ipad|tab|pad|kindle|ereader)\b",
+    },
+    {
+        "id": "tws-earbuds",
+        "name": "TWS True Wireless Earbuds",
+        "parent_slug": "earphones-headphones",
+        "regex": r"\b(?:earbud|earbuds|tws|airpods|true\s+wireless|buds)\b",
+    },
+    {
+        "id": "over-ear-headphones",
+        "name": "Over-Ear & ANC Headphones",
+        "parent_slug": "earphones-headphones",
+        "regex": r"\b(?:over-ear|on-ear|headphone|headphones|headset|anc)\b",
+    },
+    {
+        "id": "neckbands",
+        "name": "Wireless Neckband Earphones",
+        "parent_slug": "earphones-headphones",
+        "regex": r"\b(?:neckband|neckbands|bullets|rockerz)\b",
+    },
+    {
+        "id": "wired-earphones",
+        "name": "Wired Earphones & IEMs",
+        "parent_slug": "earphones-headphones",
+        "regex": r"\b(?:wired|in-ear|bassheads|iem|3\.5mm)\b",
+    },
+    {
+        "id": "portable-speakers",
+        "name": "Bluetooth & Portable Speakers",
+        "parent_slug": "speakers",
+        "regex": r"\b(?:portable|bluetooth\s+speaker|go\s*3|wireless\s+speaker|clip|flip|charge)\b",
+    },
+    {
+        "id": "soundbars-home-theatre",
+        "name": "Soundbars & Home Theatre Audio",
+        "parent_slug": "speakers",
+        "regex": r"\b(?:soundbar|sound\s*bar|subwoofer|home\s+theatre|theatre|dolby|channel|sound\s+system)\b",
+    },
+    {
+        "id": "smartwatches-bands",
+        "name": "Smartwatches & Fitness Bands",
+        "parent_slug": "smartwatches-bands",
+        "regex": r"\b(?:watch|smartwatch|band|fitness|tracker|pulse|versa)\b",
+    },
+    {
+        "id": "dslr-mirrorless",
+        "name": "DSLR & Mirrorless Cameras",
+        "parent_slug": "cameras",
+        "regex": r"\b(?:dslr|mirrorless|slr|eos|alpha|digital\s+camera|200d|z50|lumix)\b",
+    },
+    {
+        "id": "security-action-cameras",
+        "name": "Smart Security & Action Cameras",
+        "parent_slug": "cameras",
+        "regex": r"\b(?:cctv|security|pan/tilt|webcam|dashcam|tapo|action\s+camera|gopro)\b",
+    },
+    {
+        "id": "tripods-lighting",
+        "name": "Tripods, Gimbals & Studio Lighting",
+        "parent_slug": "cameras",
+        "regex": r"\b(?:tripod|gimbal|ring\s*light|studio|mount|rig|softbox|light|holder|lens)\b",
+    },
+    {
+        "id": "4k-smart-tvs",
+        "name": "4K Ultra HD & Smart Televisions",
+        "parent_slug": "tvs",
+        "regex": r"\b(?:4k|ultra\s+hd|smart\s+tv|google\s+tv|android\s+tv|qled|oled|led\s+tv|television|bravia)\b",
+    },
+    {
+        "id": "pc-monitors",
+        "name": "PC Monitors & Gaming Displays",
+        "parent_slug": "tvs",
+        "regex": r"\b(?:monitor|curved\s+monitor|gaming\s+monitor|ips\s+display|fhd\s+monitor|hz)\b",
+    },
+    {
+        "id": "keyboards",
+        "name": "Mechanical & Wireless Keyboards",
+        "parent_slug": "keyboards-mice",
+        "regex": r"\b(?:keyboard|keyboards|mechanical|keycaps|switch|backlit)\b",
+    },
+    {
+        "id": "mice",
+        "name": "Gaming & Ergonomic Mice",
+        "parent_slug": "keyboards-mice",
+        "regex": r"\b(?:mouse|mice|gaming\s+mouse|optical|wireless\s+mouse|mx\s+master|trackpad)\b",
+    },
+    {
+        "id": "wall-chargers",
+        "name": "Fast Wall Chargers & GaN Adapters",
+        "parent_slug": "cables-chargers-powerbanks",
+        "regex": r"\b(?:charger|fast\s+charger|gan|adapter|wall\s+charger|power\s+adapter|quick\s+charge)\b",
+    },
+    {
+        "id": "powerbanks",
+        "name": "Powerbanks & Portable Energy",
+        "parent_slug": "cables-chargers-powerbanks",
+        "regex": r"\b(?:power\s*bank|powerbank|battery\s+pack|portable\s+battery)\b",
+    },
+    {
+        "id": "cables",
+        "name": "USB-C, Lightning & HDMI Cables",
+        "parent_slug": "cables-chargers-powerbanks",
+        "regex": r"\b(?:cable|cord|usb-c|type-c|lightning|hdmi|aux|thunderbolt)\b",
+    },
+    {
+        "id": "cases-covers",
+        "name": "Phone Cases, Covers & Screen Guards",
+        "parent_slug": "cases-protectors",
+        "regex": r"\b(?:case|back\s+cover|flip\s+cover|armor|rugged|tempered|glass|screen\s+protector|screen\s+guard|pouch)\b",
+    },
+    {
+        "id": "storage-memory",
+        "name": "SSD, Flash Drives & Memory Cards",
+        "parent_slug": "other",
+        "regex": r"\b(?:sd\s+card|microsd|memory\s+card|ssd|flash\s+drive|pen\s+drive|hard\s+drive|storage)\b",
+    },
+    {
+        "id": "laptops-desktops",
+        "name": "Laptops, Desktops & Combos",
+        "parent_slug": "other",
+        "regex": r"\b(?:laptop|macbook|thinkcentre|pc|desktop|all-in-one|chromebook|notebook)\b",
+    },
+    {
+        "id": "networking-wifi",
+        "name": "Wi-Fi Routers & Networking",
+        "parent_slug": "other",
+        "regex": r"\b(?:router|wifi|wi-fi|range\s+extender|access\s+point|mesh|ethernet|modem|networking)\b",
+    },
+]
+
+CACHE_KEY_GRANULAR_24 = "granular_24_categories_v2"
+
+
+def get_24_granular_categories() -> List[dict]:
+    """
+    Returns the 24 high-density granular product categories with real active item counts,
+    minimum starting prices, and representative product cutout thumbnail URLs.
+    Cached for 15 minutes.
+    """
+    cached = cache.get(CACHE_KEY_GRANULAR_24)
+    if cached is not None:
+        return cached
+
+    items = []
+    for entry in GRANULAR_24_TAXONOMY:
+        qs = Product.objects.filter(
+            category__slug=entry["parent_slug"],
+            is_available=True,
+            selling_price__gt=Decimal("0.00"),
+            raw_name__iregex=entry["regex"],
+        )
+        if "exclude_regex" in entry:
+            qs = qs.exclude(raw_name__iregex=entry["exclude_regex"])
+
+        aggs = qs.aggregate(
+            cnt=Count("id"),
+            min_p=Min("selling_price"),
+            max_p=Max("selling_price"),
+        )
+        cnt = aggs["cnt"] or 0
+        min_p = aggs["min_p"] or Decimal("99.00")
+
+        # Pick representative product with valid image
+        top_p = (
+            qs.filter(media__media_type="image")
+            .prefetch_related("media")
+            .order_by("-selling_price", "-source_rating_count", "id")
+            .first()
+        )
+        if not top_p:
+            top_p = (
+                qs.prefetch_related("media")
+                .order_by("-selling_price", "id")
+                .first()
+            )
+
+        items.append({
+            "id": entry["id"],
+            "name": entry["name"],
+            "parent_slug": entry["parent_slug"],
+            "product_count": cnt,
+            "min_price": min_p,
+            "url": f"/c/{entry['parent_slug']}/?sub={entry['id']}",
+            "thumbnail_url": top_p.primary_image_url if top_p else "",
+            "lead_title": top_p.display_name if top_p else entry["name"],
+        })
+
+    cache.set(CACHE_KEY_GRANULAR_24, items, timeout=CACHE_TTL)
+    return items
+
+
+def get_sub_category_filter(sub_slug: str):
+    """
+    Retrieves the filter metadata (regex, exclude_regex, display name) for a sub-slug.
+    """
+    if not sub_slug:
+        return None
+    for entry in GRANULAR_24_TAXONOMY:
+        if entry["id"] == sub_slug:
+            return entry
+    return None

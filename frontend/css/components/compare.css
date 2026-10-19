@@ -77,4 +77,37 @@
     align-items: center;
     gap: var(--space-4);
   }
+
+  .compare-table.show-only-diffs tr.row-identical {
+    display: none;
+  }
+
+  .bg-surface-tint {
+    background-color: var(--color-info-tint);
+  }
+
+  .compare-spec-col {
+    width: 220px;
+  }
+
+  .compare-prod-col {
+    min-width: 240px;
+  }
+
+  .compare-thumb-box {
+    max-width: 140px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .compare-rival-thumb {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }

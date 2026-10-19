@@ -10,6 +10,13 @@
     {% if product.savings and product.savings > 0 %}
       <div class="price-savings-row"><span class="price-savings-note">Save {{ product.savings|inr }}</span></div>
     {% endif %}
+    {% with best_deal=product|best_coupon_offer %}
+      {% if best_deal %}
+        <div class="price-coupon-deal-row mt-1">
+          <span class="badge badge-coupon-deal">Get as low as {{ best_deal.effective_price|inr }} with coupon</span>
+        </div>
+      {% endif %}
+    {% endwith %}
   {% else %}
     <span class="text-muted caption">Price unavailable</span>
   {% endif %}

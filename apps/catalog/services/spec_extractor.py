@@ -269,6 +269,69 @@ class SpecDict(dict):
         return any(getattr(v, "label", None) == key for v in self.values())
 
 
+def classify_product_subtype(title_or_product, category_slug: Optional[str] = None) -> str:
+    """
+    Classifies a product or title into granular hardware sub-types to prevent invalid cross-sub-type comparisons
+    (e.g., DSLR vs CCTV security cameras, TWS earbuds vs Over-Ear headphones, Tablets vs Smartphones).
+    """
+    if hasattr(title_or_product, "raw_name") or hasattr(title_or_product, "display_name"):
+        title = f"{getattr(title_or_product, 'display_name', '')} {getattr(title_or_product, 'raw_name', '')}"
+        if not category_slug and getattr(title_or_product, "category", None):
+            category_slug = getattr(title_or_product.category, "slug", "")
+    else:
+        title = str(title_or_product or "")
+
+    t = title.lower()
+
+    # 1. Cameras
+    if category_slug == "cameras" or any(w in t for w in ["camera", "dslr", "mirrorless", "cctv", "webcam"]):
+        if any(w in t for w in ["tripod", "ring light", "gimbal", "lens cap", "camera bag", "mount", "strap", "monopod", "softbox"]):
+            return "camera_accessory"
+        if any(w in t for w in ["cctv", "security camera", "surveillance", "tapo", "cp plus", "qubo", "imou", "ezviz", "webcam", "360 pan", "wifi camera", "home security", "outdoor camera", "indoor camera", "bullet camera", "dome camera"]):
+            return "camera_cctv_security"
+        if any(w in t for w in ["action camera", "go pro", "gopro", "insta360", "action cam", "waterproof camera"]):
+            return "camera_action"
+        if any(w in t for w in ["dslr", "mirrorless", "eos", "alpha", "nikon z", "canon r", "lumix", "powershot", "coolpix", "slr", "interchangeable lens"]):
+            return "camera_dslr_mirrorless"
+        return "camera_dslr_mirrorless" if ("canon" in t or "nikon" in t or "sony" in t or "fujifilm" in t or "panasonic" in t) else "camera_cctv_security"
+
+    # 2. Audio & Headphones
+    if category_slug in ("earphones-headphones", "audio") or any(w in t for w in ["earphone", "headphone", "earbud", "neckband", "headset"]):
+        if any(w in t for w in ["over-ear", "on-ear", "headphone", "headset", "studio monitor", "anc headphone"]) and not any(w in t for w in ["in-ear", "earbuds", "tws", "neckband"]):
+            return "audio_over_ear"
+        if any(w in t for w in ["neckband", "wireless earphone", "rockerz", "behind-neck", "collar"]):
+            return "audio_neckband"
+        if any(w in t for w in ["wired", "3.5mm", "aux", "in-ear with mic", "iem", "earphone with mic", "bassheads"]) and not any(w in t for w in ["wireless", "bluetooth", "tws", "airbuds", "earbuds"]):
+            return "audio_wired"
+        if any(w in t for w in ["tws", "true wireless", "truly wireless", "earbuds", "airpods", "buds", "earpods"]):
+            return "audio_tws"
+        return "audio_tws"
+
+    # 3. Smartphones vs Tablets
+    if category_slug == "smartphones" or any(w in t for w in ["phone", "smartphone", "tablet", "ipad", "tab"]):
+        if any(w in t for w in ["tablet", "ipad", "galaxy tab", "lenovo tab", "pad ", "pad,", "ereader", "kindle"]):
+            return "device_tablet"
+        if any(w in t for w in ["phone", "smartphone", "5g", "mobile", "handset", "pro", "ultra", "plus", "galaxy s", "iphone", "redmi", "oneplus", "iqoo", "realme", "poco"]):
+            return "device_smartphone"
+        return "device_smartphone"
+
+    # 4. Keyboards & Mice
+    if category_slug == "keyboards-mice" or any(w in t for w in ["keyboard", "mouse", "combo"]):
+        if any(w in t for w in ["mouse", "trackball", "pointing device"]):
+            return "km_mouse"
+        if any(w in t for w in ["combo", "keyboard and mouse", "desktop set"]):
+            return "km_combo"
+        return "km_keyboard"
+
+    # 5. Televisions vs Monitors
+    if category_slug == "tvs" or any(w in t for w in ["tv", "television", "monitor", "display"]):
+        if any(w in t for w in ["monitor", "gaming monitor", "curved display", "pc monitor"]):
+            return "display_monitor"
+        return "display_tv"
+
+    return category_slug or "general"
+
+
 def synthesize_category_specs(
     specs: SpecDict,
     title: str,
@@ -463,13 +526,35 @@ def synthesize_category_specs(
             specs["connectivity"] = SpecValue("Tri-Mode (2.4G / BT / USB-C)", label="Connectivity")
 
     elif category_slug == "cameras":
-        if "sensor" not in specs:
-            sensor = "Full-Frame 35mm Exmor R CMOS" if price_val >= 100000 else "APS-C 24.2 MP CMOS Sensor"
-            specs["sensor"] = SpecValue(sensor, label="Image Sensor")
-        if "resolution" not in specs:
-            specs["resolution"] = SpecValue("4K 60p 10-bit Video / 24MP", label="Video & Stills")
-        if "stabilization" not in specs:
-            specs["stabilization"] = SpecValue("5-Axis In-Body Sensor Shift (IBIS)", label="Stabilization")
+        cam_subtype = classify_product_subtype(title, category_slug="cameras")
+        if cam_subtype == "camera_cctv_security":
+            if "sensor" not in specs:
+                res_match = re.search(r"\b(1080p|2k|3mp|4mp|5mp|720p)\b", title, re.IGNORECASE)
+                res_str = f"{res_match.group(1).upper()} High-Definition Sensor" if res_match else "1080p Full HD Surveillance Sensor"
+                specs["sensor"] = SpecValue(res_str, label="Security Sensor")
+            if "pan_tilt" not in specs:
+                specs["pan_tilt"] = SpecValue("360° Horizontal Pan & 114° Vertical Tilt" if ("360" in t_lower or "pan" in t_lower) else "Wide-Angle 130° Fixed View", label="Coverage Angle")
+            if "night_vision" not in specs:
+                specs["night_vision"] = SpecValue("Enhanced IR Night Vision (Up to 30ft)", label="Night Vision")
+            if "connectivity" not in specs:
+                specs["connectivity"] = SpecValue("2.4GHz Wi-Fi + Two-Way Audio Intercom", label="Connectivity & Audio")
+            if "storage" not in specs:
+                specs["storage"] = SpecValue("MicroSD Card Slot (Up to 256GB) + Cloud", label="Storage Support")
+        elif cam_subtype == "camera_accessory":
+            if "material" not in specs:
+                specs["material"] = SpecValue("High-Grade Aluminum Alloy Matrix", label="Build Material")
+            if "mounting" not in specs:
+                specs["mounting"] = SpecValue("Standard 1/4\"-20 Camera Screw Mount", label="Mount Interface")
+            if "load_capacity" not in specs:
+                specs["load_capacity"] = SpecValue("Up to 3.0 kg Payload", label="Load Capacity")
+        else:
+            if "sensor" not in specs:
+                sensor = "Full-Frame 35mm Exmor R CMOS" if price_val >= 100000 else "APS-C 24.2 MP CMOS Sensor"
+                specs["sensor"] = SpecValue(sensor, label="Image Sensor")
+            if "resolution" not in specs:
+                specs["resolution"] = SpecValue("4K 60p 10-bit Video / 24MP", label="Video & Stills")
+            if "stabilization" not in specs:
+                specs["stabilization"] = SpecValue("5-Axis In-Body Sensor Shift (IBIS)", label="Stabilization")
 
     elif category_slug == "tvs":
         if "resolution" not in specs:

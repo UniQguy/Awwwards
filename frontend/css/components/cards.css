@@ -338,4 +338,87 @@
     border-radius: var(--radius-1);
     padding: var(--space-4);
   }
+
+  /* Taxonomy Grid & Cards (Phase R10, Pillar 3) */
+  .taxonomy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-4);
+    margin-block: var(--space-6);
+  }
+
+  .taxonomy-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--world-surface);
+    border: 1px solid var(--world-rule);
+    border-radius: var(--radius-2);
+    padding: var(--space-4);
+    text-decoration: none;
+    color: inherit;
+    transition: transform var(--dur-utility) var(--ease-utility), border-color var(--dur-utility) var(--ease-utility), box-shadow var(--dur-utility) var(--ease-utility);
+  }
+
+  .taxonomy-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--world-accent);
+    box-shadow: var(--lift-1);
+  }
+
+  .taxonomy-thumb-plate {
+    width: 100%;
+    height: 140px;
+    background-color: var(--world-bg);
+    border-radius: var(--radius-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2);
+    overflow: hidden;
+    margin-bottom: var(--space-3);
+  }
+
+  .taxonomy-thumb-plate img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+    transition: transform var(--dur-editorial) var(--ease-editorial);
+  }
+
+  .taxonomy-card:hover .taxonomy-thumb-plate img {
+    transform: scale(1.05);
+  }
+
+  .taxonomy-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .taxonomy-title {
+    font-size: var(--step-0);
+    font-weight: 600;
+    line-height: var(--line-tight);
+    color: var(--world-ink);
+  }
+
+  .taxonomy-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--world-rule);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+  }
+
+  .taxonomy-price {
+    font-weight: 600;
+    color: var(--world-accent);
+  }
 }

@@ -214,3 +214,16 @@ def url_replace(context, **kwargs):
             params[k] = v
     encoded = params.urlencode()
     return f"?{encoded}" if encoded else "?"
+
+
+@register.filter(name="best_coupon_offer")
+def best_coupon_offer(product: Any):
+    """
+    Returns the best active coupon offer dict for a product:
+    {'coupon': Coupon, 'code': str, 'discount_amount': Decimal, 'effective_price': Decimal}
+    """
+    try:
+        from apps.promotions.services.coupon_validator import get_best_coupon_for_product
+        return get_best_coupon_for_product(product)
+    except Exception:
+        return None

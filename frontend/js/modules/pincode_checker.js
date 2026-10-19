@@ -20,7 +20,7 @@ export function initPincodeChecker() {
       if (!pin || pin.length !== 6 || !/^[1-9][0-9]{5}$/.test(pin)) {
         if (resultContainer) {
           resultContainer.innerHTML = `
-            <span class="badge badge-danger text-xs font-mono inline-flex items-center gap-1.5 py-1 px-2.5" style="background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 4px;">
+            <span class="badge badge-danger text-xs font-mono inline-flex items-center gap-1.5 py-1 px-2.5">
               <span>✕</span>
               <span>Service unavailable for PIN ${pin || "N/A"} (Please enter a valid 6-digit Indian pincode)</span>
             </span>
@@ -50,13 +50,13 @@ export function initPincodeChecker() {
         if (resultContainer) {
           if (data.serviceable) {
             resultContainer.innerHTML = `
-              <span class="badge badge-success text-xs font-mono inline-flex items-center gap-1.5 py-1 px-2.5" style="background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 4px;">
+              <span class="badge badge-success text-xs font-mono inline-flex items-center gap-1.5 py-1 px-2.5">
                 <span>${data.message || `✓ Deliverable to (${pin}) — Estimated delivery in 2–4 days • COD & Express Available`}</span>
               </span>
             `;
           } else {
             resultContainer.innerHTML = `
-              <span class="badge badge-danger text-xs font-mono inline-flex items-center gap-1.5 py-1 px-2.5" style="background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 4px;">
+              <span class="badge badge-danger text-xs font-mono inline-flex items-center gap-1.5 py-1 px-2.5">
                 <span>${data.message || `✕ Service unavailable for PIN ${pin} (Please enter a valid 6-digit Indian pincode)`}</span>
               </span>
             `;
@@ -66,7 +66,7 @@ export function initPincodeChecker() {
         if (err.name === "AbortError") return;
         if (resultContainer) {
           resultContainer.innerHTML = `
-            <span class="badge badge-danger text-xs font-mono inline-flex items-center gap-1.5 py-1 px-2.5" style="background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 4px;">
+            <span class="badge badge-danger text-xs font-mono inline-flex items-center gap-1.5 py-1 px-2.5">
               <span>✕ Service unavailable for PIN ${pin} (Please enter a valid 6-digit Indian pincode)</span>
             </span>
           `;
