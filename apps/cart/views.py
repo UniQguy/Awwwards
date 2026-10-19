@@ -25,7 +25,7 @@ from apps.cart.services.cart_service import (
 from apps.catalog.models import Product
 from apps.core.views import is_json_request
 from apps.inventory.exceptions import InsufficientStockError
-from apps.promotions.services.coupon_validator import validate_coupon
+from apps.promotions.services.coupon_validator import get_available_coupons_for_cart, validate_coupon
 
 
 def _get_cart_for_request(request: HttpRequest) -> Cart:
@@ -64,13 +64,13 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
     Renders shopping cart contents, line item editing, and financial calculation breakdown.
     """
     cart = _get_cart_for_request(request)
+    user = request.user if request.user.is_authenticated else None
 
     applied_code = request.session.get("applied_coupon_code", "").strip()
     coupon_discount = Decimal("0.00")
     coupon_obj = None
 
     if applied_code:
-        user = request.user if request.user.is_authenticated else None
         res = validate_coupon(applied_code, cart, user=user)
         if res.is_valid:
             coupon_discount = res.discount_amount
@@ -100,7 +100,7 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
             qs = (
                 Product.objects.filter(category=cross_sell_category, is_available=True)
                 .exclude(id__in=cart_product_ids)
-                .select_related("category")
+                .select_related("category", "inventory")
                 .prefetch_related("media", "specifications")
                 .order_by("-source_rating_count", "id")
             )
@@ -117,11 +117,14 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
         .prefetch_related("product__media")
     )
 
+    available_coupons = get_available_coupons_for_cart(cart, user=user, applied_code=applied_code)
+
     context = {
         "cart": cart,
         "summary": summary,
         "applied_coupon_code": applied_code,
         "coupon": coupon_obj,
+        "available_coupons": available_coupons,
         "cross_sell_products": cross_sell_products,
         "cross_sell_category": cross_sell_category,
         "saved_for_later_items": saved_for_later_items,
@@ -280,10 +283,11 @@ def coupon_apply(request: HttpRequest) -> HttpResponse:
         from apps.core.views import error_429
         return error_429(request)
 
+    next_url = request.POST.get("next") or "cart_detail"
     code = request.POST.get("code", "").strip()
     if not code:
         messages.error(request, "Please enter a promotional code.")
-        return redirect("cart_detail")
+        return redirect(next_url)
 
     cart = _get_cart_for_request(request)
     user = request.user if request.user.is_authenticated else None
@@ -296,7 +300,7 @@ def coupon_apply(request: HttpRequest) -> HttpResponse:
     else:
         messages.error(request, result.message)
 
-    return redirect("cart_detail")
+    return redirect(next_url)
 
 
 @require_POST
@@ -304,12 +308,13 @@ def coupon_remove(request: HttpRequest) -> HttpResponse:
     """
     Removes currently applied coupon code from session.
     """
+    next_url = request.POST.get("next") or "cart_detail"
     if "applied_coupon_code" in request.session:
         del request.session["applied_coupon_code"]
         request.session.modified = True
         messages.info(request, "Coupon removed.")
 
-    return redirect("cart_detail")
+    return redirect(next_url)
 
 
 @require_POST

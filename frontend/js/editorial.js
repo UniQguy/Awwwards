@@ -154,28 +154,78 @@ export function initHeroThumbnailPicker() {
   const plateSlot = document.getElementById("hero-plate-slot");
   if (!pickerBtns.length || !plateSlot) return;
 
-  const mainImg = plateSlot.querySelector(".plate-img");
-  const mainLink = plateSlot.querySelector("a[href*='/p/']");
-  const nameEl = plateSlot.querySelector(".plate-name");
-  const priceEl = plateSlot.querySelector(".plate-price");
-  const catEl = plateSlot.querySelector(".plate-category");
+  const mainImg = plateSlot.querySelector(".plate-mat-img") || plateSlot.querySelector(".plate-img");
+  const mainLink = plateSlot.querySelector("a.stretched-link") || plateSlot.querySelector("a[href*='/p/']");
+  const exploreBtn = document.getElementById("hero-explore-btn");
+  const titleEl = plateSlot.querySelector(".plate-title") || plateSlot.querySelector(".card-title");
+  const brandEl = plateSlot.querySelector(".plate-meta-line span");
+  const priceEl = plateSlot.querySelector(".price-current") || plateSlot.querySelector(".plate-price");
+  const mrpWrapper = plateSlot.querySelector(".price-mrp-wrapper");
+  const mrpEl = plateSlot.querySelector(".price-mrp-struck");
+  const savingsEl = plateSlot.querySelector(".badge-savings");
+  const captionEl = plateSlot.querySelector(".plate-caption");
+
+  function switchHero(btn) {
+    pickerBtns.forEach((b) => b.classList.remove("is-active"));
+    btn.classList.add("is-active");
+
+    const title = btn.dataset.title || btn.dataset.heroTitle;
+    const brand = btn.dataset.brand;
+    const url = btn.dataset.url || btn.dataset.heroUrl;
+    const price = btn.dataset.price || btn.dataset.heroPrice;
+    const mrp = btn.dataset.mrp;
+    const savings = btn.dataset.savings;
+    const img = btn.dataset.image || btn.dataset.heroImg;
+    const subtitle = btn.dataset.subtitle || btn.dataset.heroCategory;
+
+    if (mainImg && img) {
+      mainImg.style.transition = "opacity 140ms ease-out, transform 140ms ease-out";
+      mainImg.style.opacity = "0.2";
+      mainImg.style.transform = "scale(0.97)";
+      setTimeout(() => {
+        mainImg.src = img;
+        mainImg.alt = title || "";
+        mainImg.style.opacity = "1";
+        mainImg.style.transform = "scale(1)";
+      }, 140);
+    }
+
+    if (mainLink && url) mainLink.href = url;
+    if (exploreBtn && url) exploreBtn.href = url;
+    if (titleEl && title) titleEl.textContent = title;
+    if (brandEl && brand) brandEl.textContent = brand;
+    if (priceEl && price) priceEl.textContent = price;
+
+    if (mrpWrapper && mrpEl) {
+      if (mrp) {
+        mrpEl.textContent = mrp;
+        mrpWrapper.style.display = "";
+      } else {
+        mrpWrapper.style.display = "none";
+      }
+    }
+
+    if (savingsEl) {
+      if (savings) {
+        savingsEl.textContent = savings;
+        savingsEl.style.display = "";
+      } else {
+        savingsEl.style.display = "none";
+      }
+    }
+
+    if (captionEl && subtitle) {
+      captionEl.textContent = subtitle;
+    }
+  }
 
   pickerBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      pickerBtns.forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-
-      const title = btn.dataset.heroTitle;
-      const url = btn.dataset.heroUrl;
-      const price = btn.dataset.heroPrice;
-      const img = btn.dataset.heroImg;
-      const category = btn.dataset.heroCategory;
-
-      if (mainImg && img) mainImg.src = img;
-      if (mainLink && url) mainLink.href = url;
-      if (nameEl && title) nameEl.textContent = title;
-      if (priceEl && price) priceEl.textContent = price;
-      if (catEl && category) catEl.textContent = category;
+    btn.addEventListener("click", () => switchHero(btn));
+    btn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        switchHero(btn);
+      }
     });
   });
 }

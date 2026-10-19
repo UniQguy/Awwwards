@@ -75,137 +75,133 @@
   </div>
 
   <div class="catalog-layout">
-    <!-- Facet Filter Sidebar -->
-    <aside class="filter-panel-aside" aria-label="Filters and sorting">
-      <form method="get" action="{% url 'category_detail' slug=category.slug %}" autocomplete="off">
-        <fieldset class="filter-fieldset">
-          <legend class="filter-legend">Filter &amp; Sort</legend>
+    <!-- Top Horizontal Filter & Sort Command Bar -->
+    <div class="horizontal-filter-bar">
+      <form method="get" action="{% url 'category_detail' slug=category.slug %}" class="horizontal-filter-group m-0" id="cat-filter-form">
+        <input type="hidden" name="sort" value="{{ sort_by }}">
+        {% if selected_filters.q %}
+          <input type="hidden" name="q" value="{{ selected_filters.q }}">
+        {% endif %}
 
-          <!-- Sorting -->
-          <div class="form-group">
-            <label for="filter-sort" class="form-label">
-              <span>Sort By</span>
-            </label>
-            <select name="sort" id="filter-sort" class="form-control" autocomplete="off">
-              <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Most Popular</option>
-              <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
-              <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
-              <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Highest Rated</option>
-              <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
-            </select>
-          </div>
-
-          <!-- Brand Facet -->
-          {% if facets.brands %}
-            <div class="form-group">
-              <label for="filter-brand" class="form-label">
-                <span>Brand</span>
-              </label>
-              <select name="brand" id="filter-brand" class="form-control" autocomplete="off">
-                <option value="">All Brands</option>
-                {% for b in facets.brands %}
-                  <option value="{{ b.parsed_brand }}" {% if selected_filters.brand == b.parsed_brand %}selected{% endif %}>
-                    {{ b.parsed_brand }} ({{ b.count }})
-                  </option>
-                {% endfor %}
-              </select>
-            </div>
-          {% endif %}
-
-          <!-- Price Brackets -->
-          <div class="form-group">
-            <label for="filter-bracket" class="form-label">
-              <span>Price Range</span>
-            </label>
-            <select name="bracket" id="filter-bracket" class="form-control" autocomplete="off">
-              <option value="">Any Price</option>
-              {% for bar in price_bars %}
-                {% if bar.count > 0 %}
-                  <option value="{{ bar.index }}" {% if selected_filters.bracket == bar.index|stringformat:"i" %}selected{% endif %}>
-                    {{ bar.label }} ({{ bar.count }})
-                  </option>
-                {% endif %}
+        <!-- Brand Selector -->
+        {% if facets.brands %}
+          <div class="filter-select-wrap">
+            <select name="brand" id="filter-brand" class="form-control" autocomplete="off" aria-label="Filter by Brand">
+              <option value="">All Brands</option>
+              {% for b in facets.brands %}
+                <option value="{{ b.parsed_brand }}" {% if selected_filters.brand == b.parsed_brand %}selected{% endif %}>
+                  {{ b.parsed_brand }} ({{ b.count }})
+                </option>
               {% endfor %}
             </select>
           </div>
+        {% endif %}
 
-          <!-- Dual-thumb Range Mount (Progressively enhanced over server-rendered inputs) -->
-          <div id="price-slider-mount" class="price-slider-mount" data-category="{{ category.slug }}"></div>
+        <!-- Explicit Price Range Min/Max Inputs for semantic form compliance -->
+        <div class="sr-only">
+          <label for="filter-min-price">Min Price</label>
+          <input type="number" step="1" name="min_price" id="filter-min-price" class="form-control" value="{{ selected_filters.min_price|default:'' }}" autocomplete="off">
+          <label for="filter-max-price">Max Price</label>
+          <input type="number" step="1" name="max_price" id="filter-max-price" class="form-control" value="{{ selected_filters.max_price|default:'' }}" autocomplete="off">
+        </div>
 
-          <!-- Price Range Min/Max -->
-          <div class="form-group">
-            <label for="filter-min-price" class="form-label">
-              <span>Min Price (₹)</span>
-            </label>
-            <input type="number" step="1" name="min_price" id="filter-min-price" class="form-control" value="{{ selected_filters.min_price|default:'' }}" autocomplete="off">
-          </div>
+        <!-- Price Range Bracket -->
+        <div class="filter-select-wrap">
+          <select name="bracket" class="horizontal-filter-select" aria-label="Filter by Price Bracket">
+            <option value="">Price: All Ranges</option>
+            <option value="0" {% if selected_filters.bracket == '0' %}selected{% endif %}>Under ₹999</option>
+            <option value="1" {% if selected_filters.bracket == '1' %}selected{% endif %}>₹1,000–₹4,999</option>
+            <option value="2" {% if selected_filters.bracket == '2' %}selected{% endif %}>₹5,000–₹19,999</option>
+            <option value="3" {% if selected_filters.bracket == '3' %}selected{% endif %}>₹20,000–₹49,999</option>
+            <option value="4" {% if selected_filters.bracket == '4' %}selected{% endif %}>₹50,000+</option>
+          </select>
+        </div>
 
-          <div class="form-group">
-            <label for="filter-max-price" class="form-label">
-              <span>Max Price (₹)</span>
-            </label>
-            <input type="number" step="1" name="max_price" id="filter-max-price" class="form-control" value="{{ selected_filters.max_price|default:'' }}" autocomplete="off">
-          </div>
+        <!-- Rating Filter -->
+        <div class="filter-select-wrap">
+          <select name="rating" class="horizontal-filter-select" aria-label="Filter by Rating">
+            <option value="">Customer Rating</option>
+            <option value="4" {% if request.GET.rating == '4' %}selected{% endif %}>4★ &amp; Up</option>
+            <option value="3" {% if request.GET.rating == '3' %}selected{% endif %}>3★ &amp; Up</option>
+          </select>
+        </div>
 
-          <!-- Variant Grid Collapse Toggle -->
-          <div class="form-checkbox-group mt-2">
-            <input type="checkbox" name="collapsed" value="1" id="filter-collapsed" class="form-checkbox" {% if collapsed %}checked{% endif %} autocomplete="off">
-            <label for="filter-collapsed" class="form-checkbox-label">
-              <span>Collapse duplicate models</span>
-            </label>
-          </div>
+        <!-- Availability Toggle -->
+        <label class="caption flex items-center gap-1.5 cursor-pointer font-mono text-xs">
+          <input type="checkbox" name="in_stock" value="1" {% if request.GET.in_stock == '1' or not request.GET.in_stock %}checked{% endif %} aria-label="In Stock Only">
+          <span>In Stock</span>
+        </label>
 
-          <div class="btn-group mt-3">
-            <button type="submit" class="btn btn-primary btn-block">Apply</button>
-            <a href="{% url 'category_detail' slug=category.slug %}" class="btn btn-secondary">Reset</a>
-          </div>
-        </fieldset>
+        <!-- Variant Collapse Toggle -->
+        <label class="caption flex items-center gap-1.5 cursor-pointer font-mono text-xs">
+          <input type="checkbox" name="collapsed" value="1" {% if collapsed %}checked{% endif %} aria-label="Collapse Models">
+          <span>Collapse Models</span>
+        </label>
       </form>
 
-      <!-- Price Distribution Histogram (Technique J) -->
-      {% if price_bars %}
-        <div class="histogram-chart">
-          <h2 class="label mb-2">Price Distribution</h2>
-          <div class="histogram-bars">
-            {% for bar in price_bars %}
-              <div
-                role="img"
-                class="histogram-bar"
-                style="height: {{ bar.height_percent }}%;"
-                title="{{ bar.label }}: {{ bar.count }} items"
-                aria-label="{{ bar.label }}: {{ bar.count }} items"
-              ></div>
-            {% endfor %}
-          </div>
-          <div class="histogram-labels">
-            <span>₹0</span>
-            <span>₹80,000+</span>
-          </div>
-        </div>
-      {% endif %}
-    </aside>
+      <!-- Right Side: Sort & Result Count -->
+      <div class="flex items-center gap-4 flex-wrap">
+        <span class="caption text-muted font-mono text-xs">
+          Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} verified products
+        </span>
 
-    <!-- Product Grid Column -->
-    <section aria-labelledby="products-heading">
-      <!-- Active Filter Chips -->
-      {% if selected_filters.brand or selected_filters.bracket or selected_filters.min_price or selected_filters.max_price %}
-        <div class="active-filter-chips mb-4 flex items-center gap-2 flex-wrap">
-          <span class="caption">Active Filters:</span>
-          {% if selected_filters.brand %}
-            <span class="badge badge-secondary">Brand: {{ selected_filters.brand }}</span>
-          {% endif %}
-          {% if selected_filters.bracket %}
-            <span class="badge badge-secondary">Bracket #{{ selected_filters.bracket }}</span>
-          {% endif %}
-          {% if selected_filters.min_price %}
-            <span class="badge badge-secondary">Min: ₹{{ selected_filters.min_price }}</span>
-          {% endif %}
-          {% if selected_filters.max_price %}
-            <span class="badge badge-secondary">Max: ₹{{ selected_filters.max_price }}</span>
-          {% endif %}
-          <a href="{% url 'category_detail' slug=category.slug %}" class="badge badge-quiet text-decoration-none">&times; Clear all</a>
-        </div>
-      {% endif %}
+        <form method="get" action="{% url 'category_detail' slug=category.slug %}" class="flex items-center gap-2 m-0">
+          {% if selected_filters.q %}<input type="hidden" name="q" value="{{ selected_filters.q }}">{% endif %}
+          {% if selected_filters.brand %}<input type="hidden" name="brand" value="{{ selected_filters.brand }}">{% endif %}
+          {% if selected_filters.bracket %}<input type="hidden" name="bracket" value="{{ selected_filters.bracket }}">{% endif %}
+          {% if selected_filters.min_price %}<input type="hidden" name="min_price" value="{{ selected_filters.min_price }}">{% endif %}
+          {% if selected_filters.max_price %}<input type="hidden" name="max_price" value="{{ selected_filters.max_price }}">{% endif %}
+          {% if request.GET.rating %}<input type="hidden" name="rating" value="{{ request.GET.rating }}">{% endif %}
+          {% if request.GET.in_stock %}<input type="hidden" name="in_stock" value="{{ request.GET.in_stock }}">{% endif %}
+          {% if collapsed %}<input type="hidden" name="collapsed" value="1">{% endif %}
+
+          <label for="filter-sort" class="sr-only">Sort By</label>
+          <select name="sort" id="filter-sort" class="form-control" autocomplete="off">
+            <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Sort: Most Popular</option>
+            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+            <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Highest Rated</option>
+            <option value="discount" {% if sort_by == 'discount' %}selected{% endif %}>Biggest Savings</option>
+            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+          </select>
+        </form>
+      </div>
+    </div>
+
+    <!-- Active Filter Chips Row -->
+    {% if selected_filters.brand or selected_filters.bracket or selected_filters.min_price or selected_filters.max_price or selected_filters.q %}
+      <div class="active-filter-chips-row">
+        <span class="caption text-muted font-mono text-2xs uppercase mr-1">Active Filters:</span>
+        {% if selected_filters.q %}
+          <a href="{% url_replace q=None page=None %}" class="badge badge-accent text-2xs font-mono inline-flex items-center gap-1">
+            <span>Query: {{ selected_filters.q }}</span>
+            <span>&times;</span>
+          </a>
+        {% endif %}
+        {% if selected_filters.brand %}
+          <a href="{% url_replace brand=None page=None %}" class="badge badge-accent text-2xs font-mono inline-flex items-center gap-1">
+            <span>Brand: {{ selected_filters.brand }}</span>
+            <span>&times;</span>
+          </a>
+        {% endif %}
+        {% if selected_filters.bracket %}
+          <a href="{% url_replace bracket=None page=None %}" class="badge badge-accent text-2xs font-mono inline-flex items-center gap-1">
+            <span>Price Bracket</span>
+            <span>&times;</span>
+          </a>
+        {% endif %}
+        {% if selected_filters.min_price or selected_filters.max_price %}
+          <a href="{% url_replace min_price=None max_price=None bracket=None page=None %}" class="badge badge-accent text-2xs font-mono inline-flex items-center gap-1">
+            <span>₹{{ selected_filters.min_price|default:"0" }}–₹{{ selected_filters.max_price|default:"Max" }}</span>
+            <span>&times;</span>
+          </a>
+        {% endif %}
+        <a href="{% url 'category_detail' slug=category.slug %}" class="caption text-accent hover:underline font-mono text-xs ml-2">Clear All Filters</a>
+      </div>
+    {% endif %}
+
+    <!-- Full-Width Product Grid -->
+    <section aria-labelledby="products-heading" class="w-full">
 
       <div class="flex justify-between items-baseline hairline-bottom pb-2 mb-5">
         <h2 id="products-heading" class="heading">

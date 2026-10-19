@@ -30,6 +30,15 @@
     {% endif %}
   </header>
 
+  {% if price_tier_mismatch_warning %}
+    <div class="alert alert-warning p-4 bg-surface border-rule mb-4" role="status">
+      <div class="flex items-center gap-3">
+        <span class="badge badge-warning text-xs uppercase font-semibold">Tier Disparity</span>
+        <p class="caption text-muted mb-0">{{ price_tier_mismatch_warning }}</p>
+      </div>
+    </div>
+  {% endif %}
+
   {% if delta_advisory %}
     <div class="alert alert-warning p-4 bg-surface border-rule mb-6" role="status">
       <div class="flex items-center gap-3">
@@ -113,6 +122,37 @@
         </tbody>
       </table>
     </div>
+
+    {% if comparable_rivals %}
+      <section class="mt-8 pt-6 border-rule" aria-labelledby="rivals-heading">
+        <div class="flex justify-between items-baseline mb-4">
+          <div>
+            <span class="label text-muted font-mono text-2xs uppercase">Same Price Tier</span>
+            <h2 id="rivals-heading" class="heading body-m font-semibold">Comparable Rivals in Same Price Range (&plusmn;20%)</h2>
+          </div>
+          <span class="caption text-muted">Click to add rival into comparison matrix</span>
+        </div>
+        <div class="grid-3 gap-4">
+          {% for r in comparable_rivals %}
+            <div class="p-3 bg-surface border-rule rounded flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div style="width: 48px; height: 48px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                  {% include "includes/product_image.html" with product=r %}
+                </div>
+                <div class="min-w-0">
+                  <a href="{% url 'product_detail' slug=r.slug %}" class="body-xs font-semibold block truncate hover:underline">{{ r.display_name }}</a>
+                  <span class="caption text-accent font-semibold">{{ r.selling_price|inr }}</span>
+                </div>
+              </div>
+              <form action="{% url 'compare_add' product_id=r.id %}" method="post" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary btn-xs" aria-label="Add {{ r.display_name }} to compare">Add &plus;</button>
+              </form>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
 
     <style>
       .compare-table.show-only-diffs tr.row-identical {

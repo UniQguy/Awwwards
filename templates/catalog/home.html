@@ -39,7 +39,11 @@
       </p>
 
       <div class="hero-actions">
-        <a href="#flagship-anatomy-chapter" class="btn btn-primary">Explore Flagship &rarr;</a>
+        {% if hero_plate_product %}
+          <a href="{% url 'product_detail' slug=hero_plate_product.slug %}" id="hero-explore-btn" class="btn btn-primary">Explore Flagship &rarr;</a>
+        {% else %}
+          <a href="{% url 'category_list' %}" id="hero-explore-btn" class="btn btn-primary">Explore All Categories &rarr;</a>
+        {% endif %}
         <a href="#plate-rail-chapter" class="btn btn-secondary">Enter Exhibition</a>
       </div>
     </div>
@@ -48,7 +52,7 @@
       <div class="hero-plate-slot" id="hero-plate-slot" data-hero-img="{{ hero_plate_product.primary_image_url }}">
         <div class="hero-webgl-canvas-container" id="hero-webgl-canvas-container" aria-hidden="true"></div>
         <div class="hero-specular-sweep" aria-hidden="true"></div>
-        {% include "includes/collectible_plate.html" with product=hero_plate_product eager=True %}
+        {% include "includes/collectible_plate.html" with product=hero_plate_product eager=True heading_tag="h2" %}
         {% if hero.is_auto %}
           <p class="hero-marginalia">Selected by number of ratings on Amazon</p>
         {% endif %}
@@ -58,6 +62,14 @@
             <button
               type="button"
               class="hero-thumb-btn is-active picker-thumb thumbnail-slot"
+              data-title="{{ hero_plate_product.display_name|strip_brand:hero_plate_product.parsed_brand }}"
+              data-brand="{{ hero_plate_product.parsed_brand|default:'' }}"
+              data-price="{{ hero_plate_product.selling_price|inr }}"
+              data-mrp="{% if hero_plate_product.mrp and hero_plate_product.mrp > hero_plate_product.selling_price %}{{ hero_plate_product.mrp|inr }}{% endif %}"
+              data-savings="{% if hero_plate_product.mrp and hero_plate_product.mrp > hero_plate_product.selling_price %}Save {{ hero_plate_product.mrp|subtract:hero_plate_product.selling_price|inr }}{% endif %}"
+              data-image="{{ hero_plate_product.primary_image_url }}"
+              data-url="{% url 'product_detail' slug=hero_plate_product.slug %}"
+              data-subtitle="{{ hero_plate_product.highlight_spec_summary|default:hero_plate_product.category.name }}"
               data-hero-title="{{ hero_plate_product.display_name }}"
               data-hero-url="{% url 'product_detail' slug=hero_plate_product.slug %}"
               data-hero-price="{{ hero_plate_product.selling_price|inr }}"
@@ -71,6 +83,14 @@
               <button
                 type="button"
                 class="hero-thumb-btn picker-thumb thumbnail-slot"
+                data-title="{{ hp.display_name|strip_brand:hp.parsed_brand }}"
+                data-brand="{{ hp.parsed_brand|default:'' }}"
+                data-price="{{ hp.selling_price|inr }}"
+                data-mrp="{% if hp.mrp and hp.mrp > hp.selling_price %}{{ hp.mrp|inr }}{% endif %}"
+                data-savings="{% if hp.mrp and hp.mrp > hp.selling_price %}Save {{ hp.mrp|subtract:hp.selling_price|inr }}{% endif %}"
+                data-image="{{ hp.primary_image_url }}"
+                data-url="{% url 'product_detail' slug=hp.slug %}"
+                data-subtitle="{{ hp.highlight_spec_summary|default:hp.category.name }}"
                 data-hero-title="{{ hp.display_name }}"
                 data-hero-url="{% url 'product_detail' slug=hp.slug %}"
                 data-hero-price="{{ hp.selling_price|inr }}"
@@ -345,17 +365,73 @@
     </div>
 
     {% if chapters %}
-      <div id="chapters" class="mt-8">
+      <div id="chapters" style="margin-top: 5rem; padding-top: 4rem; border-top: 1px solid var(--border-subtle); clear: both; overflow: hidden;">
+        <div class="flex justify-between items-baseline mb-6">
+          <div>
+            <span class="label text-muted font-mono text-2xs uppercase">Curated Portfolios &middot; Editorial Selection</span>
+            <h2 class="display-s mt-1 mb-1">Department Spotlight</h2>
+          </div>
+          <span class="caption text-muted font-mono">Flagship plates from core categories</span>
+        </div>
+
         {% for chapter in chapters %}
-          <div class="mb-4 pt-4 hairline-top">
-            <span class="label text-muted font-mono text-2xs uppercase">Department Spotlight &middot; {{ chapter.category.name }}</span>
-            <h3 class="display-s mt-1 mb-1">{{ chapter.category.name }}</h3>
-            {% if chapter.category.chapter_intro %}
-              <p class="caption text-muted mt-1 mb-2">{{ chapter.category.chapter_intro }}</p>
-            {% endif %}
-            <div class="dense-list mt-2 flex flex-wrap gap-2">
-              {% for pick in chapter.picks|slice:":4" %}
-                <a href="{% url 'product_detail' slug=pick.slug %}" class="btn btn-secondary btn-sm">{{ pick.display_name }} &rarr;</a>
+          <div class="department-spotlight-section mb-10 pt-4 hairline-top">
+            <div class="flex justify-between items-baseline mb-4">
+              <div>
+                <span class="label text-muted font-mono text-2xs uppercase">Department Spotlight &middot; {{ chapter.category.name }}</span>
+                <h3 class="display-s mt-1 mb-0">{{ chapter.category.name }}</h3>
+                {% if chapter.category.chapter_intro %}
+                  <p class="caption text-muted mt-1 mb-0">{{ chapter.category.chapter_intro }}</p>
+                {% endif %}
+              </div>
+              <a href="{% url 'category_detail' slug=chapter.category.slug %}" class="link-subtle font-semibold body-xs">Explore {{ chapter.category.name }} &rarr;</a>
+            </div>
+
+            <div class="spotlight-bento-grid grid-3 gap-4">
+              {% for pick in chapter.picks|slice:":3" %}
+                <div class="spotlight-mini-card p-4 bg-surface border-rule rounded flex flex-col justify-between hover-lift relative transition-all">
+                  <div>
+                    <div class="spotlight-card-top flex items-center justify-between mb-3">
+                      {% if pick.parsed_brand %}
+                        <span class="badge badge-subtle font-mono text-2xs uppercase">{{ pick.parsed_brand }}</span>
+                      {% else %}
+                        <span></span>
+                      {% endif %}
+                      {% if pick.mrp and pick.mrp > pick.selling_price %}
+                        <span class="badge badge-savings text-2xs">Save {{ pick.mrp|subtract:pick.selling_price|inr }}</span>
+                      {% endif %}
+                    </div>
+
+                    <div class="spotlight-card-media flex items-center justify-center p-4 bg-plate-surface rounded mb-3" style="min-height: 160px; max-height: 180px;">
+                      {% if pick.primary_image_url %}
+                        <img src="{{ pick.primary_image_url }}" alt="{{ pick.display_name }}" class="object-contain max-h-36 transition-transform group-hover:scale-105" loading="lazy" style="max-height: 130px; width: auto; object-fit: contain;">
+                      {% else %}
+                        {% include "includes/product_image.html" with product=pick %}
+                      {% endif %}
+                    </div>
+
+                    <a href="{% url 'product_detail' slug=pick.slug %}" class="font-semibold body-xs block hover:underline line-clamp-2 mb-2 text-ink">
+                      {{ pick.display_name }}
+                    </a>
+
+                    {% if pick.highlight_spec_summary %}
+                      <span class="badge badge-neutral text-3xs font-mono mb-3 block truncate">{{ pick.highlight_spec_summary }}</span>
+                    {% endif %}
+                  </div>
+
+                  <div class="spotlight-card-footer pt-3 border-rule-top flex items-center justify-between mt-auto">
+                    <div>
+                      <div class="font-bold body-sm text-accent">{{ pick.selling_price|inr }}</div>
+                      {% if pick.mrp and pick.mrp > pick.selling_price %}
+                        <div class="caption text-muted line-through text-2xs">{{ pick.mrp|inr }}</div>
+                      {% endif %}
+                    </div>
+                    <a href="{% url 'product_detail' slug=pick.slug %}" class="btn btn-secondary btn-xs inline-flex items-center gap-1">
+                      <span>View Plate</span>
+                      <span>&rarr;</span>
+                    </a>
+                  </div>
+                </div>
               {% endfor %}
             </div>
           </div>
@@ -364,79 +440,95 @@
     {% endif %}
   </section>
 
-  <!-- CHAPTER 07: CURATE YOUR DESK SETUP BUNDLE BUILDER -->
-  {% if bundle_audio_items and bundle_device_items and bundle_accessory_items %}
+  <!-- CHAPTER 07: CURATE YOUR DESK SETUP 6-SLOT CONFIGURATOR -->
+  {% if setup_slots %}
     <section class="section bundle-chapter-section" id="desk-bundle-chapter" aria-labelledby="bundle-heading">
       <div class="hairline-bottom pb-2 mb-4 flex justify-between items-baseline">
         <div>
           <span class="label text-muted font-mono text-2xs uppercase">Chapter 07 / 09 &middot; Setup Configurator</span>
-          <h2 id="bundle-heading" class="display-m">Curate Your Workstation Setup</h2>
+          <h2 id="bundle-heading" class="display-m">Build Your Complete Setup</h2>
         </div>
-        <span class="caption text-muted">Select 1 Audio + 1 Device + 1 Accessory for combined dispatch</span>
+        <span class="caption text-muted">Modular 6-slot hardware rig &middot; Click to select or uncheck any component</span>
       </div>
 
-      <div class="bundle-builder-container">
-        <!-- Column 1: Audio -->
-        <div class="bundle-column" data-col="audio">
-          <span class="bundle-column-title">01 / Audio Foundation</span>
-          {% for item in bundle_audio_items %}
-            <div class="bundle-picker-card {% if forloop.first %}is-selected{% endif %}" data-id="{{ item.id }}" data-price="{{ item.selling_price }}">
-              {% if item.primary_image_url %}
-                <img src="{{ item.primary_image_url }}" alt="{{ item.display_name }}" class="bundle-picker-thumb">
-              {% endif %}
-              <div class="flex-1">
-                <span class="caption text-accent font-mono text-2xs uppercase">{{ item.parsed_brand }}</span>
-                <h3 class="body-xs font-semibold line-clamp-1">{{ item.display_name }}</h3>
-                <span class="body-sm font-semibold">{{ item.selling_price|inr }}</span>
+      <div class="setup-configurator-grid grid-3 gap-6">
+        {% for slot in setup_slots %}
+          <div class="bundle-column p-4 bg-surface border-rule rounded flex flex-col justify-between" data-col="slot-{{ slot.num }}">
+            <div class="bundle-column-header hairline-bottom pb-2 mb-3 flex items-center justify-between">
+              <div>
+                <span class="label text-muted font-mono text-3xs uppercase block">Slot {{ slot.num }}</span>
+                <h3 class="body-xs font-bold uppercase tracking-wider mb-0">{{ slot.title }}</h3>
               </div>
+              <span class="badge badge-subtle font-mono text-3xs">{{ slot.subtitle }}</span>
             </div>
-          {% endfor %}
-        </div>
 
-        <!-- Column 2: Device -->
-        <div class="bundle-column" data-col="device">
-          <span class="bundle-column-title">02 / Primary Device</span>
-          {% for item in bundle_device_items %}
-            <div class="bundle-picker-card {% if forloop.first %}is-selected{% endif %}" data-id="{{ item.id }}" data-price="{{ item.selling_price }}">
-              {% if item.primary_image_url %}
-                <img src="{{ item.primary_image_url }}" alt="{{ item.display_name }}" class="bundle-picker-thumb">
-              {% endif %}
-              <div class="flex-1">
-                <span class="caption text-accent font-mono text-2xs uppercase">{{ item.parsed_brand }}</span>
-                <h3 class="body-xs font-semibold line-clamp-1">{{ item.display_name }}</h3>
-                <span class="body-sm font-semibold">{{ item.selling_price|inr }}</span>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
+            <div class="bundle-options-list flex flex-col gap-2.5">
+              {% for item in slot.items %}
+                <div
+                  role="button"
+                  tabindex="0"
+                  class="bundle-picker-card {% if forloop.first %}is-selected{% endif %} p-2.5 border-rule rounded cursor-pointer transition-all flex items-center gap-3 relative hover-lift"
+                  data-id="{{ item.id }}"
+                  data-price="{{ item.selling_price }}"
+                  data-mrp="{{ item.mrp|default:item.selling_price }}"
+                  data-slot="{{ slot.num }}"
+                  aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+                >
+                  <div class="bundle-card-img-wrap flex items-center justify-center p-1 bg-plate-surface rounded" style="width: 52px; height: 52px; flex-shrink: 0;">
+                    {% if item.primary_image_url %}
+                      <img src="{{ item.primary_image_url }}" alt="{{ item.display_name }}" class="object-contain max-h-12 max-w-12" loading="lazy">
+                    {% else %}
+                      {% include "includes/product_image.html" with product=item %}
+                    {% endif %}
+                  </div>
 
-        <!-- Column 3: Accessory -->
-        <div class="bundle-column" data-col="accessory">
-          <span class="bundle-column-title">03 / Workstation Accessory</span>
-          {% for item in bundle_accessory_items %}
-            <div class="bundle-picker-card {% if forloop.first %}is-selected{% endif %}" data-id="{{ item.id }}" data-price="{{ item.selling_price }}">
-              {% if item.primary_image_url %}
-                <img src="{{ item.primary_image_url }}" alt="{{ item.display_name }}" class="bundle-picker-thumb">
-              {% endif %}
-              <div class="flex-1">
-                <span class="caption text-accent font-mono text-2xs uppercase">{{ item.parsed_brand }}</span>
-                <h3 class="body-xs font-semibold line-clamp-1">{{ item.display_name }}</h3>
-                <span class="body-sm font-semibold">{{ item.selling_price|inr }}</span>
-              </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center justify-between gap-1 mb-0.5">
+                      <span class="caption text-muted font-mono text-3xs uppercase truncate">{{ item.parsed_brand }}</span>
+                      <span class="bundle-card-status-pill badge {% if forloop.first %}badge-accent{% else %}badge-neutral{% endif %} text-3xs font-mono">
+                        {% if forloop.first %}Selected ✓{% else %}Select{% endif %}
+                      </span>
+                    </div>
+                    <div class="body-xs font-semibold truncate hover:underline text-ink" title="{{ item.display_name }}">
+                      {{ item.display_name }}
+                    </div>
+                    <div class="flex items-baseline gap-2 mt-0.5">
+                      <span class="body-xs font-bold text-accent">{{ item.selling_price|inr }}</span>
+                      {% if item.mrp and item.mrp > item.selling_price %}
+                        <span class="caption text-muted line-through text-3xs">{{ item.mrp|inr }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
             </div>
-          {% endfor %}
-        </div>
+          </div>
+        {% endfor %}
       </div>
 
-      <div class="bundle-checkout-bar">
-        <div>
-          <span class="caption text-muted font-mono uppercase block">Combined Workstation Total</span>
-          <span class="bundle-summary-price">₹0</span>
+      <div class="bundle-checkout-bar mt-8 p-4 bg-surface border-rule rounded flex items-center justify-between flex-wrap gap-4">
+        <div class="flex items-center gap-6">
+          <div>
+            <span class="caption text-muted font-mono uppercase block text-2xs">Configured Items</span>
+            <span class="setup-summary-count body-m font-bold font-mono text-ink">6 Components</span>
+          </div>
+          <div class="hairline-right pr-6" style="border-right: 1px solid var(--border-subtle);">
+            <span class="caption text-muted font-mono uppercase block text-2xs">Live Setup Total</span>
+            <span class="bundle-summary-price display-s font-bold text-accent">₹0</span>
+          </div>
+          <div>
+            <span class="caption text-muted font-mono uppercase block text-2xs">Total MRP Savings</span>
+            <span class="setup-summary-savings body-m font-bold font-mono text-success">₹0</span>
+          </div>
         </div>
-        <form action="{% url 'cart_add_bundle' %}" method="post">
+
+        <form action="{% url 'cart_add_bundle' %}" method="post" id="bundle-add-form" class="m-0 flex items-center gap-3">
           {% csrf_token %}
           <input type="hidden" name="product_ids" id="bundle-product-ids" value="">
-          <button type="submit" class="btn btn-primary">Add Setup to Bag &rarr;</button>
+          <button type="submit" id="bundle-submit-btn" class="btn btn-primary">
+            <span>Add Selected Setup to Bag</span>
+            <span>&rarr;</span>
+          </button>
         </form>
       </div>
     </section>
@@ -450,17 +542,37 @@
       <p class="caption text-muted">Transparent dispatch from Ahmedabad and clear order policies.</p>
     </div>
 
-    <div class="pincode-inline-box">
-      <span class="font-mono text-xs text-muted uppercase">Estimate Transit to Delivery PIN:</span>
-      <form action="{% url 'shipping_check' %}" method="get" class="flex gap-2 items-center">
-        <input type="text" name="pincode" value="{{ remembered_pincode }}" maxlength="6" class="form-input form-input-sm" style="width: 110px;" aria-label="Enter 6-digit delivery pincode">
-        <button type="submit" class="btn btn-secondary btn-sm">Check PIN</button>
-      </form>
-      {% if delivery_estimate %}
-        <span class="caption text-muted ml-auto">
-          Zone {{ delivery_estimate.zone|upper }}: Estimated transit {{ delivery_estimate.min_days }}&ndash;{{ delivery_estimate.max_days }} business days. Free shipping on orders over {{ free_shipping_threshold|inr }}.
-        </span>
-      {% endif %}
+    <div class="pincode-inline-box flex flex-col gap-2">
+      <div class="flex items-center gap-3 flex-wrap">
+        <span class="font-mono text-xs text-muted uppercase">Estimate Transit to Delivery PIN:</span>
+        <form action="{% url 'shipping_estimate' %}" method="get" class="pincode-live-form flex gap-2 items-center m-0">
+          <input
+            type="text"
+            name="pincode"
+            id="home-pincode-input"
+            value="{{ remembered_pincode }}"
+            maxlength="6"
+            class="form-input form-input-sm font-mono pincode-live-input"
+            style="width: 110px;"
+            aria-label="Enter 6-digit delivery pincode"
+            placeholder="380001"
+          >
+          <button type="submit" class="btn btn-secondary btn-sm pincode-live-btn">Check PIN</button>
+        </form>
+      </div>
+      <div class="pincode-live-result mt-1" id="home-pincode-result">
+        {% if delivery_estimate %}
+          {% if delivery_estimate.serviceable %}
+            <span class="pincode-status-badge is-success">
+              <span>✓ Deliverable to {{ remembered_pincode }} &mdash; Estimated delivery in {{ delivery_estimate.est_days_min|default:2 }}&ndash;{{ delivery_estimate.est_days_max|default:4 }} days &bull; COD &amp; Express Available</span>
+            </span>
+          {% else %}
+            <span class="pincode-status-badge is-error">
+              <span>✕ Service unavailable for PIN {{ remembered_pincode }} (Please enter a valid 6-digit Indian pincode)</span>
+            </span>
+          {% endif %}
+        {% endif %}
+      </div>
     </div>
 
     <div class="trust-pillars-grid">

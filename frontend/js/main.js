@@ -17,6 +17,7 @@ import { initSearchSuggest } from "./modules/search-suggest.js";
 import { initMotionTier, initMotionToggleButton } from "./modules/capability.js";
 import { initMediaSlots } from "./modules/media_slot.js";
 import { initRecentlyViewed } from "./modules/recently-viewed.js";
+import { initPincodeChecker } from "./modules/pincode_checker.js";
 
 function initPasswordToggle() {
   document.addEventListener("click", (e) => {
@@ -95,6 +96,20 @@ function initCardViewTransitions() {
   });
 }
 
+function initHorizontalFilters() {
+  document.addEventListener("change", (e) => {
+    const target = e.target;
+    if (
+      target.matches(".horizontal-filter-select, #filter-brand, #filter-sort") ||
+      target.matches(".horizontal-filter-group input[type='checkbox']")
+    ) {
+      if (target.form) {
+        target.form.submit();
+      }
+    }
+  });
+}
+
 function bootstrap() {
   initMotionTier();
   initMotionToggleButton();
@@ -114,6 +129,8 @@ function bootstrap() {
   initCardViewTransitions();
   initMediaSlots();
   initRecentlyViewed();
+  initPincodeChecker();
+  initHorizontalFilters();
 }
 
 if (document.readyState === "loading") {

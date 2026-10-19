@@ -65,7 +65,7 @@
                         id="qty-{{ line.item_id }}"
                         name="quantity"
                         value="{{ line.quantity }}"
-                        min="1"
+                        min="0"
                         max="{{ max_qty_per_line }}"
                         class="stepper-input"
                       >
@@ -157,35 +157,78 @@
       <aside aria-label="Bag order summary" class="cart-summary-card">
         <h2 class="summary-title">Order Summary</h2>
 
-        <!-- Coupon Apply Block (WP7: clean promo field) -->
+        <!-- Coupon Apply Block (WP7: clean promo field & Phase R9 1-click apply) -->
         <div class="hairline-bottom pb-4 mb-4">
           {% if applied_coupon_code %}
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center mb-3">
               <div>
                 <span class="badge badge-in-stock">Coupon: {{ applied_coupon_code }}</span>
                 <span class="text-success caption">-{{ summary.applied_discount|inr }}</span>
               </div>
               <form action="{% url 'coupon_remove' %}" method="post" class="u-inline-form">
                 {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'cart_detail' %}">
                 <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
               </form>
             </div>
           {% else %}
-            <form action="{% url 'coupon_apply' %}" method="post" data-fetch-enhance>
+            <form action="{% url 'coupon_apply' %}" method="post" data-fetch-enhance class="mb-3">
               {% csrf_token %}
+              <input type="hidden" name="next" value="{% url 'cart_detail' %}">
               <label for="id-coupon-code" class="form-label mb-1">Promo code</label>
               <div class="flex gap-2">
                 <input
                   type="text"
                   id="id-coupon-code"
                   name="code"
-                  class="form-control"
+                  class="form-control font-mono uppercase"
                   placeholder="Enter code"
                   autocomplete="off"
                 >
                 <button type="submit" class="btn btn-secondary">Apply</button>
               </div>
             </form>
+          {% endif %}
+
+          {% if available_coupons %}
+            <div class="available-coupons-box mt-3 pt-3 border-rule border-t">
+              <span class="caption text-muted font-mono uppercase text-2xs block mb-2 font-bold tracking-wider">Available Coupons &mdash; Click to Apply</span>
+              <div class="flex flex-col gap-2">
+                {% for cp in available_coupons %}
+                  <div class="coupon-click-card p-2.5 rounded border border-subtle bg-surface text-xs flex justify-between items-center gap-2 {% if cp.is_applied %}border-accent bg-accent-soft{% endif %}">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <strong class="font-mono text-accent text-xs">{{ cp.code }}</strong>
+                        {% if cp.is_applied %}
+                          <span class="badge badge-in-stock text-2xs">Applied &check;</span>
+                        {% elif cp.is_valid %}
+                          <span class="badge badge-secondary text-2xs text-success">Saves {{ cp.savings_amount|inr }}</span>
+                        {% else %}
+                          <span class="caption text-muted text-2xs">Add {{ cp.needed_amount|inr }} more to unlock</span>
+                        {% endif %}
+                      </div>
+                      <p class="caption text-muted text-2xs truncate mt-0.5" title="{{ cp.description }}">{{ cp.description }}</p>
+                    </div>
+                    {% if cp.is_applied %}
+                      <form action="{% url 'coupon_remove' %}" method="post" class="m-0">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'cart_detail' %}">
+                        <button type="submit" class="btn btn-2xs btn-secondary">Remove</button>
+                      </form>
+                    {% elif cp.is_valid %}
+                      <form action="{% url 'coupon_apply' %}" method="post" class="m-0">
+                        {% csrf_token %}
+                        <input type="hidden" name="code" value="{{ cp.code }}">
+                        <input type="hidden" name="next" value="{% url 'cart_detail' %}">
+                        <button type="submit" class="btn btn-2xs btn-primary">Apply</button>
+                      </form>
+                    {% else %}
+                      <button type="button" class="btn btn-2xs btn-secondary opacity-50 cursor-not-allowed" disabled>Locked</button>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
           {% endif %}
         </div>
 

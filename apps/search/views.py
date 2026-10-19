@@ -22,12 +22,19 @@ def search_view(request: HttpRequest) -> HttpResponse:
     Faceted search results page with token scoring, spelling correction, and filters.
     """
     query = request.GET.get("q", "").strip()
-    category_slug = request.GET.get("c", "").strip() or None
+    category_slug = request.GET.get("category", "").strip() or request.GET.get("c", "").strip() or None
     brand = request.GET.get("brand", "").strip() or None
     sort_by = request.GET.get("sort", "popularity").strip()
 
     min_price_val = None
     max_price_val = None
+    min_rating_val = None
+
+    if request.GET.get("rating"):
+        try:
+            min_rating_val = Decimal(request.GET.get("rating").strip())
+        except Exception:
+            pass
 
     bracket_idx = request.GET.get("bracket")
     if bracket_idx is not None and bracket_idx != "":
@@ -58,6 +65,7 @@ def search_view(request: HttpRequest) -> HttpResponse:
         brand=brand,
         min_price=min_price_val,
         max_price=max_price_val,
+        min_rating=min_rating_val,
         sort_by=sort_by,
     )
 
@@ -86,6 +94,7 @@ def search_view(request: HttpRequest) -> HttpResponse:
             "bracket": bracket_idx,
             "min_price": min_price_val,
             "max_price": max_price_val,
+            "rating": request.GET.get("rating", "").strip(),
         },
         "sort_by": sort_by,
         "querystring": querystring,

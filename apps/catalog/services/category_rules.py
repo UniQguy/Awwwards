@@ -219,8 +219,18 @@ RE_SMARTWATCH = re.compile(
 )
 
 # ----------------------------------------------------------------------
-# 7. Keyboards & Mice
+# 7. Keyboards & Mice vs Musical Instruments
 # ----------------------------------------------------------------------
+
+RE_MUSICAL_INSTRUMENT = re.compile(
+    r"\b(?:musical\s+keyboard|portable\s+keyboard|piano|synthesizer|synthesiser|harmonium|guitar|ukulele|casio\s+ctx|casio\s+sa|casio\s+ct-?s|yamaha\s+psr|yamaha\s+f\d|midi\s+keyboard|electronic\s+keyboard\s+with\s+adaptor|keyboard\s+with\s+adaptor)\b",
+    re.IGNORECASE,
+)
+
+RE_TABLETS = re.compile(
+    r"\b(?:tablet|tablets|ipad|galaxy\s+tab|lenovo\s+tab|motorola\s+tab|realme\s+pad|redmi\s+pad|xiaomi\s+pad|nokia\s+t\d+|oppo\s+pad)\b",
+    re.IGNORECASE,
+)
 
 RE_KEYBOARDS_MICE = re.compile(
     r"\b(?:keyboard|keypad|mouse|mice|trackpad|mousepad|mouse\s*pad|desk\s*mat|keycaps|mechanical\s+keyboard|wireless\s+mouse|gaming\s+mouse|combo\s+keyboard|keyboard\s+and\s+mouse)\b",
@@ -246,7 +256,7 @@ RE_PHONE_PREFIX = re.compile(
 )
 
 RE_PHONE_SPECS = re.compile(
-    r"\b(?:\d+GB\s+RAM|\d+GB\s+Storage|\d+TB\s+Storage|\d+mAh|\d+MP\s+(?:Quad|Dual|Triple|Rear|Front|AI)?\s*Camera|Super\s+Amoled|5G\s+Mobile|Smartphone)\b",
+    r"\b(?:\d+GB\s+RAM|\d+GB\s+Storage|\d+TB\s+Storage|\d+mAh|\d+MP\s+(?:Quad|Dual|Triple|Rear|Front|AI)?\s*Camera|Super\s+Amoled|5G\s+Mobile)\b",
     re.IGNORECASE,
 )
 
@@ -272,6 +282,10 @@ def classify_category(title: str, sub_category: str = "") -> str:
     text = f"{title} {sub_category}".strip()
 
     # 1. HARD EXCLUSIONS & DISAMBIGUATIONS
+    # Musical instruments (Yamaha PSR, Casio, piano, synthesizer) -> strictly 'other' (Sundry Electronics)
+    if RE_MUSICAL_INSTRUMENT.search(text):
+        return "other"
+
     # Storage & Memory Cards -> NOT cameras -> 'other'
     if RE_STORAGE_MEMORY_CARD.search(text):
         return "other"
@@ -289,9 +303,10 @@ def classify_category(title: str, sub_category: str = "") -> str:
         if not re.search(r"\b(?:smartwatch|smart\s*watch|fitness\s*tracker|activity\s*tracker|spo2|heart\s*rate|bluetooth\s*calling)\b", text, re.I):
             return "cases-protectors"
 
-
     # 2. CASES & PROTECTORS PRECEDENCE
-    if RE_CASE_ACCESSORY_PREFIX.search(text) or RE_CASE_ACCESSORY_TERMS.search(text):
+    if re.search(r"\bwith\s+(?:flip\s+cover|case|cover)\b", text, re.I) and (RE_TABLETS.search(text) or RE_PHONE_PREFIX.search(text) or re.search(r"\bandroid\b", text, re.I)):
+        pass
+    elif RE_CASE_ACCESSORY_PREFIX.search(text) or RE_CASE_ACCESSORY_TERMS.search(text) or re.search(r"\b(?:case|cover|tempered\s*glass|screen\s*protector|skin)\s+(?:for|compatible)\b", text, re.I):
         if not (RE_PHONE_PREFIX.search(text) and RE_PHONE_SPECS.search(text) and not re.search(r"\b(?:cover|case|glass)\s+for\b", text, re.I)):
             return "cases-protectors"
 
@@ -318,25 +333,29 @@ def classify_category(title: str, sub_category: str = "") -> str:
     if RE_SMARTWATCH.search(text):
         return "smartwatches-bands"
 
-    # 8. KEYBOARDS & MICE
-    if RE_KEYBOARDS_MICE.search(text):
+    # 8. KEYBOARDS & MICE (Computer input peripherals only)
+    if RE_KEYBOARDS_MICE.search(text) and not RE_MUSICAL_INSTRUMENT.search(text):
         return "keyboards-mice"
 
     # 9. CAMERAS & OPTICS
     if RE_CAMERA_DEVICE.search(text):
         return "cameras"
 
-    # 10. SMARTPHONES & DEVICES
+    # 10. CABLES, CHARGERS & POWER SECONDARY PRECEDENCE
+    if re.search(r"\b(?:cable|charger|charging|power\s*bank|powerbank|adapter|adaptor|converter|usb\s*hub)\b", text, re.I) and not RE_PHONE_SPECS.search(text):
+        return "cables-chargers-powerbanks"
+
+    # 11. SMARTPHONES & TABLETS / CORE DEVICES
+    if RE_TABLETS.search(text) and not re.search(r"\b(?:case|cover|glass|sleeve|pouch|stand|holder)\b", text, re.I):
+        return "smartphones"
+
     if RE_PHONE_PREFIX.search(text):
         if not re.search(r"\b(?:cable|charger|adapter|case|cover|glass)\b", text, re.I) or RE_PHONE_SPECS.search(text):
             return "smartphones"
 
     if re.search(r"\b(?:smartphone|smartphones|mobile\s+phone|cellular\s+phone)\b", text, re.I):
-        return "smartphones"
-
-    # 11. SECONDARY CABLES / CHARGERS CATCH-ALL
-    if re.search(r"\b(?:charger|charging\s+cable|usb\s+cable|type-c\s+cable|lightning\s+cable|power\s+adapter|gan\s+fast\s+charger|wall\s+charger)\b", text, re.I):
-        return "cables-chargers-powerbanks"
+        if not re.search(r"\b(?:cable|charger|adapter|case|cover|glass|protector|holder|stand)\b", text, re.I) or RE_PHONE_SPECS.search(text):
+            return "smartphones"
 
     return "other"
 

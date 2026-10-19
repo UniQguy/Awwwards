@@ -51,6 +51,29 @@ def get_token_synonyms(token: str) -> Set[str]:
     return syns
 
 
+ACCESSORY_KEYWORDS = {
+    "case", "cover", "back cover", "flip cover", "tempered", "glass",
+    "protector", "cable", "cord", "charger", "adapter", "holder",
+    "stand", "strap", "skin", "sleeve", "mount", "guard", "screen guard",
+}
+
+PRIMARY_HARDWARE_CATEGORIES = {
+    "smartphones", "earphones-headphones", "tvs", "cameras",
+    "smartwatches-bands", "speakers", "keyboards-mice",
+}
+
+ACCESSORY_CATEGORIES = {
+    "cases-protectors", "cables-chargers-powerbanks",
+}
+
+PHONE_BRANDS = {
+    "oppo", "vivo", "realme", "redmi", "xiaomi", "oneplus",
+    "samsung", "iphone", "apple", "iqoo", "motorola", "nokia", "pixel",
+}
+
+TIER_MODIFIERS = {"pro", "max", "ultra", "plus", "mini", "lite"}
+
+
 def calculate_match_score(
     product: Product,
     query_clean: str,
@@ -64,61 +87,131 @@ def calculate_match_score(
        400: All tokens (or synonyms) match as word prefixes
        200+: Fuzzy similarity score (difflib)
          0: No match
+
+    Plus Phase R9 domain boosts and penalties:
+      +600: Primary hardware category boost (when query does not contain accessory keywords)
+      -500: Accessory category penalty or "for / compatible with" penalty
+      +800: Smartphone category boost (when query mentions phone / smartphone / phone brand)
+      +500: Brand match boost when phone brand queried (-600 penalty for other brands)
+      +1000: Exact base model tier boost (e.g. "iphone 14" vs "iphone 14 pro/max")
     """
     p_sku = (product.sku or "").lower().strip()
     p_title = (product.display_name or "").lower().strip()
     p_raw = (product.raw_name or "").lower().strip()
     p_brand = (product.parsed_brand or "").lower().strip()
     p_search = (product.search_text or "").lower().strip()
+    cat_slug = product.category.slug if product.category else ""
+
+    base_score = 0
 
     # 1. Exact SKU or title match
     if query_clean in (p_sku, p_title, p_raw):
-        return 1000
+        base_score = 1000
+    else:
+        title_words = set(re.findall(r"\w+", p_title))
+        search_words = set(re.findall(r"\w+", p_search)) | title_words
 
-    title_words = set(re.findall(r"\w+", p_title))
-    search_words = set(re.findall(r"\w+", p_search)) | title_words
+        # 2. All tokens as whole words (accounting for synonyms)
+        all_tokens_as_whole_words = True
+        for t in tokens:
+            syns = get_token_synonyms(t)
+            if not (syns & search_words):
+                all_tokens_as_whole_words = False
+                break
+        if all_tokens_as_whole_words:
+            base_score = 800
+        else:
+            # 3. Brand + Model match
+            brand_tokens = [t for t in tokens if t in p_brand or any(syn in p_brand for syn in get_token_synonyms(t))]
+            model_tokens = [t for t in tokens if t in title_words or any(syn in title_words for syn in get_token_synonyms(t))]
+            if brand_tokens and model_tokens:
+                base_score = 600
+            else:
+                # 4. All tokens as prefixes
+                all_tokens_as_prefixes = True
+                for t in tokens:
+                    syns = get_token_synonyms(t)
+                    if not any(any(w.startswith(syn) for syn in syns) for w in search_words):
+                        all_tokens_as_prefixes = False
+                        break
+                if all_tokens_as_prefixes:
+                    base_score = 400
+                else:
+                    # 5. Fuzzy match (difflib)
+                    title_ratio = difflib.SequenceMatcher(None, query_clean, p_title).ratio()
+                    token_ratios = []
+                    for t in tokens:
+                        best_t = max((difflib.SequenceMatcher(None, t, w).ratio() for w in search_words), default=0.0)
+                        token_ratios.append(best_t)
+                    avg_token_ratio = sum(token_ratios) / len(token_ratios) if token_ratios else 0.0
 
-    # 2. All tokens as whole words (accounting for synonyms)
-    all_tokens_as_whole_words = True
-    for t in tokens:
-        syns = get_token_synonyms(t)
-        if not (syns & search_words):
-            all_tokens_as_whole_words = False
-            break
-    if all_tokens_as_whole_words:
-        return 800
+                    if title_ratio >= 0.55 or avg_token_ratio >= 0.65:
+                        fuzzy_score = int(max(title_ratio, avg_token_ratio) * 100)
+                        base_score = 200 + fuzzy_score
 
-    # 3. Brand + Model match
-    # At least one token matches brand and at least one token matches a word in title/model
-    brand_tokens = [t for t in tokens if t in p_brand or any(syn in p_brand for syn in get_token_synonyms(t))]
-    model_tokens = [t for t in tokens if t in title_words or any(syn in title_words for syn in get_token_synonyms(t))]
-    if brand_tokens and model_tokens:
-        return 600
+    if base_score <= 0:
+        return 0
 
-    # 4. All tokens as prefixes
-    all_tokens_as_prefixes = True
-    for t in tokens:
-        syns = get_token_synonyms(t)
-        if not any(any(w.startswith(syn) for syn in syns) for w in search_words):
-            all_tokens_as_prefixes = False
-            break
-    if all_tokens_as_prefixes:
-        return 400
+    score = base_score
 
-    # 5. Fuzzy match (difflib)
-    # Check overall title ratio or token-level fuzzy matches (handling typos like "hedphones")
-    title_ratio = difflib.SequenceMatcher(None, query_clean, p_title).ratio()
-    token_ratios = []
-    for t in tokens:
-        best_t = max((difflib.SequenceMatcher(None, t, w).ratio() for w in search_words), default=0.0)
-        token_ratios.append(best_t)
-    avg_token_ratio = sum(token_ratios) / len(token_ratios) if token_ratios else 0.0
+    # Only apply domain boosts/penalties to direct matches (base_score >= 400)
+    # This ensures fuzzy typo queries (e.g. "aplle") stay in the fuzzy score range (< 400)
+    # so is_fallback remains True and did_you_mean triggers properly.
+    if base_score >= 400:
+        title_words = set(re.findall(r"\w+", p_title))
 
-    if title_ratio >= 0.55 or avg_token_ratio >= 0.65:
-        fuzzy_score = int(max(title_ratio, avg_token_ratio) * 100)
-        return 200 + fuzzy_score
+        # Phase R9: 1. Primary Device Boost vs Accessory Penalty
+        query_has_accessory = any(k in query_clean for k in ACCESSORY_KEYWORDS) or any(t in ACCESSORY_KEYWORDS for t in tokens)
+        is_accessory_product = (
+            cat_slug in ACCESSORY_CATEGORIES
+            or "for " in p_title
+            or "compatible with" in p_title
+            or any(k in p_title for k in ("cover", "case", "tempered", "glass", "protector"))
+        )
 
-    return 0
+        if not query_has_accessory:
+            if cat_slug in PRIMARY_HARDWARE_CATEGORIES and not is_accessory_product:
+                score += 600
+            elif is_accessory_product:
+                score -= 500
+
+        # Phase R9: Phone query boost & phone brand prioritization
+        query_has_phone = (
+            any(w in query_clean for w in ("phone", "smartphone", "mobile"))
+            or any(b in query_clean for b in PHONE_BRANDS)
+        )
+        if query_has_phone:
+            if cat_slug == "smartphones" and not is_accessory_product:
+                score += 800
+
+            queried_phone_brands = [b for b in PHONE_BRANDS if b in query_clean or any(t == b for t in tokens)]
+            if queried_phone_brands:
+                brand_matched = (
+                    any(b in p_brand for b in queried_phone_brands)
+                    or (any(b in ("apple", "iphone") for b in queried_phone_brands) and ("apple" in p_brand or "iphone" in p_title))
+                )
+                if brand_matched:
+                    score += 500
+                else:
+                    score -= 600
+
+        # Phase R9: 2. Exact Model Match Priority (e.g., "iphone 14" vs "iphone 14 pro max")
+        query_modifiers = {m for m in TIER_MODIFIERS if m in tokens or m in query_clean}
+        title_modifiers = {m for m in TIER_MODIFIERS if m in title_words}
+
+        all_query_tokens_in_title = all(
+            t in title_words or any(syn in title_words for syn in get_token_synonyms(t))
+            for t in tokens
+        )
+        if all_query_tokens_in_title and not is_accessory_product:
+            if not query_modifiers and not title_modifiers:
+                # Exact base model (e.g. "Apple iPhone 14 (128 GB)")
+                score += 1000
+            elif query_modifiers and query_modifiers == title_modifiers:
+                # Exact modifier tier match (e.g. "iPhone 14 Pro")
+                score += 1000
+
+    return max(1, score)
 
 
 def execute_catalog_search(

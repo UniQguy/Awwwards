@@ -35,84 +35,128 @@
   </header>
 
   <div class="catalog-layout">
-    <!-- Search Facets Sidebar -->
-    <aside class="filter-panel-aside" aria-label="Search filters">
-      <form method="get" action="{% url 'search_results' %}">
+    <!-- Top Horizontal Filter & Sort Command Bar -->
+    <div class="horizontal-filter-bar">
+      <form method="get" action="{% url 'search_results' %}" class="horizontal-filter-group m-0" id="search-filter-form">
         <input type="hidden" name="q" value="{{ query }}">
+        <input type="hidden" name="sort" value="{{ sort_by }}">
 
-        <fieldset class="filter-fieldset">
-          <legend class="filter-legend">Filter Results</legend>
-
-          <!-- Sort -->
-          <div class="form-group">
-            <label for="search-sort" class="form-label">
-              <span>Sort</span>
-            </label>
-            <select name="sort" id="search-sort" class="form-control">
-              <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Most Popular</option>
-              <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
-              <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
-              <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Highest Rated</option>
-              <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+        <!-- Category Facet -->
+        {% if facets.categories %}
+          <div class="filter-select-wrap">
+            <select name="c" class="horizontal-filter-select" aria-label="Filter by Category">
+              <option value="">All Categories</option>
+              {% for cat in facets.categories %}
+                <option value="{{ cat.slug }}" {% if selected_filters.category == cat.slug %}selected{% endif %}>
+                  {{ cat.name }} ({{ cat.product_count }})
+                </option>
+              {% endfor %}
             </select>
           </div>
+        {% endif %}
 
-          <!-- Category Facet -->
-          {% if facets.categories %}
-            <div class="form-group">
-              <label for="filter-category" class="form-label">
-                <span>Category</span>
-              </label>
-              <select name="c" id="filter-category" class="form-control">
-                <option value="">All Categories</option>
-                {% for cat in facets.categories %}
-                  <option value="{{ cat.slug }}" {% if selected_filters.category == cat.slug %}selected{% endif %}>
-                    {{ cat.name }} ({{ cat.product_count }})
-                  </option>
-                {% endfor %}
-              </select>
-            </div>
-          {% endif %}
-
-          <!-- Brand Facet -->
-          {% if facets.brands %}
-            <div class="form-group">
-              <label for="filter-brand" class="form-label">
-                <span>Brand</span>
-              </label>
-              <select name="brand" id="filter-brand" class="form-control">
-                <option value="">All Brands</option>
-                {% for b in facets.brands %}
-                  <option value="{{ b.parsed_brand }}" {% if selected_filters.brand == b.parsed_brand %}selected{% endif %}>
-                    {{ b.parsed_brand }} ({{ b.count }})
-                  </option>
-                {% endfor %}
-              </select>
-            </div>
-          {% endif %}
-
-          <!-- Price Min/Max -->
-          <div class="form-group">
-            <label for="search-min-price" class="form-label">
-              <span>Min Price (₹)</span>
-            </label>
-            <input type="number" step="1" name="min_price" id="search-min-price" class="form-control" value="{{ selected_filters.min_price|default:'' }}">
+        <!-- Brand Facet -->
+        {% if facets.brands %}
+          <div class="filter-select-wrap">
+            <select name="brand" class="horizontal-filter-select" aria-label="Filter by Brand">
+              <option value="">All Brands</option>
+              {% for b in facets.brands %}
+                <option value="{{ b.parsed_brand }}" {% if selected_filters.brand == b.parsed_brand %}selected{% endif %}>
+                  {{ b.parsed_brand }} ({{ b.count }})
+                </option>
+              {% endfor %}
+            </select>
           </div>
+        {% endif %}
 
-          <div class="form-group">
-            <label for="search-max-price" class="form-label">
-              <span>Max Price (₹)</span>
-            </label>
-            <input type="number" step="1" name="max_price" id="search-max-price" class="form-control" value="{{ selected_filters.max_price|default:'' }}">
-          </div>
+        <!-- Price Range Bracket -->
+        <div class="filter-select-wrap">
+          <select name="bracket" class="horizontal-filter-select" aria-label="Filter by Price Bracket">
+            <option value="">Price: All Ranges</option>
+            <option value="0" {% if selected_filters.bracket == '0' %}selected{% endif %}>Under ₹999</option>
+            <option value="1" {% if selected_filters.bracket == '1' %}selected{% endif %}>₹1,000–₹4,999</option>
+            <option value="2" {% if selected_filters.bracket == '2' %}selected{% endif %}>₹5,000–₹19,999</option>
+            <option value="3" {% if selected_filters.bracket == '3' %}selected{% endif %}>₹20,000–₹49,999</option>
+            <option value="4" {% if selected_filters.bracket == '4' %}selected{% endif %}>₹50,000+</option>
+          </select>
+        </div>
 
-          <div class="btn-group mt-2">
-            <button type="submit" class="btn btn-primary btn-block">Apply</button>
-            <a href="{% url 'search_results' %}?q={{ query|urlencode }}" class="btn btn-secondary">Reset</a>
-          </div>
-        </fieldset>
+        <!-- Rating Filter -->
+        <div class="filter-select-wrap">
+          <select name="rating" class="horizontal-filter-select" aria-label="Filter by Rating">
+            <option value="">Customer Rating</option>
+            <option value="4" {% if request.GET.rating == '4' %}selected{% endif %}>4★ &amp; Up</option>
+            <option value="3" {% if request.GET.rating == '3' %}selected{% endif %}>3★ &amp; Up</option>
+          </select>
+        </div>
+
+        <!-- Availability Toggle -->
+        <label class="caption flex items-center gap-1.5 cursor-pointer font-mono text-xs">
+          <input type="checkbox" name="in_stock" value="1" {% if request.GET.in_stock == '1' or not request.GET.in_stock %}checked{% endif %} aria-label="In Stock Only">
+          <span>In Stock</span>
+        </label>
       </form>
-    </aside>
+
+      <!-- Right Side: Sort & Result Count -->
+      <div class="flex items-center gap-4 flex-wrap">
+        <span class="caption text-muted font-mono text-xs">
+          Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} verified products
+        </span>
+
+        <form method="get" action="{% url 'search_results' %}" class="flex items-center gap-2 m-0">
+          <input type="hidden" name="q" value="{{ query }}">
+          {% if selected_filters.category %}<input type="hidden" name="c" value="{{ selected_filters.category }}">{% endif %}
+          {% if selected_filters.brand %}<input type="hidden" name="brand" value="{{ selected_filters.brand }}">{% endif %}
+          {% if selected_filters.bracket %}<input type="hidden" name="bracket" value="{{ selected_filters.bracket }}">{% endif %}
+          {% if selected_filters.min_price %}<input type="hidden" name="min_price" value="{{ selected_filters.min_price }}">{% endif %}
+          {% if selected_filters.max_price %}<input type="hidden" name="max_price" value="{{ selected_filters.max_price }}">{% endif %}
+          {% if selected_filters.rating %}<input type="hidden" name="rating" value="{{ selected_filters.rating }}">{% endif %}
+          {% if request.GET.in_stock %}<input type="hidden" name="in_stock" value="{{ request.GET.in_stock }}">{% endif %}
+
+          <label for="search-top-sort-select" class="sr-only">Sort By</label>
+          <select name="sort" id="search-top-sort-select" class="horizontal-filter-select font-mono font-semibold">
+            <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Sort: Most Popular</option>
+            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+            <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Highest Rated</option>
+            <option value="discount" {% if sort_by == 'discount' %}selected{% endif %}>Biggest Savings</option>
+            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+          </select>
+        </form>
+      </div>
+    </div>
+
+    <!-- Active Filter Chips Row -->
+    {% if selected_filters.category or selected_filters.brand or selected_filters.bracket or selected_filters.min_price or selected_filters.max_price %}
+      <div class="active-filter-chips-row">
+        <span class="caption text-muted font-mono text-2xs uppercase mr-1">Active Filters:</span>
+        {% if selected_filters.category %}
+          <a href="{% url_replace c=None page=None %}" class="badge badge-accent text-2xs font-mono inline-flex items-center gap-1">
+            <span>Category: {{ selected_filters.category }}</span>
+            <span>&times;</span>
+          </a>
+        {% endif %}
+        {% if selected_filters.brand %}
+          <a href="{% url_replace brand=None page=None %}" class="badge badge-accent text-2xs font-mono inline-flex items-center gap-1">
+            <span>Brand: {{ selected_filters.brand }}</span>
+            <span>&times;</span>
+          </a>
+        {% endif %}
+        {% if selected_filters.bracket %}
+          <a href="{% url_replace bracket=None page=None %}" class="badge badge-accent text-2xs font-mono inline-flex items-center gap-1">
+            <span>Price Bracket</span>
+            <span>&times;</span>
+          </a>
+        {% endif %}
+        {% if selected_filters.min_price or selected_filters.max_price %}
+          <a href="{% url_replace min_price=None max_price=None bracket=None page=None %}" class="badge badge-accent text-2xs font-mono inline-flex items-center gap-1">
+            <span>₹{{ selected_filters.min_price|default:"0" }}–₹{{ selected_filters.max_price|default:"Max" }}</span>
+            <span>&times;</span>
+          </a>
+        {% endif %}
+        <a href="{% url 'search_results' %}?q={{ query|urlencode }}" class="caption text-accent hover:underline font-mono text-xs ml-2">Clear All Filters</a>
+      </div>
+    {% endif %}
 
     <!-- Product Grid -->
     <section aria-labelledby="results-heading">

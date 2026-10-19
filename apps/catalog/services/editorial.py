@@ -4,9 +4,9 @@ Powers the Kinetic Monograph: home hero, home chapters, category spreads,
 typographic index rows, and allow-listed brand indexes.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import List, Optional, Sequence
+from typing import Any, List, Optional, Sequence
 from django.db.models import Count, Max, Min, Prefetch, Q
 
 from apps.catalog.models import (
@@ -49,7 +49,7 @@ class CategoryStats:
     in_stock_count: int
 
 
-@dataclass(frozen=True)
+@dataclass
 class CategorySpreadResult:
     """Editorial spread package for a category marquee."""
     category: Category
@@ -57,6 +57,7 @@ class CategorySpreadResult:
     picks: List[Product]
     is_auto: bool
     editorial_line: str
+    clusters: List[Any] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -122,12 +123,12 @@ def eligible_cutout_products(products: Sequence[Product], max_cutouts: int = 3) 
 
 HERO_ELIGIBLE_CATEGORIES = [
     "smartphones",
+    "earphones-headphones",
+    "cameras",
     "tvs",
     "speakers",
     "smartwatches-bands",
-    "earphones-headphones",
     "keyboards-mice",
-    "cameras",
 ]
 
 
@@ -158,14 +159,14 @@ def hero_products(n: int = 3) -> HeroResult:
         curated_prods = [
             fp.product
             for fp in curated_col.featured_items.all()
-            if fp.product.is_purchasable and fp.product.primary_image_url and fp.product.selling_price
+            if fp.product.is_purchasable and fp.product.selling_price
         ]
         flagship_curated = [p for p in curated_prods if p.selling_price >= Decimal("15000.00")]
         selected = flagship_curated if flagship_curated else curated_prods
         if selected:
             return HeroResult(products=selected[:n], is_auto=False)
 
-    # 2. Fallback auto-select: prioritize flagship hardware (>= 15,000) across primary categories
+    # 2. Fallback auto-select: select 1 per category by rating desc
     day_of_year = date.today().timetuple().tm_yday
     num_cats = len(HERO_ELIGIBLE_CATEGORIES)
     start_idx = day_of_year % num_cats
@@ -176,19 +177,19 @@ def hero_products(n: int = 3) -> HeroResult:
 
     prods = (
         Product.objects.filter(
+            category__slug__in=HERO_ELIGIBLE_CATEGORIES,
             selling_price__gt=Decimal("0.00"),
             is_available=True,
-            media__media_type="image",
         )
-        .exclude(category__slug__in=["cables-chargers-powerbanks", "cases-protectors", "other"])
+        .exclude(raw_name__iregex=r"yamaha\s+psr|casiotone|portable\s+keyboard|musical\s+keyboard|synthesizer")
         .select_related("category")
         .prefetch_related("media", "specifications")
-        .order_by("-selling_price", "-source_rating_count", "id")
+        .order_by("-source_rating_count", "-selling_price", "id")
     )
 
     best_per_cat = {}
     for p in prods:
-        if p.category_id not in best_per_cat and p.primary_image_url:
+        if p.category_id not in best_per_cat:
             best_per_cat[p.category_id] = p
 
     sorted_candidates = sorted(

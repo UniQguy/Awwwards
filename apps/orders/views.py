@@ -33,7 +33,7 @@ from apps.orders.services.order_creator import place_order
 from apps.orders.services.order_status import can_transition, transition_order_status
 from apps.orders.services.tracking import get_tracking_info
 from apps.orders.utils.number_words import number_to_words_inr
-from apps.promotions.services.coupon_validator import validate_coupon
+from apps.promotions.services.coupon_validator import get_available_coupons_for_cart, validate_coupon
 from apps.shipping.services.estimator import estimate_delivery
 
 
@@ -315,6 +315,8 @@ def checkout_review(request: HttpRequest) -> HttpResponse:
             cod_disabled_reason = "Maximum 2 active Cash on Delivery orders allowed per 24 hours. Please complete your order via Online Payment."
 
     can_razorpay = True
+    user = request.user if request.user.is_authenticated else None
+    available_coupons = get_available_coupons_for_cart(cart, user=user, applied_code=applied_code)
 
     context = {
         "cart": cart,
@@ -326,6 +328,8 @@ def checkout_review(request: HttpRequest) -> HttpResponse:
         "is_guest": is_guest,
         "can_razorpay": can_razorpay,
         "hold_minutes": 15,
+        "applied_coupon_code": applied_code,
+        "available_coupons": available_coupons,
         "breadcrumbs": [
             {"title": "Checkout", "url": "/checkout/"},
             {"title": "Review & Payment", "url": "/checkout/review/"},

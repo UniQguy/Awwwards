@@ -165,4 +165,30 @@
     background-color: var(--world-bg);
     border-radius: var(--radius-1);
   }
+
+  /* Cancelled Order Banner (Phase R9) */
+  .order-cancelled-banner {
+    border: 2px solid var(--danger);
+    background-color: var(--surface-2);
+    border-radius: var(--radius-2);
+  }
+  .order-cancelled-eyebrow {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    margin-bottom: var(--space-3);
+    font-size: var(--step--2);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: var(--radius-1);
+    background: var(--surface-3);
+    color: var(--danger);
+  }
+  .order-cancelled-title {
+    color: var(--danger);
+  }
+  .order-cancelled-notice {
+    background: var(--surface-2);
+    border-left: 4px solid var(--danger);
+  }
 }

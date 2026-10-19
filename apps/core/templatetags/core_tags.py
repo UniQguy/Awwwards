@@ -98,6 +98,7 @@ def savings(mrp: Any, selling_price: Any) -> str:
 
 
 @register.filter(name="subtract")
+@register.filter(name="sub")
 def subtract(value: Any, arg: Any) -> Any:
     """Subtract arg from value, returning Decimal or 0."""
     try:
@@ -196,4 +197,20 @@ def star_glyphs(rating: Any) -> str:
         return ""
 
 
-
+@register.simple_tag(takes_context=True)
+def url_replace(context, **kwargs):
+    """
+    Returns the current query string with updated key-value pairs,
+    omitting keys set to None or empty string.
+    """
+    request = context.get("request")
+    if not request:
+        return ""
+    params = request.GET.copy()
+    for k, v in kwargs.items():
+        if v is None or v == "":
+            params.pop(k, None)
+        else:
+            params[k] = v
+    encoded = params.urlencode()
+    return f"?{encoded}" if encoded else "?"

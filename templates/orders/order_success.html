@@ -1,22 +1,37 @@
 {% extends "base.html" %}
 {% load core_tags %}
 
-{% block title %}Order Confirmed #{{ order.order_number }} — ELECTROCART{% endblock %}
+{% block title %}{% if order.status == 'CANCELLED' or order.status == 'cancelled' %}Order Cancelled #{{ order.order_number }} — ELECTROCART{% else %}Order Confirmed #{{ order.order_number }} — ELECTROCART{% endif %}{% endblock %}
 {% block meta_description %}Order confirmation and receipt summary for your purchase.{% endblock %}
 {% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
 
 {% block content %}
 <div class="container section">
   <div class="max-w-md mx-auto">
-    <div class="alert alert-success text-center p-6 mb-6">
-      <h1 class="display-m mb-2">Order Confirmed</h1>
-      <p class="body mb-2">
-        Order Placed Successfully. Thank you for choosing ELECTROCART. Your order reference is <strong>#{{ order.order_number }}</strong>.
-      </p>
-      <p class="caption">
-        A confirmation receipt has been sent to <strong>{{ order.recipient_email }}</strong>.
-      </p>
-    </div>
+    {% if order.status == 'CANCELLED' or order.status == 'cancelled' %}
+      <div class="alert alert-danger order-cancelled-banner text-center p-6 mb-6">
+        <div class="order-cancelled-eyebrow">
+          STATUS: ORDER CANCELLED &bull; CREDIT NOTE ISSUED
+        </div>
+        <h1 class="display-m mb-2 order-cancelled-title">Order Cancelled</h1>
+        <p class="body mb-2">
+          Order #{{ order.order_number }} has been cancelled and reserved inventory has been released.
+        </p>
+        <p class="caption">
+          A cancellation acknowledgement has been recorded for <strong>{{ order.recipient_email }}</strong>.
+        </p>
+      </div>
+    {% else %}
+      <div class="alert alert-success text-center p-6 mb-6">
+        <h1 class="display-m mb-2">Order Confirmed</h1>
+        <p class="body mb-2">
+          Order Placed Successfully. Thank you for choosing ELECTROCART. Your order reference is <strong>#{{ order.order_number }}</strong>.
+        </p>
+        <p class="caption">
+          A confirmation receipt has been sent to <strong>{{ order.recipient_email }}</strong>.
+        </p>
+      </div>
+    {% endif %}
 
     <!-- Quick Action Links -->
     <div class="flex gap-4 justify-center flex-wrap mb-8">
@@ -26,15 +41,36 @@
       <a href="{% url 'order_invoice' order_number=order.order_number %}" class="btn btn-secondary" target="_blank">
         View GST Invoice / Bill of Supply
       </a>
+      {% if order.status == 'CANCELLED' or order.status == 'cancelled' %}
+        {% if order.credit_notes.exists %}
+          <a href="{% url 'order_credit_note_pdf' order_number=order.order_number %}" class="btn btn-secondary">
+            Credit Note (PDF)
+          </a>
+        {% endif %}
+      {% endif %}
     </div>
 
     <!-- Order Summary Details -->
     <section class="checkout-card mb-6" aria-labelledby="order-specs-heading">
+      {% if order.status == 'CANCELLED' or order.status == 'cancelled' %}
+        <div class="alert alert-danger order-cancelled-notice p-3 mb-4 flex items-center justify-between flex-wrap gap-2 text-xs font-mono">
+          <span><strong>Cancelled Order Notice:</strong> Reserved inventory has been restored to warehouse stock.</span>
+          {% if order.credit_notes.exists %}
+            <span class="badge badge-secondary font-bold">GST Credit Note Issued</span>
+          {% endif %}
+        </div>
+      {% endif %}
+
       <h2 id="order-specs-heading" class="heading hairline-bottom pb-2 mb-4">Order Specifications</h2>
 
       <div class="grid-2 mb-5">
         <div>
-          <p class="body-sm mb-1"><strong>Status:</strong> <span class="badge badge-in-stock">{{ order.get_status_display }}</span></p>
+          <p class="body-sm mb-1">
+            <strong>Status:</strong>
+            <span class="badge {% if order.status == 'CANCELLED' or order.status == 'cancelled' %}badge-danger{% else %}badge-in-stock{% endif %}">
+              {{ order.get_status_display }}
+            </span>
+          </p>
           <p class="body-sm mb-1"><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
           <p class="body-sm mb-1"><strong>Payment Status:</strong> {{ order.get_payment_status_display }}</p>
           <p class="body-sm"><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y, g:i A" }}</p>
@@ -50,7 +86,7 @@
       </div>
 
       <h3 class="label mb-3">Merchandise Items</h3>
-      <div class="table-container mb-5" style="overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%;">
+      <div class="table-container mb-5 overflow-x-auto">
         <table class="spec-table">
           <caption class="sr-only">Items included in order</caption>
           <thead>
@@ -98,13 +134,19 @@
       </dl>
 
       <div class="summary-grand-total">
-        <span class="total-label">Total Paid / Payable</span>
-        <span class="total-amount">{{ order.total_amount|inr }}</span>
+        <span class="total-label">{% if order.status == 'CANCELLED' or order.status == 'cancelled' %}Total Payable{% else %}Total Paid / Payable{% endif %}</span>
+        <span class="total-amount">
+          {% if order.status == 'CANCELLED' or order.status == 'cancelled' %}
+            ₹0 <span class="caption text-muted font-normal text-xs">(Cancelled &mdash; Was {{ order.total_amount|inr }})</span>
+          {% else %}
+            {{ order.total_amount|inr }}
+          {% endif %}
+        </span>
       </div>
     </section>
 
     <!-- Order Cancellation Option (if state permits) -->
-    {% if order.status != 'cancelled' and order.status != 'delivered' and order.status != 'refunded' %}
+    {% if order.status != 'cancelled' and order.status != 'CANCELLED' and order.status != 'delivered' and order.status != 'refunded' %}
       <div class="checkout-card text-center">
         <h3 class="label mb-2">Need to cancel this order?</h3>
         <p class="caption mb-4">
@@ -115,13 +157,6 @@
           {% if token %}<input type="hidden" name="token" value="{{ token }}">{% endif %}
           <button type="submit" class="btn btn-sm btn-danger">Cancel Order</button>
         </form>
-      </div>
-    {% elif order.status == 'cancelled' %}
-      <div class="alert alert-danger text-center">
-        <strong>This order has been cancelled.</strong>
-        {% if order.credit_notes.exists %}
-          A GST Credit Note has been generated.
-        {% endif %}
       </div>
     {% endif %}
   </div>

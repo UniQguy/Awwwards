@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load core_tags %}
 
-{% block title %}Shipment Tracking #{{ order.order_number }} — ELECTROCART{% endblock %}
+{% block title %}{% if order.status == 'cancelled' or order.status == 'CANCELLED' %}Order Cancelled #{{ order.order_number }} — ELECTROCART{% else %}Shipment Tracking #{{ order.order_number }} — ELECTROCART{% endif %}{% endblock %}
 {% block meta_description %}Milestone progress, GST breakdown, and carrier tracking details for shipment #{{ order.order_number }}.{% endblock %}
 {% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
 

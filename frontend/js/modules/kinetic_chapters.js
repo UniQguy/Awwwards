@@ -178,34 +178,87 @@ export function initDeskBundleBuilder() {
 
   const columns = bundleSection.querySelectorAll(".bundle-column");
   const priceDisplay = bundleSection.querySelector(".bundle-summary-price");
+  const countDisplay = bundleSection.querySelector(".setup-summary-count");
+  const savingsDisplay = bundleSection.querySelector(".setup-summary-savings");
   const hiddenInput = bundleSection.querySelector("#bundle-product-ids");
+  const submitBtn = bundleSection.querySelector("#bundle-submit-btn");
   if (!columns.length || !priceDisplay || !hiddenInput) return;
 
   function updateBundleTotal() {
     let total = 0;
+    let mrpTotal = 0;
     const selectedIds = [];
 
     columns.forEach((col) => {
       const activeCard = col.querySelector(".bundle-picker-card.is-selected");
       if (activeCard) {
         const price = parseFloat(activeCard.dataset.price || "0");
+        const mrp = parseFloat(activeCard.dataset.mrp || activeCard.dataset.price || "0");
         const pid = activeCard.dataset.id;
         total += price;
+        mrpTotal += Math.max(mrp, price);
         if (pid) selectedIds.push(pid);
       }
     });
 
+    const savings = Math.max(0, mrpTotal - total);
     priceDisplay.textContent = `₹${Math.round(total).toLocaleString("en-IN")}`;
+    if (countDisplay) {
+      countDisplay.textContent = `${selectedIds.length} Component${selectedIds.length === 1 ? "" : "s"}`;
+    }
+    if (savingsDisplay) {
+      savingsDisplay.textContent = `Save ₹${Math.round(savings).toLocaleString("en-IN")}`;
+    }
     hiddenInput.value = selectedIds.join(",");
+
+    if (submitBtn) {
+      if (selectedIds.length === 0) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
+        submitBtn.style.pointerEvents = "none";
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = "1";
+        submitBtn.style.pointerEvents = "auto";
+      }
+    }
   }
 
   columns.forEach((col) => {
     const cards = col.querySelectorAll(".bundle-picker-card");
     cards.forEach((card) => {
-      card.addEventListener("click", () => {
-        cards.forEach((c) => c.classList.remove("is-selected"));
-        card.classList.add("is-selected");
+      const handleToggle = () => {
+        const wasSelected = card.classList.contains("is-selected");
+
+        cards.forEach((c) => {
+          c.classList.remove("is-selected");
+          c.setAttribute("aria-pressed", "false");
+          const pill = c.querySelector(".bundle-card-status-pill");
+          if (pill) {
+            pill.textContent = "Select";
+            pill.className = "bundle-card-status-pill badge badge-neutral text-3xs font-mono";
+          }
+        });
+
+        if (!wasSelected) {
+          card.classList.add("is-selected");
+          card.setAttribute("aria-pressed", "true");
+          const pill = card.querySelector(".bundle-card-status-pill");
+          if (pill) {
+            pill.textContent = "Selected ✓";
+            pill.className = "bundle-card-status-pill badge badge-accent text-3xs font-mono";
+          }
+        }
+
         updateBundleTotal();
+      };
+
+      card.addEventListener("click", handleToggle);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleToggle();
+        }
       });
     });
   });

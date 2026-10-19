@@ -44,9 +44,9 @@
       </div>
     {% endif %}
 
-    <h3 class="plate-title card-title">
+    <{{ heading_tag|default:"h3" }} class="plate-title card-title">
       {{ product.display_name|strip_brand:product.parsed_brand }}
-    </h3>
+    </{{ heading_tag|default:"h3" }}>
 
     {% if product.highlight_spec_summary %}
       <p class="plate-caption">{{ product.highlight_spec_summary }}</p>

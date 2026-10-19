@@ -22,10 +22,10 @@ export function initQuantityStepper() {
     minusBtn.addEventListener("click", (e) => {
       e.preventDefault();
       const current = parseInt(input.value, 10) || 1;
-      const min = parseInt(input.min, 10) || 1;
-      if (current > min) {
-        input.value = current - 1;
-        triggerLiveUpdate(form, input.value);
+      const nextVal = current - 1;
+      if (nextVal >= 0) {
+        input.value = nextVal;
+        triggerLiveUpdate(form, nextVal);
       }
     });
 
@@ -97,6 +97,9 @@ async function triggerLiveUpdate(form, quantity) {
         setTimeout(() => {
           if (data.item_removed && lineItem) {
             lineItem.remove();
+            if (data.cart_count === 0) {
+              window.location.reload();
+            }
           } else if (linePrice) {
             linePrice.textContent = data.formatted_line_subtotal;
           }

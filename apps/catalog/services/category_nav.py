@@ -120,3 +120,82 @@ def get_mega_menu_categories() -> List[Category]:
 
     cache.set(CACHE_KEY_NAV_PREVIEWS, categories, timeout=CACHE_TTL)
     return categories
+
+
+CATEGORY_CLUSTERS_MAP = {
+    "earphones-headphones": [
+        ("TWS Wireless Earbuds", "earbuds", r"\b(?:earbud|earbuds|tws|airpods|true\s+wireless)\b"),
+        ("Over-Ear Headphones", "headphones", r"\b(?:over-ear|on-ear|headphone|headphones|headset)\b"),
+        ("Neckbands", "neckband", r"\b(?:neckband|bullets)\b"),
+        ("Wired IEMs & Earphones", "wired earphones", r"\b(?:wired|in-ear|earphone|earphones)\b"),
+    ],
+    "smartphones": [
+        ("5G Flagships", "5G", r"\b(?:5g|ultra|pro\s+max)\b"),
+        ("Mid-Range Smartphones", "smartphones", r"\b(?:redmi|realme|oppo|vivo|samsung|oneplus|poco|iqoo|motorola)\b"),
+        ("Tablets & eReaders", "tablets", r"\b(?:tablet|tablets|ipad|tab|pad)\b"),
+    ],
+    "speakers": [
+        ("Bluetooth Portable Speakers", "portable speaker", r"\b(?:portable|bluetooth\s+speaker|go\s*3|wireless\s+speaker)\b"),
+        ("Soundbars & Home Theatre", "soundbar", r"\b(?:soundbar|sound\s*bar|subwoofer|home\s+theatre|dolby)\b"),
+        ("Smart & Desktop Speakers", "desktop speaker", r"\b(?:echo|alexa|desktop|pebble|multimedia)\b"),
+    ],
+    "tvs": [
+        ("4K Smart TVs", "4K TV", r"\b(?:4k|ultra\s+hd|smart\s+tv|google\s+tv|android\s+tv)\b"),
+        ("QLED & OLED Panels", "QLED", r"\b(?:qled|oled)\b"),
+        ("Desktop & Gaming Monitors", "monitor", r"\b(?:monitor|curved\s+monitor|gaming\s+monitor)\b"),
+    ],
+    "smartwatches-bands": [
+        ("Advanced Smartwatches", "smartwatch", r"\b(?:apple\s+watch|galaxy\s+watch|bluetooth\s+calling|smartwatch|smart\s*watch)\b"),
+        ("Fitness Trackers & Bands", "fitness band", r"\b(?:band|fitness\s*tracker|activity\s*tracker|pulse)\b"),
+        ("Sport & Outdoor Wearables", "sport watch", r"\b(?:sport|gps|rugged|titan|amazfit)\b"),
+    ],
+    "cameras": [
+        ("Mirrorless & DSLRs", "DSLR", r"\b(?:dslr|mirrorless|slr|eos|alpha)\b"),
+        ("Security & Smart Cameras", "security camera", r"\b(?:cctv|security|pan/tilt|webcam|dashcam|tapo)\b"),
+        ("Lenses & Precision Optics", "lens", r"\b(?:lens|telephoto|prime|zoom|optics)\b"),
+    ],
+    "keyboards-mice": [
+        ("Mechanical Keyboards", "mechanical keyboard", r"\b(?:mechanical|keycaps|switch|backlit)\b"),
+        ("Wireless Office Combos", "keyboard combo", r"\b(?:combo|wireless\s+keyboard|keyboard\s+and\s+mouse)\b"),
+        ("Gaming & Ergonomic Mice", "mouse", r"\b(?:mouse|mice|gaming\s+mouse|mx\s+master|trackpad)\b"),
+    ],
+    "cables-chargers-powerbanks": [
+        ("Powerbanks & Battery Packs", "powerbank", r"\b(?:power\s*bank|powerbank|battery\s+pack)\b"),
+        ("Fast Wall Chargers & GaN", "charger", r"\b(?:charger|fast\s+charger|gan|adapter|wall\s+charger)\b"),
+        ("USB-C & Lightning Cables", "cable", r"\b(?:cable|cord|usb-c|type-c|lightning)\b"),
+        ("Hubs & Surge Protectors", "surge protector", r"\b(?:hub|surge|spike|strip|multiport)\b"),
+    ],
+    "cases-protectors": [
+        ("Protective & Rugged Cases", "phone case", r"\b(?:case|back\s+cover|flip\s+cover|armor|rugged|hybrid)\b"),
+        ("Tempered Glass & Guards", "tempered glass", r"\b(?:tempered|glass|screen\s+protector|screen\s+guard)\b"),
+        ("Watch Straps & Bands", "watch strap", r"\b(?:strap|band|replacement)\b"),
+    ],
+    "other": [
+        ("Computing & Laptops", "laptop", r"\b(?:laptop|macbook|thinkcentre|pc|desktop)\b"),
+        ("Musical Instruments", "musical keyboard", r"\b(?:yamaha|casio|piano|synthesizer|keyboard\s+with\s+adaptor)\b"),
+        ("Storage & Batteries", "memory card", r"\b(?:sd\s+card|microsd|memory\s+card|battery|batteries|drive)\b"),
+    ],
+}
+
+
+def get_category_clusters(cat_slug: str) -> List[dict]:
+    """
+    Returns granular sub-category clusters with real product counts and filter URLs
+    for the specified category slug.
+    """
+    clusters_meta = CATEGORY_CLUSTERS_MAP.get(cat_slug, [])
+    results = []
+    for label, q_term, pattern in clusters_meta:
+        cnt = Product.objects.filter(
+            category__slug=cat_slug,
+            is_available=True,
+            selling_price__gt=Decimal("0.00"),
+            raw_name__iregex=pattern,
+        ).count()
+        results.append({
+            "name": label,
+            "query": q_term,
+            "count": cnt,
+            "url": f"/c/{cat_slug}/?q={q_term}",
+        })
+    return results

@@ -174,5 +174,61 @@ def validate_coupon(
         discount_amount=discount,
         coupon=coupon,
         reason_code=None,
-        message=f"Applied {coupon.code.upper()}! Savings of INR {discount}.",
+        message=f"Applied {coupon.code.upper()}. Savings of INR {discount}.",
     )
+
+
+def get_available_coupons_for_cart(cart: Cart, user=None, applied_code: str = "") -> list:
+    """
+    Returns active coupons with validation state, savings amount, and eligibility status
+    for display in shopping bag and checkout review.
+    """
+    now = timezone.now()
+    active_coupons = Coupon.objects.filter(
+        is_active=True,
+        valid_from__lte=now,
+        valid_until__gte=now,
+    ).prefetch_related("applicable_categories").order_by("min_order_amount")
+
+    cart_items = list(cart.items.select_related("product").all())
+    cart_subtotal = sum(
+        ((item.product.selling_price or Decimal("0.00")) * item.quantity for item in cart_items),
+        Decimal("0.00"),
+    )
+
+    clean_applied = (applied_code or "").strip().upper()
+    result = []
+
+    for c in active_coupons:
+        val_res = validate_coupon(c.code, cart, user=user)
+        is_applied = (c.code.upper() == clean_applied)
+        meets_min = cart_subtotal >= c.min_order_amount
+        needed_amount = max(Decimal("0.00"), c.min_order_amount - cart_subtotal)
+
+        if val_res.is_valid:
+            savings = val_res.discount_amount
+        else:
+            if c.discount_type == Coupon.TYPE_PERCENTAGE:
+                base = max(cart_subtotal, c.min_order_amount)
+                raw = (base * c.discount_value / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                savings = min(raw, c.max_discount_amount) if c.max_discount_amount else raw
+            else:
+                savings = c.discount_value
+
+        result.append({
+            "coupon": c,
+            "code": c.code,
+            "description": c.description,
+            "discount_type": c.discount_type,
+            "discount_value": c.discount_value,
+            "min_order_amount": c.min_order_amount,
+            "max_discount_amount": c.max_discount_amount,
+            "is_valid": val_res.is_valid,
+            "is_applied": is_applied,
+            "meets_min": meets_min,
+            "needed_amount": needed_amount,
+            "savings_amount": savings,
+            "reason_message": val_res.message if not val_res.is_valid else "",
+        })
+
+    return result

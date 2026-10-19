@@ -180,40 +180,36 @@
         </div>
 
         <!-- Inline PIN Code Delivery Estimator -->
-        <div class="product-pincode-inline mb-4 p-3 bg-surface border-rule">
-          <form action="{% url 'shipping_check' %}" method="post" class="flex gap-2 items-center" data-fetch-enhance>
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{{ request.path }}">
+        <div class="product-pincode-inline mb-4 p-3 bg-surface border-rule rounded">
+          <form action="{% url 'shipping_estimate' %}" method="get" class="pincode-live-form flex gap-2 items-center m-0">
             <label for="shipping-pincode-input" class="caption text-muted flex-shrink-0">Deliver to:</label>
             <input
               type="text"
               id="shipping-pincode-input"
               name="pincode"
-              class="form-control"
-              placeholder="PIN code (e.g. 560001)"
+              class="form-control font-mono pincode-live-input"
+              placeholder="e.g. 380001"
               pattern="[1-9][0-9]{5}"
               maxlength="6"
               value="{{ remembered_pincode }}"
               required
+              style="max-width: 130px;"
             >
-            <button type="submit" class="btn btn-secondary">Check</button>
+            <button type="submit" class="btn btn-secondary pincode-live-btn">Check</button>
           </form>
-          {% if delivery_estimate %}
-            <div class="mt-2">
+          <div class="pincode-live-result mt-2" id="pdp-pincode-result">
+            {% if delivery_estimate %}
               {% if delivery_estimate.serviceable %}
-                <p class="text-success caption">
-                  <strong>Delivery available to {{ remembered_pincode }}:</strong>
-                  {{ delivery_estimate.est_days_min }}&ndash;{{ delivery_estimate.est_days_max }} business days
-                  ({{ delivery_estimate.date_min|date:"D, M j" }} &ndash; {{ delivery_estimate.date_max|date:"D, M j" }})
-                  {% if delivery_estimate.cod_allowed %} &bull; Cash on Delivery eligible{% endif %}
-                </p>
+                <span class="pincode-status-badge is-success">
+                  <span>✓ Deliverable to {{ remembered_pincode }} &mdash; Estimated delivery in {{ delivery_estimate.est_days_min|default:2 }}&ndash;{{ delivery_estimate.est_days_max|default:4 }} days &bull; COD &amp; Express Available</span>
+                </span>
               {% else %}
-                <p class="text-danger caption">
-                  <strong>Delivery unavailable to PIN {{ remembered_pincode }}:</strong> {{ delivery_estimate.unavailable_reason }}
-                </p>
+                <span class="pincode-status-badge is-error">
+                  <span>✕ Service unavailable for PIN {{ remembered_pincode }} (Please enter a valid 6-digit Indian pincode)</span>
+                </span>
               {% endif %}
-            </div>
-          {% endif %}
+            {% endif %}
+          </div>
         </div>
 
         <!-- Available Coupons -->
@@ -500,7 +496,7 @@
                 id="id-reviewer-name"
                 name="reviewer_name"
                 class="form-control"
-                value="{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"
+                value="{% if user.is_authenticated %}{{ user.get_full_name|default:user.email }}{% endif %}"
                 placeholder="e.g. Priyanshu Sharma"
                 required
               >

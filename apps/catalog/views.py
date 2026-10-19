@@ -85,27 +85,51 @@ def home(request: HttpRequest) -> HttpResponse:
             "savings": vd.mrp - vd.selling_price,
         })
 
-    # 4. Chapter 04: Head-to-Head Spec Duel (Flagship vs Mid-Range)
+    # 4. Chapter 04: Head-to-Head Spec Duel (Same-Tier Flagship Rivalry)
     duel_a = (
-        Product.objects.filter(category__slug="smartphones", selling_price__gte=50000, media__media_type="image")
+        Product.objects.filter(
+            category__slug="smartphones",
+            display_name__icontains="S23 Ultra",
+            media__media_type="image",
+        )
+        .select_related("category")
+        .prefetch_related("media", "specifications")
+        .order_by("-selling_price")
+        .first()
+        or Product.objects.filter(category__slug="smartphones", selling_price__gte=100000, media__media_type="image")
         .select_related("category")
         .prefetch_related("media", "specifications")
         .order_by("-selling_price")
         .first()
     )
     duel_b = (
-        Product.objects.filter(category__slug="smartphones", selling_price__lte=25000, selling_price__gte=8000, media__media_type="image")
+        Product.objects.filter(
+            category__slug="smartphones",
+            display_name__icontains="iPhone 14 Pro",
+            media__media_type="image",
+        )
+        .exclude(id=duel_a.id if duel_a else -1)
+        .select_related("category")
+        .prefetch_related("media", "specifications")
+        .order_by("-selling_price")
+        .first()
+        or Product.objects.filter(
+            category__slug="smartphones",
+            selling_price__gte=90000,
+            media__media_type="image",
+        )
+        .exclude(id=duel_a.id if duel_a else -1)
         .select_related("category")
         .prefetch_related("media", "specifications")
         .order_by("-selling_price")
         .first()
     )
     duel_specs = [
-        {"label": "Processor Silicon", "val_a": "Qualcomm Snapdragon 8 Gen 2 (4nm)", "val_b": "MediaTek Helio G85 (12nm)", "winner": "a"},
-        {"label": "RAM Architecture", "val_a": "12 GB LPDDR5X", "val_b": "4 GB LPDDR4X", "winner": "a", "bar_a": 95, "bar_b": 35},
-        {"label": "Display Refresh", "val_a": "120Hz Dynamic AMOLED LTPO", "val_b": "60Hz IPS LCD", "winner": "a", "bar_a": 100, "bar_b": 50},
-        {"label": "Primary Optics", "val_a": "200 MP Primary + OIS", "val_b": "13 MP Dual AI", "winner": "a", "bar_a": 98, "bar_b": 25},
-        {"label": "Fast Charging", "val_a": "45W Super Fast", "val_b": "10W Standard", "winner": "a", "bar_a": 75, "bar_b": 20},
+        {"label": "Processor Silicon", "val_a": "Qualcomm Snapdragon 8 Gen 2 (4nm)", "val_b": "Apple A16 Bionic (4nm)", "winner": "tie", "bar_a": 98, "bar_b": 98},
+        {"label": "RAM Architecture", "val_a": "12 GB LPDDR5X", "val_b": "6 GB LPDDR5", "winner": "a", "bar_a": 95, "bar_b": 70},
+        {"label": "Display Refresh", "val_a": "6.8\" Dynamic AMOLED 2X 120Hz", "val_b": "6.1\" Super Retina XDR 120Hz", "winner": "tie", "bar_a": 96, "bar_b": 96},
+        {"label": "Primary Optics", "val_a": "200 MP ISOCELL + 10x Optical", "val_b": "48 MP Quad-Pixel + 3x Optical", "winner": "a", "bar_a": 98, "bar_b": 92},
+        {"label": "Battery & Endurance", "val_a": "5000 mAh + 45W Fast Charge", "val_b": "3200 mAh + 20W Fast Charge", "winner": "a", "bar_a": 92, "bar_b": 78},
     ]
 
     # 5. Chapter 05: Horizontal Collector's Plate Rail (6 distinct categories)
@@ -126,40 +150,52 @@ def home(request: HttpRequest) -> HttpResponse:
     from apps.catalog.services.category_nav import get_mega_menu_categories
     categories_rail = get_mega_menu_categories()
 
-    # 7. Chapter 07: Curate Your Desk Setup Bundle Builder
-    bundle_audio_items = list(
-        Product.objects.filter(
-            category__slug__in=["earphones-headphones", "speakers"],
-            is_available=True,
-            media__media_type="image",
-            selling_price__gt=0,
+    # 7. Chapter 07: Curate Your Desk Setup 6-Slot Configurator
+    slot_core_ids = [3082, 6188, 4606]
+    slot_display_ids = [1451, 4558, 2163]
+    slot_km_ids = [2324, 1727, 4415]
+    slot_audio_ids = [6472, 1876, 6610]
+    slot_phone_ids = [4573, 5197, 3550]
+    slot_hub_ids = [1151, 6904, 3684]
+
+    def _fetch_slot_products(ids, fallback_filter, exclude_regex=None):
+        items = list(
+            Product.objects.filter(id__in=ids, is_available=True)
+            .select_related("category")
+            .prefetch_related("media")
         )
-        .select_related("category")
-        .prefetch_related("media")
-        .order_by("-selling_price")[:3]
-    )
-    bundle_device_items = list(
-        Product.objects.filter(
-            category__slug__in=["smartphones", "smartwatches-bands"],
-            is_available=True,
-            media__media_type="image",
-            selling_price__gt=0,
-        )
-        .select_related("category")
-        .prefetch_related("media")
-        .order_by("-selling_price")[:3]
-    )
-    bundle_accessory_items = list(
-        Product.objects.filter(
-            category__slug__in=["cables-chargers-powerbanks", "keyboards-mice"],
-            is_available=True,
-            media__media_type="image",
-            selling_price__gt=0,
-        )
-        .select_related("category")
-        .prefetch_related("media")
-        .order_by("-selling_price")[:3]
-    )
+        if len(items) < 3:
+            qs = Product.objects.filter(
+                is_available=True,
+                media__media_type="image",
+                selling_price__gt=0,
+                **fallback_filter,
+            ).exclude(id__in=[p.id for p in items])
+            if exclude_regex:
+                qs = qs.exclude(raw_name__iregex=exclude_regex)
+            extra = list(qs.select_related("category").prefetch_related("media").order_by("-selling_price")[:3 - len(items)])
+            items.extend(extra)
+        return items[:3]
+
+    slot_01_items = _fetch_slot_products(slot_core_ids, {"category__slug__in": ["smartphones", "other"]}, r"sleeve|case|cover|bag|cable")
+    slot_02_items = _fetch_slot_products(slot_display_ids, {"category__slug": "tvs"}, r"cable|mount|bracket|remote")
+    slot_03_items = _fetch_slot_products(slot_km_ids, {"category__slug": "keyboards-mice"}, r"yamaha|casio|piano|synthesizer")
+    slot_04_items = _fetch_slot_products(slot_audio_ids, {"category__slug__in": ["earphones-headphones", "speakers"]}, r"tablet|tab|phone")
+    slot_05_items = _fetch_slot_products(slot_phone_ids, {"category__slug": "smartphones"}, r"case|cover|cable|charger|glass")
+    slot_06_items = _fetch_slot_products(slot_hub_ids, {"category__slug": "cables-chargers-powerbanks"})
+
+    setup_slots = [
+        {"num": "01", "title": "Computing / PC Core", "subtitle": "Desktops, Laptops & Tablets", "items": slot_01_items},
+        {"num": "02", "title": "Display & Visuals", "subtitle": "Monitors & Smart Panels", "items": slot_02_items},
+        {"num": "03", "title": "PC Keyboard & Mouse", "subtitle": "Mechanical & Ergonomic Peripherals", "items": slot_03_items},
+        {"num": "04", "title": "Audio & Studio", "subtitle": "Over-Ear Headphones & Soundbars", "items": slot_04_items},
+        {"num": "05", "title": "Primary Smartphone", "subtitle": "Flagship 5G Handsets", "items": slot_05_items},
+        {"num": "06", "title": "Power, Mic & Desk Hub", "subtitle": "High-Speed GaN & Fast Power", "items": slot_06_items},
+    ]
+
+    bundle_audio_items = slot_04_items
+    bundle_device_items = slot_05_items
+    bundle_accessory_items = slot_03_items
 
     # 8. Shipping & Manifesto
     shipping_config = ShippingConfig.get_solo()
@@ -211,6 +247,7 @@ def home(request: HttpRequest) -> HttpResponse:
         "duel_specs": duel_specs,
         "plate_rail_products": plate_rail_products,
         "categories_rail": categories_rail,
+        "setup_slots": setup_slots,
         "bundle_audio_items": bundle_audio_items,
         "bundle_device_items": bundle_device_items,
         "bundle_accessory_items": bundle_accessory_items,
@@ -233,8 +270,13 @@ def category_list(request: HttpRequest) -> HttpResponse:
     Monograph category index: one tall spread per active category alternating left and right offsets,
     each with category name in display-l, live stats in marginalia, one pick on a plate, and an Enter link.
     """
+    from apps.catalog.services.category_nav import get_category_clusters
+
     categories = list(Category.objects.filter(is_active=True).order_by("display_order", "name"))
     category_spreads = [category_spread(cat) for cat in categories]
+    for s in category_spreads:
+        s.clusters = get_category_clusters(s.category.slug)
+
     total_listings = Product.objects.filter(is_available=True, selling_price__gt=0).count()
     price_aggs = Product.objects.filter(is_available=True, selling_price__gt=0).aggregate(
         min_price=Min("selling_price"),
@@ -248,6 +290,7 @@ def category_list(request: HttpRequest) -> HttpResponse:
         {
             "category_spreads": category_spreads,
             "total_listings": total_listings,
+            "total_categories": len(categories),
             "min_price": min_price,
             "max_price": max_price,
         },
@@ -263,6 +306,7 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     category = get_object_or_404(Category, slug=slug, is_active=True)
 
     # Filter arguments
+    q = request.GET.get("q", "").strip()
     brand = request.GET.get("brand", "").strip() or None
     sort_by = request.GET.get("sort", "popularity").strip()
     collapsed = request.GET.get("collapsed", "0") == "1"
@@ -297,7 +341,8 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     page_param = request.GET.get("page", "1")
     is_page_1 = str(page_param) in ("1", "", "None")
     has_active_filters = bool(
-        brand
+        q
+        or brand
         or bracket_idx
         or request.GET.get("min_price")
         or request.GET.get("max_price")
@@ -309,7 +354,7 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     spread = category_spread(category, max_picks=6) if show_marquee else None
 
     search_result = execute_catalog_search(
-        query="",
+        query=q,
         category_slug=category.slug,
         brand=brand,
         min_price=min_price_val,
@@ -334,6 +379,7 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
         "page_obj": page_obj,
         "facets": search_result["facets"],
         "selected_filters": {
+            "q": q,
             "brand": brand,
             "min_price": min_price_val,
             "max_price": max_price_val,
@@ -646,13 +692,40 @@ def compare_tray(request: HttpRequest) -> HttpResponse:
         request.session["compare_tray"] = [p.id for p in products]
         request.session.modified = True
 
-    # Price-Tier & Value Delta Advisory (Flagship vs Budget)
+    # Price-Tier & Value Delta Advisory and Comparable Rivals
     delta_advisory = None
+    comparable_rivals = []
+    price_tier_mismatch_warning = None
+
+    if products:
+        ref_price = products[0].selling_price or Decimal("0.00")
+        if ref_price > 0:
+            min_r = ref_price * Decimal("0.80")
+            max_r = ref_price * Decimal("1.25")
+            comparable_rivals = list(
+                Product.objects.filter(
+                    category=common_category,
+                    is_available=True,
+                    selling_price__gte=min_r,
+                    selling_price__lte=max_r,
+                    media__media_type="image",
+                )
+                .exclude(id__in=[p.id for p in products])
+                .select_related("category")
+                .prefetch_related("media")
+                .order_by("-source_rating_count", "-selling_price")[:6]
+            )
+
     if len(products) >= 2:
         prices = [p.selling_price for p in products if p.selling_price and p.selling_price > 0]
         if prices:
             min_p = min(prices)
             max_p = max(prices)
+            if min_p > 0 and (max_p / min_p) >= Decimal("1.6"):
+                price_tier_mismatch_warning = (
+                    f"Notice: You are comparing two vastly different price tiers (₹{min_p:,.0f} vs ₹{max_p:,.0f}). "
+                    f"Features, materials, and silicon class reflect different market segments."
+                )
             if max_p >= Decimal("50000.00") and min_p <= Decimal("15000.00") and min_p > 0:
                 mult = round(float(max_p / min_p), 1)
                 delta_advisory = {
@@ -760,6 +833,8 @@ def compare_tray(request: HttpRequest) -> HttpResponse:
         "compared_products": products,
         "spec_rows": spec_rows,
         "delta_advisory": delta_advisory,
+        "comparable_rivals": comparable_rivals,
+        "price_tier_mismatch_warning": price_tier_mismatch_warning,
         "common_category": common_category,
         "breadcrumbs": [{"title": "Product Comparison", "url": "/compare/"}],
     }
