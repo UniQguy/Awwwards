@@ -17,6 +17,10 @@ def storefront_context(request):
     """
     Supplies global storefront state across all page templates.
     """
+    admin_url = getattr(settings, "ADMIN_URL", "admin").strip("/")
+    if request.path.startswith(f"/{admin_url}/") or request.path == f"/{admin_url}":
+        return {}
+
     user = getattr(request, "user", None)
     session = getattr(request, "session", None)
     guest_token = (

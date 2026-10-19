@@ -4,49 +4,875 @@
 {% block content %}
 <div id="content-main">
   {% if dashboard %}
-  <div class="module" id="store-operations-dashboard" style="margin-bottom: 24px; padding: 20px 24px; background: #ffffff; border: 1px solid var(--hairline-color, #cbd5e1); border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
-      <h2 style="margin: 0; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #0f172a;">
-        {% translate "Store Operations Snapshot" %}
-      </h2>
-      <span style="font-size: 11px; color: #64748b; font-family: monospace;">{% translate "Live Metrics" %}</span>
-    </div>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 18px;">
-      <div style="padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
-        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Orders Today</div>
-        <div style="font-size: 26px; font-weight: 700; color: #0f172a; margin-top: 6px;">{{ dashboard.orders_today }}</div>
+  <style>
+    /* ElectroCart Store Operations Dashboard Styles */
+    :root {
+      --dash-bg: var(--body-bg, #f8fafc);
+      --dash-card-bg: var(--darkened-bg, #ffffff);
+      --dash-text: var(--body-fg, #0f172a);
+      --dash-subtle: var(--body-quiet-color, #64748b);
+      --dash-border: var(--hairline-color, #e2e8f0);
+      --dash-blue: #3b82f6;
+      --dash-green: #22c55e;
+      --dash-amber: #f59e0b;
+      --dash-red: #ef4444;
+      --dash-cyan: #06b6d4;
+    }
+
+    #store-operations-dashboard {
+      margin-bottom: 30px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      font-family: inherit;
+      color: var(--dash-text);
+    }
+
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .dash-title-group h1.dash-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--dash-text);
+      letter-spacing: -0.01em;
+    }
+
+    .dash-title-group .dash-snapshot-label {
+      font-size: 12px;
+      color: var(--dash-subtle);
+      font-weight: 500;
+    }
+
+    .dash-range-switch {
+      display: inline-flex;
+      background: var(--dash-card-bg);
+      border: 1px solid var(--dash-border);
+      border-radius: 6px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .dash-range-btn {
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--dash-subtle);
+      text-decoration: none;
+      border-radius: 4px;
+      transition: none;
+    }
+
+    .dash-range-btn:hover {
+      color: var(--dash-text);
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    .dash-range-btn.is-active {
+      background: #1d4ed8;
+      color: #ffffff;
+    }
+
+    /* KPI Row */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background: var(--dash-card-bg);
+      border: 1px solid var(--dash-border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .kpi-icon-wrap {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .kpi-icon-green { background: #dcfce7; color: #15803d; }
+    .kpi-icon-blue { background: #dbeafe; color: #1d4ed8; }
+    .kpi-icon-cyan { background: #cffafe; color: #0e7490; }
+    .kpi-icon-amber { background: #fef3c7; color: #b45309; }
+
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--dash-subtle);
+      margin-bottom: 6px;
+    }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--dash-text);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
+    .kpi-subtext {
+      font-size: 11px;
+      color: var(--dash-subtle);
+      margin-top: 4px;
+    }
+
+    /* Dashboard Main Grid Sections */
+    .dash-row-grid-4 {
+      display: grid;
+      grid-template-columns: 1.3fr 1.1fr 1fr 1.2fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .dash-row-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .dash-row-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1200px) {
+      .dash-row-grid-4, .dash-row-grid-3, .dash-row-grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dash-row-grid-4, .dash-row-grid-3, .dash-row-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dash-card {
+      background: var(--dash-card-bg);
+      border: 1px solid var(--dash-border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dash-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0 0 14px 0;
+      color: var(--dash-text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dash-card-subtitle {
+      font-size: 11px;
+      color: var(--dash-subtle);
+      font-weight: 400;
+    }
+
+    /* Tables */
+    .dash-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .dash-table th {
+      text-align: left;
+      padding: 6px 8px;
+      font-weight: 600;
+      color: var(--dash-subtle);
+      border-bottom: 1px solid var(--dash-border);
+      background: transparent;
+    }
+
+    .dash-table td {
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--dash-border);
+      color: var(--dash-text);
+    }
+
+    .dash-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .empty-state {
+      padding: 24px 12px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--dash-subtle);
+      font-style: italic;
+    }
+
+    /* Orders per day Bar Chart */
+    .chart-container {
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 120px;
+      display: block;
+    }
+
+    .opd-table-wrap {
+      overflow-x: auto;
+      margin-top: 10px;
+      border-top: 1px dashed var(--dash-border);
+      padding-top: 8px;
+    }
+
+    .opd-table {
+      width: 100%;
+      font-size: 11px;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+
+    .opd-table th, .opd-table td {
+      padding: 4px 6px;
+      border: 1px solid var(--dash-border);
+    }
+
+    .opd-table th {
+      background: rgba(0, 0, 0, 0.02);
+      color: var(--dash-subtle);
+      text-align: left;
+    }
+
+    .chart-caption {
+      font-size: 11px;
+      color: var(--dash-subtle);
+      margin-top: 6px;
+      margin-bottom: 0;
+    }
+
+    /* Status Horizontal Bars */
+    .status-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 30px;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .status-label {
+      color: var(--dash-subtle);
+      font-weight: 500;
+    }
+
+    .status-track {
+      background: var(--dash-border);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .status-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    .status-count {
+      text-align: right;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--dash-text);
+    }
+
+    /* Donut Payment Split */
+    .donut-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 0;
+    }
+
+    .donut-legend {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 12px;
+      margin-top: 12px;
+      font-variant-numeric: tabular-nums;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .status-badge.delivered { background: #dcfce7; color: #15803d; }
+    .status-badge.shipped { background: #e0f2fe; color: #0369a1; }
+    .status-badge.confirmed, .status-badge.placed { background: #dbeafe; color: #1d4ed8; }
+    .status-badge.processing, .status-badge.packed { background: #fef3c7; color: #b45309; }
+    .status-badge.cancelled { background: #fee2e2; color: #b91c1c; }
+    .status-badge.pending { background: #f1f5f9; color: #475569; }
+
+    /* Stock Health */
+    .stock-badges {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .stock-pill {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid var(--dash-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stock-pill-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--dash-subtle);
+    }
+
+    .stock-num-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .stock-circle-red { background: #ef4444; }
+    .stock-circle-amber { background: #f59e0b; }
+
+    .lowest-stock-list {
+      margin: 0;
+      padding: 0 0 0 16px;
+      font-size: 12px;
+      color: var(--dash-text);
+    }
+
+    .lowest-stock-list li {
+      padding: 4px 0;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed var(--dash-border);
+    }
+
+    .lowest-stock-list li:last-child {
+      border-bottom: none;
+    }
+
+    .sample-stock-note {
+      font-size: 11px;
+      color: var(--dash-subtle);
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    /* Catalogue Health */
+    .health-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .health-item {
+      padding: 12px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid var(--dash-border);
+    }
+
+    .health-item-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--dash-subtle);
+      margin-bottom: 6px;
+    }
+
+    .health-item-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dash-text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Quick Links */
+    .quick-links-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .quick-link-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--dash-card-bg);
+      border: 1px solid var(--dash-border);
+      border-radius: 6px;
+      color: var(--dash-text);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: none;
+    }
+
+    .quick-link-btn:hover {
+      background: rgba(0, 0, 0, 0.03);
+      color: #1d4ed8;
+      border-color: #93c5fd;
+    }
+  </style>
+
+  <div class="module" id="store-operations-dashboard">
+    <!-- Header with Range Filter -->
+    <div class="dash-header">
+      <div class="dash-title-group">
+        <h1 class="dash-title">{% translate "Store Operations Dashboard" %}</h1>
+        <span class="dash-snapshot-label">{% translate "Store Operations Snapshot" %} &bull; {% translate "Live Metrics" %}</span>
       </div>
-      <div style="padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
-        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Today's Revenue</div>
-        <div style="font-size: 26px; font-weight: 700; color: #0f172a; margin-top: 6px;">{{ dashboard.revenue_today|inr }}</div>
-      </div>
-      <div style="padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
-        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Low Stock Alert</div>
-        <div style="font-size: 26px; font-weight: 700; color: {% if dashboard.low_stock_count %}#b91c1c{% else %}#0f172a{% endif %}; margin-top: 6px;">
-          {{ dashboard.low_stock_count }}
-        </div>
-      </div>
-      <div style="padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
-        <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Unpriced Products</div>
-        <div style="font-size: 26px; font-weight: 700; color: {% if dashboard.products_without_price %}#b91c1c{% else %}#0f172a{% endif %}; margin-top: 6px;">
-          {{ dashboard.products_without_price }}
-        </div>
+      <div class="dash-range-switch" role="group" aria-label="{% translate 'Dashboard Date Range' %}">
+        <span style="font-size: 11px; font-weight: 600; color: var(--dash-subtle); margin-right: 6px; align-self: center;">Range:</span>
+        <a href="?range=7" class="dash-range-btn {% if dashboard.range_days == 7 %}is-active{% endif %}">7 days</a>
+        <a href="?range=30" class="dash-range-btn {% if dashboard.range_days == 30 %}is-active{% endif %}">30 days</a>
       </div>
     </div>
 
-    {% if dashboard.orders_by_status %}
-    <div style="border-top: 1px solid #f1f5f9; padding-top: 14px; font-size: 13px; color: #334155;">
-      <strong style="margin-right: 8px;">{% translate "Orders by Status:" %}</strong>
-      <span style="display: inline-flex; flex-wrap: wrap; gap: 8px;">
-        {% for st in dashboard.orders_by_status %}
-          <span style="background: #e2e8f0; color: #1e293b; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;">
-            {{ st.status }}: <strong>{{ st.count }}</strong>
+    <!-- 1. KPI Row (6 items) -->
+    <div class="kpi-grid">
+      <!-- KPI 1: Orders Today -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Orders Today</span>
+          <span class="kpi-icon-wrap kpi-icon-green" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
           </span>
-        {% endfor %}
-      </span>
+        </div>
+        <div class="kpi-value">{{ dashboard.orders_today }}</div>
+      </div>
+
+      <!-- KPI 2: Revenue Today -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Revenue today</span>
+          <span class="kpi-icon-wrap kpi-icon-blue" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3a4.5 4.5 0 0 0 0-9"/></svg>
+          </span>
+        </div>
+        <div class="kpi-value">{{ dashboard.revenue_today|inr }}</div>
+      </div>
+
+      <!-- KPI 3: Orders in Range -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Orders in range</span>
+          <span class="kpi-icon-wrap kpi-icon-blue" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </span>
+        </div>
+        <div class="kpi-value">{{ dashboard.orders_in_range }}</div>
+      </div>
+
+      <!-- KPI 4: Revenue in Range -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Revenue in range</span>
+          <span class="kpi-icon-wrap kpi-icon-green" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3a4.5 4.5 0 0 0 0-9"/></svg>
+          </span>
+        </div>
+        <div class="kpi-value">{{ dashboard.revenue_in_range|inr }}</div>
+      </div>
+
+      <!-- KPI 5: Average Order Value -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Average order value</span>
+          <span class="kpi-icon-wrap kpi-icon-cyan" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </span>
+        </div>
+        <div class="kpi-value">{{ dashboard.average_order_value|inr }}</div>
+      </div>
+
+      <!-- KPI 6: Pending Orders -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Pending orders</span>
+          <span class="kpi-icon-wrap kpi-icon-amber" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </span>
+        </div>
+        <div class="kpi-value">{{ dashboard.pending_orders }}</div>
+        <div class="kpi-subtext">(placed + confirmed + packed)</div>
+      </div>
     </div>
-    {% endif %}
+
+    <!-- Row 2: Charts and Top Products Grid -->
+    <div class="dash-row-grid-4">
+      <!-- 2. Orders per Day (SVG Bar Chart + Table Fallback) -->
+      <div class="dash-card">
+        <h2 class="dash-card-title">Orders per day <span class="dash-card-subtitle">(last {{ dashboard.range_days }} days)</span></h2>
+        
+        <div class="chart-container">
+          <svg viewBox="0 0 500 140" class="chart-svg" role="img" aria-labelledby="chart-title chart-desc">
+            <title id="chart-title">Orders per day chart</title>
+            <desc id="chart-desc">Orders count per day for the selected {{ dashboard.range_days }} day range.</desc>
+
+            <!-- Grid horizontal baseline -->
+            <line x1="10" y1="120" x2="490" y2="120" stroke="var(--dash-border)" stroke-width="1" />
+            <line x1="10" y1="65" x2="490" y2="65" stroke="var(--dash-border)" stroke-width="1" stroke-dasharray="3 3" />
+
+            <!-- Bars -->
+            {% for bar in dashboard.svg_bars %}
+            <g class="bar-group">
+              {% if bar.height > 0 %}
+              <rect x="{{ bar.x }}" y="{{ bar.y }}" width="{{ bar.width }}" height="{{ bar.height }}" fill="#3b82f6" rx="3" />
+              <text x="{{ bar.center_x }}" y="{{ bar.text_y }}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--dash-text)">{{ bar.val }}</text>
+              {% endif %}
+              <text x="{{ bar.center_x }}" y="134" text-anchor="middle" font-size="9" fill="var(--dash-subtle)">{{ bar.label }}</text>
+            </g>
+            {% endfor %}
+          </svg>
+        </div>
+
+        <!-- Accessible table fallback -->
+        <div class="opd-table-wrap">
+          <table class="opd-table" aria-label="{% translate 'Orders per day tabular data' %}">
+            <thead>
+              <tr>
+                <th scope="row">Date</th>
+                {% for d in dashboard.orders_per_day %}
+                <th scope="col">{{ d.label }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Orders</th>
+                {% for d in dashboard.orders_per_day %}
+                <td>{{ d.count }}</td>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="chart-caption">Orders per day for the selected range.</p>
+      </div>
+
+      <!-- 3. Orders by Status -->
+      <div class="dash-card">
+        <h2 class="dash-card-title">Orders by status</h2>
+        <div class="status-list">
+          {% for st in dashboard.orders_by_status %}
+          <div class="status-row">
+            <span class="status-label">{{ st.status }}</span>
+            <div class="status-track">
+              <div class="status-fill" style="width: {{ st.pct }}%; background: {{ st.color }};"></div>
+            </div>
+            <span class="status-count">{{ st.count }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- 4. Payment Split -->
+      <div class="dash-card">
+        <h2 class="dash-card-title">Payment split</h2>
+        <div class="donut-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Payment split chart">
+            <circle cx="60" cy="60" r="40" fill="none" stroke="#e2e8f0" stroke-width="16" />
+            {% if dashboard.payment_split.total_orders > 0 %}
+              <!-- Online (Green) Base Circle -->
+              <circle cx="60" cy="60" r="40" fill="none" stroke="#22c55e" stroke-width="16" />
+              <!-- COD (Blue) Segment -->
+              <circle cx="60" cy="60" r="40" fill="none" stroke="#3b82f6" stroke-width="16"
+                      stroke-dasharray="{{ dashboard.payment_split.cod_stroke }} 251.32"
+                      stroke-dashoffset="0"
+                      transform="rotate(-90 60 60)" />
+            {% endif %}
+            <text x="60" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="var(--dash-text)" font-variant-numeric="tabular-nums">{{ dashboard.payment_split.total_orders }}</text>
+            <text x="60" y="70" text-anchor="middle" font-size="10" fill="var(--dash-subtle)">orders</text>
+          </svg>
+
+          <div class="donut-legend">
+            <span class="legend-item">
+              <span class="legend-dot" style="background: #3b82f6;"></span>
+              COD {{ dashboard.payment_split.cod_count }} ({{ dashboard.payment_split.cod_pct }}%)
+            </span>
+            <span class="legend-item">
+              <span class="legend-dot" style="background: #22c55e;"></span>
+              Online {{ dashboard.payment_split.online_count }} ({{ dashboard.payment_split.online_pct }}%)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Top 5 Products by Quantity Sold -->
+      <div class="dash-card">
+        <h2 class="dash-card-title">Top 5 products by quantity sold</h2>
+        {% if dashboard.top_products %}
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th style="width: 20px;">#</th>
+              <th>Product</th>
+              <th class="text-right">Units</th>
+              <th class="text-right">Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in dashboard.top_products %}
+            <tr>
+              <td style="color: var(--dash-subtle);">{{ forloop.counter }}.</td>
+              <td title="{{ p.title }}">
+                <span style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
+                  {{ p.title }}
+                </span>
+              </td>
+              <td class="text-right tabular-nums font-semibold">{{ p.units }}</td>
+              <td class="text-right tabular-nums">{{ p.revenue|inr }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">No orders in this period</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Row 3: Categories, Latest Orders & Stock Health -->
+    <div class="dash-row-grid-3">
+      <!-- 6. Top Categories by Units Sold -->
+      <div class="dash-card">
+        <h2 class="dash-card-title">Top categories by units sold</h2>
+        {% if dashboard.top_categories %}
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th class="text-right">Units</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cat in dashboard.top_categories %}
+            <tr>
+              <td>{{ cat.name }}</td>
+              <td class="text-right tabular-nums font-semibold">{{ cat.units }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">No orders in this period</div>
+        {% endif %}
+      </div>
+
+      <!-- 7. Latest 8 Orders Table -->
+      <div class="dash-card">
+        <h2 class="dash-card-title">Latest 8 orders</h2>
+        {% if dashboard.latest_orders %}
+        <div style="overflow-x: auto;">
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th class="text-right">Total</th>
+                <th>Status</th>
+                <th class="text-right">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for o in dashboard.latest_orders %}
+              <tr>
+                <td>
+                  <a href="{{ o.change_url }}" style="font-weight: 600; text-decoration: none; color: #1d4ed8;">
+                    #{{ o.order_number }}
+                  </a>
+                </td>
+                <td style="color: var(--dash-subtle);">{{ o.customer }}</td>
+                <td class="text-right tabular-nums font-semibold">{{ o.total_amount|inr }}</td>
+                <td>
+                  <span class="status-badge {{ o.status }}">
+                    {{ o.status_label }}
+                  </span>
+                </td>
+                <td class="text-right tabular-nums" style="color: var(--dash-subtle); white-space: nowrap;">
+                  {{ o.created_at|date:"M j, H:i" }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">No orders in this period</div>
+        {% endif %}
+      </div>
+
+      <!-- 8. Stock Health -->
+      <div class="dash-card">
+        <h2 class="dash-card-title">Stock health</h2>
+        <div class="stock-badges">
+          <div class="stock-pill">
+            <span class="stock-pill-title">Out of stock</span>
+            <span class="stock-num-circle stock-circle-red">{{ dashboard.stock_health.out_of_stock }}</span>
+          </div>
+          <div class="stock-pill">
+            <span class="stock-pill-title">Low Stock Alert</span>
+            <span class="stock-num-circle stock-circle-amber">{{ dashboard.stock_health.low_stock }}</span>
+          </div>
+        </div>
+
+        <div style="font-size: 12px; font-weight: 600; color: var(--dash-subtle); margin-bottom: 8px;">
+          Only 8 lowest-stock products (purchasable)
+        </div>
+
+        {% if dashboard.stock_health.lowest_stock_products %}
+        <ol class="lowest-stock-list">
+          {% for item in dashboard.stock_health.lowest_stock_products %}
+          <li>
+            <a href="{{ item.change_url }}" style="text-decoration: none; color: inherit; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ item.display_name }}">
+              {{ item.display_name }}
+            </a>
+            <span class="tabular-nums font-semibold">{{ item.quantity }}</span>
+          </li>
+          {% endfor %}
+        </ol>
+        {% else %}
+        <div class="empty-state">No purchasable products found</div>
+        {% endif %}
+
+        <div class="sample-stock-note">Sample stock data</div>
+      </div>
+    </div>
+
+    <!-- Row 4: Catalogue Health & Quick Links -->
+    <div class="dash-row-grid-2">
+      <!-- 9. Catalogue Health -->
+      <div class="dash-card">
+        <h2 class="dash-card-title">Catalogue health</h2>
+        <div class="health-grid">
+          <div class="health-item">
+            <div class="health-item-label">Unpriced products</div>
+            <div class="health-item-val">{{ dashboard.catalogue_health.unpriced_products }}</div>
+          </div>
+          <div class="health-item">
+            <div class="health-item-label">Products without images</div>
+            <div class="health-item-val">{{ dashboard.catalogue_health.products_without_images }}</div>
+          </div>
+          <div class="health-item">
+            <div class="health-item-label">Unknown brand</div>
+            <div class="health-item-val">{{ dashboard.catalogue_health.unknown_brand_products }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Quick Links -->
+      <div class="dash-card">
+        <h2 class="dash-card-title">Quick links</h2>
+        <div class="quick-links-grid">
+          {% for ql in dashboard.quick_links %}
+          <a href="{{ ql.url }}" class="quick-link-btn">
+            {% if ql.title == "Orders" %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            {% elif ql.title == "Products" %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="m7.5 4.27 9 5.15M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+            {% elif ql.title == "Inventory" %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+            {% elif ql.title == "Coupons" %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
+            {% elif ql.title == "Shipping config" %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            {% else %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            {% endif %}
+            <span>{{ ql.title }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
   </div>
   {% endif %}
   {{ block.super }}

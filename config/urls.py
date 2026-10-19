@@ -37,42 +37,10 @@ _original_admin_index = admin.site.index
 
 
 def _custom_admin_index(request, extra_context=None):
-    from decimal import Decimal
-    from django.db.models import Count, F, Q
-    from django.utils import timezone
-    from apps.catalog.models import Product
-    from apps.inventory.models import Inventory
-    from apps.orders.models import Order
+    from apps.core.admin_dashboard import get_admin_dashboard_context, resolve_range_days
 
-    today = timezone.localdate()
-    orders_today_qs = Order.objects.filter(created_at__date=today)
-    orders_today_count = orders_today_qs.count()
-
-    # Sum in Python Decimal (never float)
-    revenue_today = Decimal("0.00")
-    for val in orders_today_qs.values_list("total_amount", flat=True):
-        if val is not None:
-            revenue_today += Decimal(str(val))
-
-    status_counts = list(
-        Order.objects.values("status").annotate(count=Count("id")).order_by("status")
-    )
-
-    low_stock_count = Inventory.objects.filter(
-        quantity__gt=0, quantity__lte=F("low_stock_threshold")
-    ).count()
-
-    products_without_price = Product.objects.filter(
-        Q(selling_price__isnull=True) | Q(selling_price=0)
-    ).count()
-
-    dashboard = {
-        "orders_today": orders_today_count,
-        "revenue_today": revenue_today,
-        "orders_by_status": status_counts,
-        "low_stock_count": low_stock_count,
-        "products_without_price": products_without_price,
-    }
+    range_days = resolve_range_days(request.GET.get("range"))
+    dashboard = get_admin_dashboard_context(range_days=range_days, request=request)
 
     ctx = dict(extra_context or {})
     ctx["dashboard"] = dashboard
